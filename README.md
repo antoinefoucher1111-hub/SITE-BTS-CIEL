@@ -89,9 +89,8 @@ python3 --version
 ### 2. Cloner le Dépôt
 
 Ouvrez votre terminal ou invite de commande et clonez ce dépôt :
-```bash
-git clone https://github.com/votre-compte/bts-ciel-revision-hub.git
-cd bts-ciel-revision-hub
+```bashgit@github.com:antoinefoucher1111-hub/SITE-BTS-CIEL.git
+cd SITE-BTS-CIEL
 ```
 
 ---
@@ -129,7 +128,12 @@ pip install streamlit pandas matplotlib requests
 ### 5. Lancer l'Application
 
 Démarrez le serveur local Streamlit :
-
+## Important : pensez à bien vous placer à l'endroit ou app-v8.py est téléchargé 
+exemple :
+```bash 
+cd "C:\Users\antoi\Downloads"
+````
+Et ensuite :
 ```bash
 streamlit run app-v8.py
 ```
