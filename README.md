@@ -9,7 +9,7 @@ Bienvenue sur le dépôt officiel du **Compagnon d'Apprentissage et de Révision
 
 Ce projet fournit un environnement complet pour préparer et réussir les deux années du BTS ainsi que les épreuves d'examen (**E4, E5 et E6**) :
 1. Un **carnet de bord numérique exhaustif en Markdown** (`structure_notebook_ciel-v3.md`).
-2. Une **plateforme interactive locale en Python / Streamlit** (`app-v7.py`) intégrant cours, calculatrices dynamiques, simulateurs de commandes, annales d'examens et gestionnaire de projet E6.
+2. Une **plateforme interactive locale en Python / Streamlit** (`app-v8.py`) intégrant cours, calculatrices dynamiques, simulateurs de commandes, annales d'examens et gestionnaire de projet E6.
 
 ---
 
@@ -59,7 +59,7 @@ Ce projet fournit un environnement complet pour préparer et réussir les deux a
 
 ```text
 .
-├── app-v7.py                    # Application Web Streamlit (Version Ultime)
+├── app-v8.py                    # Application Web Streamlit (Version Ultime)
 ├── structure_notebook_ciel-v3.md # Carnet de bord Markdown complet pour la prise de notes
 ├── scores_history_v3.json       # Fichier local d'historique des scores et statistiques
 ├── e6_project.json              # Fichier local de persistance des tâches du projet E6
@@ -131,7 +131,7 @@ pip install streamlit pandas matplotlib requests
 Démarrez le serveur local Streamlit :
 
 ```bash
-streamlit run app-v7.py
+streamlit run app-v8.py
 ```
 
 Le terminal affichera les informations suivantes :
@@ -233,13 +233,13 @@ Un atelier complet pour préparer l'épreuve E4 et le dossier E6 :
 * Assurez-vous d'avoir bien activé votre environnement virtuel (`source venv/bin/activate` ou `.\venv\Scripts\activate`).
 * Vous pouvez aussi lancer l'application avec :
   ```bash
-  python -m streamlit run app-v7.py
+  python -m streamlit run app-v8.py
   ```
 
 ### ❓ Le port 8501 est déjà utilisé
 Si une autre instance est en cours d'exécution, lancez l'application sur un autre port :
 ```bash
-streamlit run app-v7.py --server.port 8502
+streamlit run app-v8.py --server.port 8502
 ```
 
 ### ❓ Comment réinitialiser mes statistiques ou les tâches du projet E6 ?
