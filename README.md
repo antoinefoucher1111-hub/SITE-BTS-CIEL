@@ -1,4 +1,4 @@
-# 🎓 Compagnon d'Apprentissage & Studio de Révision — BTS CIEL (Option A & B)
+# 🎓 Compagnon d'Apprentissage & Studio de Révision — BTS CIEL (Option A)
 
 Bienvenue sur le dépôt officiel du **Compagnon d'Apprentissage et Studio de Révision BTS CIEL (Cybersécurité, Informatique et réseaux, Électronique)**.
 
