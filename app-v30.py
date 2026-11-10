@@ -458,6 +458,82 @@ QUIZZES_BANK_10 = {
 }
 
 
+
+def render_10_questions_quiz(category_or_module, quiz_key):
+    """
+    Rendu dynamique d'un quiz certifiant de 10 questions avec calcul de score,
+    explications détaillées et attribution de points XP au profil utilisateur.
+    """
+    import streamlit as st
+    
+    # 1. Recherche des questions dans QUIZZES_BANK_10
+    questions = []
+    if category_or_module in QUIZZES_BANK_10:
+        questions = QUIZZES_BANK_10[category_or_module]
+    else:
+        # Recherche par module dans GRAND_QUIZ_DATA
+        cat_lower = category_or_module.lower()
+        matching = []
+        for q in GRAND_QUIZ_DATA:
+            m_mod = q.get('mod', '').lower()
+            if ('réseau' in cat_lower and 'réseau' in m_mod) or \
+               ('cyber' in cat_lower and 'cyber' in m_mod) or \
+               ('prog' in cat_lower and ('prog' in m_mod or 'dev' in m_mod)) or \
+               ('élec' in cat_lower and ('élec' in m_mod or 'iot' in m_mod)) or \
+               ('modél' in cat_lower and ('uml' in m_mod or 'sysml' in m_mod)) or \
+               ('math' in cat_lower and 'math' in m_mod) or \
+               ('sys' in cat_lower and ('sys' in m_mod or 'admin' in m_mod)):
+                matching.append({
+                    'q': q['q'],
+                    'opts': q.get('options', q.get('opts', [])),
+                    'rep': q['rep'],
+                    'expl': q.get('expl', 'Conforme aux exigences officielles du BTS CIEL.')
+                })
+        questions = matching[:10]
+        if len(questions) < 10 and 'Suites' in QUIZZES_BANK_10:
+            # Fallback
+            questions = (questions + QUIZZES_BANK_10['Suites'])[:10]
+
+    st.markdown(f"<div style='background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(56, 189, 248, 0.2); border-radius: 12px; padding: 14px 18px; margin-bottom: 20px;'>"
+                f"<b style='color: #38bdf8;'>🎯 Questionnaire Certifiant</b> : 10 questions à choix multiples pour valider vos acquis en <b>{category_or_module}</b>. "
+                f"<span style='color: #94a3b8; font-size: 0.85rem;'>Gagnez jusqu'à <b>+50 XP</b> sur votre profil !</span></div>", unsafe_allow_html=True)
+
+    user_answers = {}
+    for idx, item in enumerate(questions):
+        q_num = idx + 1
+        st.markdown(f"**Q{q_num} : {item['q']}**")
+        opts = item.get('opts', item.get('options', []))
+        user_answers[idx] = st.radio(f"Choix pour Q{q_num} :", opts, key=f"{quiz_key}_rad_{idx}")
+        st.markdown("<div style='margin-bottom: 12px;'></div>", unsafe_allow_html=True)
+
+    if st.button("Valider mon questionnaire (10 questions)", type="primary", key=f"{quiz_key}_submit_btn"):
+        score = 0
+        st.markdown("---")
+        st.markdown("### 📊 Résultats & Corrigé Détaillé")
+        for idx, item in enumerate(questions):
+            q_num = idx + 1
+            user_ans = user_answers[idx]
+            rep_exacte = item['rep']
+            if user_ans == rep_exacte:
+                score += 1
+                st.success(f"✅ **Q{q_num} Exact !** ({user_ans})\n\n💡 *Explication :* {item['expl']}")
+            else:
+                st.error(f"❌ **Q{q_num} Incorrect.** Vous avez répondu : *{user_ans}* | Réponse attendue : **{rep_exacte}**\n\n💡 *Explication :* {item['expl']}")
+
+        # Attribution XP & Bilan
+        pct = (score / len(questions)) * 100
+        pts_earned = score * 5
+        add_user_points(pts_earned, quiz_key)
+        
+        if score >= 8:
+            st.success(f"🏆 **Excellente Maîtrise ! Note : {score} / 10 ({pct:.0f}%)** — Vous avez gagné **+{pts_earned} XP** !")
+            st.balloons()
+        elif score >= 5:
+            st.info(f"👍 **Score Honorable : {score} / 10 ({pct:.0f}%)** — Vous avez gagné **+{pts_earned} XP**. Relisez les mémos pour viser le 10/10.")
+        else:
+            st.warning(f"⚠️ **Score Insuffisant : {score} / 10 ({pct:.0f}%)** — Vous avez gagné **+{pts_earned} XP**. Révisez le cours de la semaine avant de retenter.")
+
+
 # Advanced Interactive Simulator & Practice Lab for BTS CIEL (All 5 Sections Expanded)
 import streamlit as st
 
