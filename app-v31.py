@@ -6,7 +6,7 @@ import os
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 from datetime import datetime, timedelta
-st.set_page_config(page_title='BTS CIEL Pro Studio - Excellence Numérique', page_icon='⚡', layout='wide', initial_sidebar_state='expanded')
+st.set_page_config(page_title='BTS CIEL Pro Studio v31', page_icon='⚡', layout='wide', initial_sidebar_state='expanded')
 import matplotlib
 matplotlib.use('Agg')
 st.markdown(r'''/* Modern Clean Tech CSS for BTS CIEL Studio Pro */
@@ -332,38 +332,40 @@ def save_users(db):
         pass
 
 def create_default_user_data(username="Invité BTS CIEL", role="Candidat Option A"):
-    today = datetime.now()
-    default_history = [
-        {'date': (today - timedelta(days=14)).strftime('%Y-%m-%d %H:%M'), 'quiz': 'Diagnostic Initial', 'score': 6, 'total': 10, 'details': {'Réseaux': 2, 'Cybersécurité': 1, 'Prog': 1, 'SysAdmin': 1, 'Elec': 1, 'Maths': 0, 'UML': 0}},
-        {'date': (today - timedelta(days=7)).strftime('%Y-%m-%d %H:%M'), 'quiz': 'Entraînement S1', 'score': 8, 'total': 10, 'details': {'Réseaux': 3, 'Cybersécurité': 2, 'Prog': 1, 'SysAdmin': 1, 'Elec': 1, 'Maths': 0, 'UML': 0}},
-        {'date': (today - timedelta(days=2)).strftime('%Y-%m-%d %H:%M'), 'quiz': 'Grand Quiz Examen', 'score': 9, 'total': 10, 'details': {'Réseaux': 2, 'Cybersécurité': 2, 'Prog': 2, 'SysAdmin': 1, 'Elec': 1, 'Maths': 1, 'UML': 0}}
-    ]
     return {
         'username': username,
         'role': role,
         'created_at': datetime.now().strftime('%Y-%m-%d %H:%M'),
         'last_login': datetime.now().strftime('%Y-%m-%d %H:%M'),
-        'points': 75,
-        'level': 'Technicien Supérieur Confirmé ⚡',
-        'history': default_history,
+        'points': 0,
+        'level': 'Apprenti Technicien 🚀',
+        'history': [],
         'domain_mastery': {
-            'Réseaux & Télécoms': 70,
-            'Cybersécurité & Hardening': 65,
-            'Programmation C++ & Python': 55,
-            'Administration Système & AD': 60,
-            'Électronique & Bus': 50,
-            'Mathématiques Appliquées': 45,
-            'Modélisation SysML & E6': 40
+            'Réseaux & Télécoms': 0,
+            'Cybersécurité & Hardening': 0,
+            'Programmation C++ & Python': 0,
+            'Administration Système & AD': 0,
+            'Électronique & Bus': 0,
+            'Mathématiques Appliquées': 0,
+            'Modélisation SysML & E6': 0
         },
-        'completed_activities': {
-            'w1_diag': True
-        },
-        'badges': [
-            {'id': 'first_step', 'nom': 'Pied à l\'Étrier', 'desc': 'Première session d\'évaluation complétée', 'icon': '🎯', 'date': (today - timedelta(days=14)).strftime('%Y-%m-%d')},
-            {'id': 'net_rookie', 'nom': 'Architecte Réseau', 'desc': 'Score >= 8/10 en Réseaux & Commutation', 'icon': '📶', 'date': (today - timedelta(days=7)).strftime('%Y-%m-%d')}
-        ],
-        'notes': 'Objectif : Obtenir la mention Très Bien au BTS CIEL Option A.'
+        'completed_activities': {},
+        'badges': [],
+        'notes': 'Objectif : réussir le BTS CIEL Option A.'
     }
+
+
+def _repair_user_data(data, username, role='Candidat Option A'):
+    """Répare les profils enregistrés dans un ancien format (v30 : {'role', 'progress'})."""
+    if isinstance(data, dict) and 'points' not in data and isinstance(data.get('progress'), dict):
+        data = data['progress']
+    base = create_default_user_data(username, role)
+    if not isinstance(data, dict):
+        return base
+    for k, v in base.items():
+        data.setdefault(k, v)
+    data['username'] = username
+    return data
 
 def init_user_session():
     if 'current_user' not in st.session_state:
@@ -372,7 +374,7 @@ def init_user_session():
         st.session_state.user_role = 'Candidat Option A'
     if 'user_progress' not in st.session_state:
         db = load_users()
-        user_data = db.get(st.session_state.current_user, create_default_user_data(st.session_state.current_user))
+        user_data = _repair_user_data(db.get(st.session_state.current_user), st.session_state.current_user)
         st.session_state.user_progress = user_data
     if 'cloud_sync_status' not in st.session_state:
         st.session_state.cloud_sync_status = 'Mode Local Synchrone'
@@ -387,6 +389,9 @@ def get_active_user_data():
         save_users(db)
         st.session_state.user_progress = user_data
         return user_data
+    if 'points' not in db[u] or 'completed_activities' not in db[u] or 'history' not in db[u]:
+        db[u] = _repair_user_data(db[u], u, st.session_state.get('user_role', 'Candidat Option A'))
+        save_users(db)
     return db[u]
 
 def update_active_user_data(user_data):
@@ -515,44 +520,15 @@ def render_10_questions_quiz(category_or_module, quiz_key):
         score = 0
         st.markdown("---")
         st.markdown("### 📊 Résultats & Corrigé Détaillé")
-        u_data = get_active_user_data()
-        skills = u_data.setdefault('skills_tracking', {'mastered_skills': {}, 'weaknesses': {}, 'recent_errors': []})
-        now_date_str = datetime.now().strftime('%Y-%m-%d %H:%M')
-
         for idx, item in enumerate(questions):
             q_num = idx + 1
             user_ans = user_answers[idx]
             rep_exacte = item['rep']
-            q_text_short = item['q'][:80]
             if user_ans == rep_exacte:
                 score += 1
                 st.success(f"✅ **Q{q_num} Exact !** ({user_ans})\n\n💡 *Explication :* {item['expl']}")
-                # Enregistrer la réussite
-                sid = f"q_{category_or_module}_{idx}"
-                s_rec = skills['mastered_skills'].setdefault(sid, {'name': q_text_short, 'domain': category_or_module, 'count': 0})
-                s_rec['count'] += 1
             else:
                 st.error(f"❌ **Q{q_num} Incorrect.** Vous avez répondu : *{user_ans}* | Réponse attendue : **{rep_exacte}**\n\n💡 *Explication :* {item['expl']}")
-                # Enregistrer la lacune / point à revoir
-                wid = f"err_{category_or_module}_{idx}"
-                w_rec = skills['weaknesses'].setdefault(wid, {'name': q_text_short, 'domain': category_or_module, 'last_error': f"Répondu '{user_ans}' au lieu de '{rep_exacte}'", 'count': 0, 'date': now_date_str})
-                w_rec['count'] += 1
-                w_rec['last_error'] = f"Répondu '{user_ans}' au lieu de '{rep_exacte}'"
-                w_rec['date'] = now_date_str
-                # Journal des erreurs
-                skills['recent_errors'].append({
-                    'question': item['q'],
-                    'user_ans': user_ans,
-                    'correct': rep_exacte,
-                    'expl': item['expl'],
-                    'domain': category_or_module,
-                    'date': now_date_str
-                })
-                # Garder les 30 plus récentes
-                if len(skills['recent_errors']) > 30:
-                    skills['recent_errors'] = skills['recent_errors'][-30:]
-
-        update_active_user_data(u_data)
 
         # Attribution XP & Bilan
         pct = (score / len(questions)) * 100
@@ -568,270 +544,6 @@ def render_10_questions_quiz(category_or_module, quiz_key):
         else:
             st.warning(f"⚠️ **Score Insuffisant : {score} / 10 ({pct:.0f}%)** — Vous avez gagné **+{pts_earned} XP**. Révisez le cours de la semaine avant de retenter.")
 
-
-
-# Module de Diagnostic et Suivi des Compétences / Lacunes / Export IA pour BTS CIEL
-import streamlit as st
-import json
-from datetime import datetime
-
-def render_competencies_and_ai_diagnostic():
-    st.markdown("<div class='hero-title'>🎯 Bilan des Compétences, Réussites & Export Diagnostic IA</div>", unsafe_allow_html=True)
-    st.markdown("<p style='color:#94a3b8;'>Analysez vos points forts, identifiez vos erreurs précises (lacunes à combler) et générez en un clic un <b>Prompt de Remédiation IA personnalisé</b> à copier-coller dans une IA pour travailler vos points faibles.</p>", unsafe_allow_html=True)
-    
-    user_data = get_active_user_data()
-    u_name = user_data.get('username', 'Candidat BTS CIEL')
-    u_role = user_data.get('role', 'Option A Informatique & Réseaux')
-    
-    # Structure de données pour le diagnostic précis
-    tracking = user_data.setdefault('skills_tracking', {
-        'mastered_skills': {},      # skill_id: {'name': ..., 'domain': ..., 'count': ...}
-        'weaknesses': {},            # skill_id: {'name': ..., 'domain': ..., 'last_error': ..., 'count': ..., 'date': ...}
-        'recent_errors': []         # list of {'question': ..., 'user_ans': ..., 'correct': ..., 'expl': ..., 'domain': ..., 'date': ...}
-    })
-    
-    tab_diag1, tab_diag2, tab_diag3, tab_diag4 = st.tabs([
-        "📊 Tableau de Bord Compétences",
-        "🚨 Points à Revoir & Erreurs Récentes",
-        "🤖 Générateur de Prompt IA (Remédiation)",
-        "⚙️ Paramétrage & Ajout Manuel"
-    ])
-    
-    with tab_diag1:
-        st.subheader("📊 Cartographie des Compétences & Taux de Réussite")
-        
-        # Métriques rapides
-        c_m1, c_m2, c_m3, c_m4 = st.columns(4)
-        mastered_count = len(tracking.get('mastered_skills', {}))
-        weakness_count = len(tracking.get('weaknesses', {}))
-        total_evals = len(user_data.get('history', []))
-        total_xp = user_data.get('points', 0)
-        
-        with c_m1:
-            st.metric("🏆 Notions Validées", f"{mastered_count} compétences")
-        with c_m2:
-            st.metric("⚠️ Points à Revoir", f"{weakness_count} lacunes ciblées")
-        with c_m3:
-            st.metric("📝 Évaluations Complétées", f"{total_evals} sessions")
-        with c_m4:
-            st.metric("⚡ Total Points XP", f"{total_xp} pts")
-            
-        st.markdown("<br>", unsafe_allow_html=True)
-        
-        # Jauges par domaine officiel du BTS CIEL
-        st.markdown("### 📈 Taux de Maîtrise par Domaine d'Épreuve")
-        doms = user_data.get('domain_mastery', {})
-        col_d1, col_d2 = st.columns(2)
-        
-        dom_items = list(doms.items())
-        half = (len(dom_items) + 1) // 2
-        
-        with col_d1:
-            for d_name, pct in dom_items[:half]:
-                color = "#34d399" if pct >= 75 else "#38bdf8" if pct >= 50 else "#fb923c" if pct >= 30 else "#f43f5e"
-                st.markdown(f"""
-                <div style='background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 12px 16px; margin-bottom: 12px;'>
-                    <div style='display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;'>
-                        <span style='font-size: 0.9rem; font-weight: 700; color: #f8fafc;'>{d_name}</span>
-                        <span style='font-size: 0.85rem; font-weight: 800; color: {color};'>{pct}%</span>
-                    </div>
-                    <div style='background: rgba(255, 255, 255, 0.1); height: 7px; border-radius: 9999px; overflow: hidden;'>
-                        <div style='background: {color}; height: 100%; width: {pct}%; border-radius: 9999px;'></div>
-                    </div>
-                </div>
-                """, unsafe_allow_html=True)
-                
-        with col_d2:
-            for d_name, pct in dom_items[half:]:
-                color = "#34d399" if pct >= 75 else "#38bdf8" if pct >= 50 else "#fb923c" if pct >= 30 else "#f43f5e"
-                st.markdown(f"""
-                <div style='background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 12px 16px; margin-bottom: 12px;'>
-                    <div style='display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;'>
-                        <span style='font-size: 0.9rem; font-weight: 700; color: #f8fafc;'>{d_name}</span>
-                        <span style='font-size: 0.85rem; font-weight: 800; color: {color};'>{pct}%</span>
-                    </div>
-                    <div style='background: rgba(255, 255, 255, 0.1); height: 7px; border-radius: 9999px; overflow: hidden;'>
-                        <div style='background: {color}; height: 100%; width: {pct}%; border-radius: 9999px;'></div>
-                    </div>
-                </div>
-                """, unsafe_allow_html=True)
-                
-        st.markdown("---")
-        st.markdown("### ✅ Liste des Compétences Validées (Points Forts)")
-        mastered = tracking.get('mastered_skills', {})
-        if mastered:
-            c_p1, c_p2 = st.columns(2)
-            items_m = list(mastered.items())
-            for i, (s_id, s_info) in enumerate(items_m):
-                col_target = c_p1 if i % 2 == 0 else c_p2
-                with col_target:
-                    st.markdown(f"""
-                    <div style='background: rgba(6, 78, 59, 0.2); border: 1px solid rgba(52, 211, 153, 0.3); border-radius: 10px; padding: 10px 14px; margin-bottom: 10px;'>
-                        <b style='color: #34d399;'>✓ {s_info.get('name', s_id)}</b><br>
-                        <span style='color: #94a3b8; font-size: 0.8rem;'>Domaine : {s_info.get('domain', 'Général')} | Réussi {s_info.get('count', 1)} fois</span>
-                    </div>
-                    """, unsafe_allow_html=True)
-        else:
-            st.info("Aucune compétence marquée comme totalement validée pour le moment. Entraînez-vous sur les quiz et flashcards !")
-            
-    with tab_diag2:
-        st.subheader("🚨 Points à Revoir & Journal des Erreurs Récentes")
-        st.markdown("<p style='color:#94a3b8;'>Ce tableau récapitule vos erreurs exactes lors des derniers tests. C'est la matière première idéale pour cibler votre révision.</p>", unsafe_allow_html=True)
-        
-        weaknesses = tracking.get('weaknesses', {})
-        recent_errs = tracking.get('recent_errors', [])
-        
-        if weaknesses:
-            st.markdown("#### ⚠️ Notions Fragiles Détectées")
-            for w_id, w_info in weaknesses.items():
-                st.markdown(f"""
-                <div style='background: rgba(127, 29, 29, 0.2); border: 1px solid rgba(248, 113, 113, 0.35); border-radius: 12px; padding: 14px 18px; margin-bottom: 12px;'>
-                    <div style='display: flex; justify-content: space-between;'>
-                        <b style='color: #f87171; font-size: 1rem;'>⚠️ {w_info.get('name', w_id)}</b>
-                        <span class='badge badge-rose'>{w_info.get('domain', 'Examen')}</span>
-                    </div>
-                    <div style='color: #cbd5e1; font-size: 0.88rem; margin-top: 6px;'>
-                        <b>Dernière erreur constatée :</b> {w_info.get('last_error', 'Réponse erronée')}
-                    </div>
-                    <div style='color: #94a3b8; font-size: 0.78rem; margin-top: 4px;'>
-                        Fréquence : signalé {w_info.get('count', 1)} fois | Date : {w_info.get('date', 'Récemment')}
-                    </div>
-                </div>
-                """, unsafe_allow_html=True)
-                
-        if recent_errs:
-            st.markdown("#### 📜 Historique Détaillé des Dernières Questions Ratées")
-            for idx_err, err in enumerate(reversed(recent_errs[-8:])):
-                with st.expander(f"❌ Q : {err.get('question', '')[:75]}... ({err.get('domain', '')})"):
-                    st.markdown(f"**Question complète :**\n{err.get('question')}")
-                    st.markdown(f"<span style='color: #f87171;'>Votre réponse : <b>{err.get('user_ans')}</b></span>", unsafe_allow_html=True)
-                    st.markdown(f"<span style='color: #34d399;'>Bonne réponse : <b>{err.get('correct')}</b></span>", unsafe_allow_html=True)
-                    st.info(f"💡 **Explication / Règle :** {err.get('expl')}")
-                    st.caption(f"Session du : {err.get('date')}")
-        else:
-            if not weaknesses:
-                st.success("🎉 Félicitations ! Aucun point de blocage critique ni erreur récente enregistrée.")
-                
-        if st.button("🗑️ Vider le journal des erreurs", key="btn_clear_errs"):
-            tracking['weaknesses'] = {}
-            tracking['recent_errors'] = []
-            update_active_user_data(user_data)
-            st.success("Journal d'erreurs réinitialisé !")
-            st.rerun()
-
-    with tab_diag3:
-        st.subheader("🤖 Générateur de Prompt de Remédiation pour IA")
-        st.markdown("""
-        <div style='background: rgba(30, 41, 59, 0.7); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 14px; padding: 18px; margin-bottom: 20px;'>
-            <h4 style='color: #38bdf8; margin: 0;'>💡 Mode d'Emploi pour vous faire aider par une IA</h4>
-            <p style='color: #cbd5e1; font-size: 0.9rem; margin-top: 6px; line-height: 1.6;'>
-                1. Cliquez sur le bouton <b>« Copier le Prompt Diagnostic IA »</b> ci-dessous.<br>
-                2. Collez ce texte dans votre IA préférée (ChatGPT, Claude, Gemini, etc.).<br>
-                3. L'IA recevra la liste exacte de vos points forts, de vos erreurs récentes et de votre profil BTS CIEL, et vous générera automatiquement un <b>cours de rattrapage sur-mesure avec 5 exercices d'entraînement ciblés</b> !
-            </p>
-        </div>
-        """, unsafe_allow_html=True)
-        
-        # Construction du prompt intelligent
-        weak_list_text = ""
-        for w_id, w_info in tracking.get('weaknesses', {}).items():
-            weak_list_text += f"- {w_info.get('name', w_id)} (Domaine: {w_info.get('domain')}) -> Erreur: {w_info.get('last_error')}\n"
-        
-        if not weak_list_text and tracking.get('recent_errors'):
-            for err in tracking.get('recent_errors')[-5:]:
-                weak_list_text += f"- Sur la question: \"{err.get('question')}\" -> J'ai répondu \"{err.get('user_ans')}\" au lieu de \"{err.get('correct')}\" ({err.get('domain')})\n"
-                
-        if not weak_list_text:
-            weak_list_text = "- Consolidation générale sur le calcul de sous-réseaux VLSM, le chiffrement VPN IPsec/OpenVPN et les classes virtuelles pures en C++.\n"
-            
-        strong_list_text = ""
-        for s_id, s_info in tracking.get('mastered_skills', {}).items():
-            strong_list_text += f"- {s_info.get('name', s_id)} ({s_info.get('domain')})\n"
-        if not strong_list_text:
-            strong_list_text = "- Bases du modèle OSI, permissions Linux de base, structure générale de projet E6.\n"
-            
-        dom_summary = ", ".join([f"{k}: {v}%" for k, v in user_data.get('domain_mastery', {}).items()])
-        
-        prompt_ia = f"""Bonjour, je suis étudiant en 2ème année de BTS CIEL (Cybersécurité, Informatique et réseaux, Électronique), spécialité {u_role}.
-Je prépare mes épreuves d'examen (E4 Épreuve écrite technique, E5 TP Pratique, et E6 Projet).
-
-Voici le bilan exact de mon apprentissage extrait de ma plateforme de révision :
-- Étudiant : {u_name}
-- Taux d'acquisition actuel par domaine : {dom_summary}
-
-✅ MES ACQUIS ET POINTS FORTS :
-{strong_list_text}
-
-🚨 MES ERREURS RÉCENTES ET NOTIONS À REVOIR ABSOLUMENT :
-{weak_list_text}
-
-TES OBJECTIFS PÉDAGOGIQUES :
-1. Analyse mon profil et explique-moi de manière ultra-claire et pédagogique la règle théorique fondamentale derrière mes erreurs (avec analogies et schémas si besoin).
-2. Pour chacune de mes lacunes, rédige un résumé mémo "Règle d'or pour le BTS CIEL".
-3. Propose-moi ensuite un entraînement sur-mesure de 5 questions/exercices progressifs ciblant UNIQUEMENT ces lacunes pour tester si j'ai compris.
-4. Ne me donne pas les réponses tout de suite : attends que je te donne mes propositions pour me corriger pas-à-pas.
-
-Es-tu prêt ? Commence par la synthèse explicative de mes points faibles."""
-
-        st.text_area("📋 Aperçu du Prompt Formaté (Prêt à l'emploi) :", value=prompt_ia, height=280, key="txt_prompt_ia")
-        
-        c_copy1, c_copy2 = st.columns([1, 1])
-        with c_copy1:
-            st.download_button(
-                label="📥 Télécharger le Prompt (fichier .txt)",
-                data=prompt_ia,
-                file_name=f"prompt_diagnostic_ia_{u_name.replace(' ', '_')}.txt",
-                mime="text/plain",
-                key="btn_dl_prompt"
-            )
-        with c_copy2:
-            st.info("💡 Vous pouvez aussi simplement sélectionner le texte ci-dessus et faire `Ctrl+A` puis `Ctrl+C`.")
-
-    with tab_diag4:
-        st.subheader("⚙️ Déclaration Personnalisée de Compétences")
-        st.markdown("<p style='color:#94a3b8;'>Vous pouvez ajouter manuellement une notion que vous maîtrisez ou un sujet sur lequel vous sentez que vous avez des difficultés.</p>", unsafe_allow_html=True)
-        
-        c_add1, c_add2 = st.columns(2)
-        with c_add1:
-            st.markdown("#### ➕ Signaler une Lacune à Revoir")
-            with st.form(key="form_add_weak"):
-                w_name = st.text_input("Intitulé de la notion difficile :", placeholder="ex: Calcul EUI-64 en IPv6, Pointeur unique C++...")
-                w_dom = st.selectbox("Matière associée :", ["Réseaux & Télécoms", "Cybersécurité & Hardening", "Programmation C++/Python", "Linux Debian & AD", "Électronique & Bus", "Maths Appliquées", "Modélisation SysML/E6"])
-                w_desc = st.text_area("Ce qui vous pose problème :", placeholder="ex: Je confonds l'inversion du 7ème bit et l'insertion de FFFE...")
-                submit_w = st.form_submit_button("Ajouter à mes points à revoir")
-                if submit_w and w_name.strip():
-                    wid = f"custom_{len(tracking['weaknesses'])+1}"
-                    tracking['weaknesses'][wid] = {
-                        'name': w_name.strip(),
-                        'domain': w_dom,
-                        'last_error': w_desc.strip() if w_desc.strip() else "Signalé par l'étudiant",
-                        'count': 1,
-                        'date': datetime.now().strftime('%Y-%m-%d')
-                    }
-                    update_active_user_data(user_data)
-                    st.success(f"La notion '{w_name}' a été ajoutée à vos points à revoir !")
-                    st.rerun()
-                    
-        with c_add2:
-            st.markdown("#### 🏆 Valider une Compétence Acquise")
-            with st.form(key="form_add_skill"):
-                s_name = st.text_input("Compétence maîtrisée :", placeholder="ex: Routage statique Cisco, Masques octaux chmod...")
-                s_dom = st.selectbox("Matière :", ["Réseaux & Télécoms", "Cybersécurité & Hardening", "Programmation C++/Python", "Linux Debian & AD", "Électronique & Bus", "Maths Appliquées", "Modélisation SysML/E6"])
-                submit_s = st.form_submit_button("Marquer comme validée")
-                if submit_s and s_name.strip():
-                    sid = f"skill_{len(tracking['mastered_skills'])+1}"
-                    tracking['mastered_skills'][sid] = {
-                        'name': s_name.strip(),
-                        'domain': s_dom,
-                        'count': 1
-                    }
-                    # Retirer des lacunes si présent
-                    for wid, winf in list(tracking['weaknesses'].items()):
-                        if winf.get('name', '').lower() == s_name.strip().lower():
-                            del tracking['weaknesses'][wid]
-                    add_user_points(20, f"skill_{s_name}", s_dom)
-                    st.success(f"Compétence '{s_name}' enregistrée ! (+20 XP)")
-                    st.rerun()
 
 
 # Module de Rendu Analyse des Scores pour BTS CIEL Studio Pro
@@ -1708,9 +1420,2615 @@ public:
                 st.error("❌ Réponses attendues : 1) Adresse Esclave (Slave ID 1), 2) Read Holding Registers, 3) 2 registres.")
 
 
+
+# ══════════════════════════════════════════════════════════════════════════════
+# V31 — BANQUES DE QUESTIONS AJOUTÉES
+# ══════════════════════════════════════════════════════════════════════════════
+M_NET = '📶 Réseaux & Télécoms'
+M_CYB = '🔒 Cybersécurité'
+M_DEV = '💻 Programmation / Dev'
+M_SYS = '🖥️ Administration Système'
+M_ELE = '🔌 Électronique & IoT'
+M_UML = '📐 Modélisation UML & SysML'
+M_MAT = '📈 Mathématiques'
+
+
+def _b10(rows):
+    """(question, [options], index bonne réponse, explication) -> format des quiz de 10 questions."""
+    return [{'q': q, 'opts': o, 'options': o, 'rep': o[i], 'expl': e} for (q, o, i, e) in rows]
+
+
+# Banque utilisée par les pages Suites, Fonctions, Kirchhoff, Oscilloscope et CAN
+# (elle était appelée dans la v30 mais n'existait pas : ces pages plantaient).
+QUIZZES_BANK_10 = {
+    'Suites': _b10([
+        ("Suite arithmétique : u0 = 3 et raison r = 4. Combien vaut u5 ?", ['20', '23', '27', '3072'], 1, "u_n = u0 + n×r, donc u5 = 3 + 5×4 = 23."),
+        ("Suite géométrique : u0 = 2 et raison q = 3. Combien vaut u4 ?", ['14', '54', '162', '486'], 2, "u_n = u0 × q^n, donc u4 = 2 × 3^4 = 2 × 81 = 162."),
+        ("On a u(n+1) = u(n) − 5. Quelle est la nature de la suite ?", ['Arithmétique de raison −5', 'Géométrique de raison −5', 'Arithmétique de raison 5', 'Ni l\'une ni l\'autre'], 0, "On ajoute toujours le même nombre (−5) pour passer au terme suivant : c'est une suite arithmétique."),
+        ("Combien vaut la somme 1 + 2 + 3 + … + 100 ?", ['5000', '5050', '10100', '4950'], 1, "Somme = nombre de termes × (premier + dernier) / 2 = 100 × 101 / 2 = 5050."),
+        ("Suite géométrique de raison q = 0,5 et u0 = 8. Vers quoi tend u_n ?", ['+∞', '8', '0', '0,5'], 2, "Quand −1 < q < 1, q^n devient de plus en plus petit : la suite tend vers 0."),
+        ("u_n = 2n + 1. Combien vaut u(n+1) − u(n) ?", ['1', '2', '2n', '3'], 1, "u(n+1) − u(n) = 2(n+1) + 1 − (2n + 1) = 2. L'écart est constant : suite arithmétique de raison 2."),
+        ("Un abonnement augmente de 5 % chaque année. Le prix suit une suite…", ['arithmétique de raison 5', 'géométrique de raison 0,05', 'géométrique de raison 1,05', 'arithmétique de raison 1,05'], 2, "Augmenter de 5 % revient à multiplier par 1,05 : suite géométrique de raison 1,05."),
+        ("Combien vaut 1 + 2 + 4 + 8 + … + 2^9 ?", ['511', '1023', '1024', '2047'], 1, "Somme géométrique : premier × (1 − q^N)/(1 − q) avec N = 10 termes : (1 − 2^10)/(1 − 2) = 1023."),
+        ("Suite arithmétique avec u1 = 10 et u4 = 19. Quelle est la raison ?", ['3', '9', '4,5', '2,25'], 0, "Entre u1 et u4 il y a 3 pas : 19 − 10 = 9, donc r = 9 / 3 = 3."),
+        ("Suite géométrique avec u0 > 0 et q = 2. Comment évolue-t-elle ?", ['Elle tend vers 0', 'Elle est constante', 'Elle tend vers +∞', 'Elle oscille'], 2, "Avec q > 1 et un premier terme positif, chaque terme est plus grand que le précédent : elle tend vers +∞."),
+    ]),
+    'Fonctions': _b10([
+        ("Combien vaut ln(1) ?", ['0', '1', 'e', "Ça n'existe pas"], 0, "ln(1) = 0 car e^0 = 1."),
+        ("Combien vaut e^0 ?", ['0', '1', 'e', '−1'], 1, "N'importe quel nombre non nul à la puissance 0 vaut 1."),
+        ("Combien vaut ln(e^3) ?", ['e', '3e', '3', 'ln 3'], 2, "ln et exp s'annulent : ln(e^x) = x, donc ln(e^3) = 3."),
+        ("ln(a × b) est égal à…", ['ln(a) × ln(b)', 'ln(a) + ln(b)', 'ln(a) − ln(b)', 'a × ln(b)'], 1, "Le logarithme transforme un produit en somme : ln(ab) = ln(a) + ln(b)."),
+        ("Quelle est la dérivée de f(x) = e^(−3x) ?", ['e^(−3x)', '−3e^(−3x)', '3e^(−3x)', '−3x·e^(−3x)'], 1, "(e^u)' = u' × e^u avec u = −3x donc u' = −3."),
+        ("Quelle est la solution de e^x = 5 ?", ['x = 5/e', 'x = e^5', 'x = ln(5)', 'x = 5'], 2, "On applique ln des deux côtés : x = ln(5)."),
+        ("Un amplificateur multiplie la puissance par 100. Quel est son gain en dB ?", ['10 dB', '20 dB', '40 dB', '100 dB'], 1, "En puissance : G = 10 × log(100) = 10 × 2 = 20 dB."),
+        ("Une puissance divisée par 2 correspond environ à…", ['−2 dB', '−3 dB', '−6 dB', '−10 dB'], 1, "10 × log(1/2) ≈ −3 dB. C'est la définition de la fréquence de coupure."),
+        ("Charge d'un condensateur dans un circuit RC : à t = τ, la tension vaut environ…", ['37 % de E', '50 % de E', '63 % de E', '99 % de E'], 2, "u(τ) = E(1 − e^(−1)) ≈ 0,63 E. Le condensateur est considéré chargé à 5τ."),
+        ("Quelle est la limite de e^(−x) quand x tend vers +∞ ?", ['+∞', '1', '0', '−∞'], 2, "e^(−x) = 1/e^x, et e^x devient immense : le quotient tend vers 0."),
+    ]),
+    'Kirchhoff': _b10([
+        ("Une résistance de 220 Ω est traversée par 20 mA. Quelle tension à ses bornes ?", ['4,4 V', '11 V', '4400 V', '0,09 V'], 0, "U = R × I = 220 × 0,020 = 4,4 V. Attention à convertir les mA en A."),
+        ("Un appareil sous 12 V consomme 2 A. Quelle puissance ?", ['6 W', '14 W', '24 W', '48 W'], 2, "P = U × I = 12 × 2 = 24 W."),
+        ("Deux résistances de 100 Ω et 220 Ω en série. Résistance équivalente ?", ['68,75 Ω', '120 Ω', '320 Ω', '22000 Ω'], 2, "En série, on additionne : 100 + 220 = 320 Ω."),
+        ("Deux résistances de 100 Ω en parallèle. Résistance équivalente ?", ['200 Ω', '100 Ω', '50 Ω', '25 Ω'], 2, "En parallèle : R1×R2/(R1+R2) = 10000/200 = 50 Ω. Deux résistances identiques en parallèle donnent la moitié."),
+        ("Que dit la loi des nœuds ?", ['La somme des tensions dans une maille est nulle', 'La somme des courants qui entrent est égale à la somme des courants qui sortent', 'U = R × I', 'La puissance se conserve'], 1, "En un nœud, le courant ne s'accumule pas : ce qui entre ressort."),
+        ("Que dit la loi des mailles ?", ['La somme algébrique des tensions le long d\'une maille fermée est nulle', 'Le courant est le même partout', 'Les résistances s\'additionnent', 'La tension est la même partout'], 0, "En faisant le tour complet d'une boucle, on revient au même potentiel : la somme des tensions vaut 0."),
+        ("Pont diviseur : Ve = 10 V, R1 = R2 = 1 kΩ, sortie prise sur R2. Combien vaut Vs ?", ['10 V', '5 V', '2,5 V', '20 V'], 1, "Vs = Ve × R2/(R1+R2) = 10 × 1/2 = 5 V."),
+        ("Une résistance de 10 Ω est traversée par 2 A. Puissance dissipée (effet Joule) ?", ['20 W', '40 W', '5 W', '200 W'], 1, "P = R × I² = 10 × 4 = 40 W."),
+        ("En un nœud, 3 A entrent par un fil et 1 A sort par un deuxième. Combien sort par le troisième ?", ['4 A', '3 A', '2 A', '1 A'], 2, "Loi des nœuds : 3 = 1 + I3, donc I3 = 2 A."),
+        ("Une lampe de 100 W reste allumée 2 h. Énergie consommée ?", ['50 Wh', '100 Wh', '200 Wh', '200 W'], 2, "E = P × t = 100 × 2 = 200 Wh (le Wh est une énergie, le W une puissance)."),
+    ]),
+    'Oscilloscope': _b10([
+        ("Une période occupe 4 divisions, base de temps 5 ms/div. Quelle est la période ?", ['1,25 ms', '9 ms', '20 ms', '50 ms'], 2, "T = nombre de divisions × calibre = 4 × 5 ms = 20 ms."),
+        ("Un signal a une période de 20 ms. Quelle est sa fréquence ?", ['20 Hz', '50 Hz', '500 Hz', '0,05 Hz'], 1, "f = 1/T = 1/0,020 = 50 Hz."),
+        ("L'amplitude occupe 3 divisions, sensibilité 2 V/div. Tension maximale ?", ['1,5 V', '5 V', '6 V', '0,67 V'], 2, "U = 3 × 2 = 6 V."),
+        ("Un signal sinusoïdal fait 8 V crête à crête. Quelle est son amplitude (valeur max) ?", ['16 V', '8 V', '4 V', '5,66 V'], 2, "Crête à crête = du minimum au maximum = 2 × amplitude. Donc amplitude = 4 V."),
+        ("Signal sinusoïdal d'amplitude 10 V. Valeur efficace ?", ['≈ 7,07 V', '≈ 14,1 V', '5 V', '10 V'], 0, "Ueff = Umax/√2 = 10/1,414 ≈ 7,07 V (valable pour un sinus)."),
+        ("À quoi sert le couplage AC de l'oscilloscope ?", ['À amplifier le signal', 'À supprimer la composante continue du signal', 'À mesurer le courant', 'À inverser le signal'], 1, "En AC, un condensateur bloque le continu : on ne voit que la partie variable."),
+        ("À quoi sert le réglage du déclenchement (trigger) ?", ['À changer la couleur de la trace', 'À stabiliser l\'affichage du signal à l\'écran', 'À augmenter la fréquence', 'À protéger la sonde'], 1, "Le trigger fait démarrer chaque balayage au même point du signal : l'image est fixe."),
+        ("Avec une sonde ×10, la tension réelle est…", ['10 fois plus petite que celle lue', '10 fois plus grande que celle lue (si l\'oscilloscope n\'est pas réglé sur ×10)', 'identique', '100 fois plus grande'], 1, "La sonde ×10 divise le signal par 10 : il faut multiplier la lecture par 10 ou régler la voie sur ×10."),
+        ("Un signal carré est à l'état haut 2 ms sur une période de 10 ms. Rapport cyclique ?", ['2 %', '20 %', '50 %', '80 %'], 1, "α = durée à l'état haut / période = 2/10 = 20 %."),
+        ("Un signal a une période de 1 µs. Quelle est sa fréquence ?", ['1 kHz', '1 MHz', '1 GHz', '1 Hz'], 1, "f = 1/T = 1/10^-6 = 10^6 Hz = 1 MHz."),
+    ]),
+    'CAN_ADC': _b10([
+        ("Combien de niveaux différents peut coder un CAN 10 bits ?", ['10', '100', '1024', '2048'], 2, "2^10 = 1024 niveaux (de 0 à 1023)."),
+        ("CAN 10 bits avec Vref = 5 V. Combien vaut le quantum ?", ['≈ 4,88 mV', '≈ 19,5 mV', '0,5 V', '≈ 48,8 mV'], 0, "q = Vref / 2^n = 5 / 1024 ≈ 4,88 mV."),
+        ("Que dit le théorème de Shannon ?", ['Fe doit être égale à fmax', 'Fe doit être au moins 2 fois plus grande que la fréquence maximale du signal', 'Fe doit être inférieure à fmax', 'Le quantum doit valoir 1 V'], 1, "Pour ne pas perdre d'information : Fe ≥ 2 × fmax."),
+        ("Un signal audio monte jusqu'à 20 kHz. Fréquence d'échantillonnage minimale ?", ['10 kHz', '20 kHz', '40 kHz', '80 kHz'], 2, "Fe ≥ 2 × 20 kHz = 40 kHz (d'où le 44,1 kHz du CD)."),
+        ("Où place-t-on le filtre anti-repliement ?", ['Après le CNA', 'Avant le CAN, c\'est un filtre passe-bas', 'Avant le CAN, c\'est un filtre passe-haut', 'Dans le microcontrôleur'], 1, "On coupe les fréquences trop hautes AVANT d'échantillonner avec un passe-bas."),
+        ("Sur un Arduino UNO (10 bits, 5 V), analogRead() renvoie 512. Tension mesurée ?", ['≈ 0,5 V', '≈ 2,5 V', '≈ 5 V', '≈ 1,25 V'], 1, "U = N × q = 512 × 5/1024 = 2,5 V."),
+        ("CAN 8 bits avec Vref = 3,3 V. Quantum ?", ['≈ 12,9 mV', '≈ 3,2 mV', '≈ 0,41 V', '≈ 25,8 mV'], 0, "q = 3,3 / 256 ≈ 12,9 mV."),
+        ("Si on ajoute 1 bit de résolution à un CAN, le nombre de niveaux…", ['augmente de 1', 'double', 'est multiplié par 10', 'ne change pas'], 1, "Chaque bit supplémentaire multiplie par 2 le nombre de niveaux (et divise le quantum par 2)."),
+        ("Quel est le rôle d'un CNA ?", ['Transformer un signal analogique en nombre', 'Transformer un nombre en tension analogique', 'Filtrer le signal', 'Amplifier le signal'], 1, "CNA = Convertisseur Numérique → Analogique (DAC en anglais)."),
+        ("Que se passe-t-il si la fréquence d'échantillonnage est trop faible ?", ['Le signal est amplifié', 'Il y a repliement de spectre (aliasing) : le signal reconstruit est faux', 'Le quantum augmente', 'Rien de particulier'], 1, "Si Fe < 2 fmax, des fréquences fantômes apparaissent : c'est le repliement."),
+    ]),
+}
+
+
+def _nb(mod, chap, rows):
+    """(question, [options], index bonne réponse, explication, aide en mots simples)"""
+    return [{'q': q, 'options': o, 'rep': o[i], 'expl': e, 'aide': a, 'mod': mod, 'chap': chap} for (q, o, i, e, a) in rows]
+
+
+NOUVELLE_BANQUE = []
+
+# ───────────────────────────── MATHÉMATIQUES ─────────────────────────────
+NOUVELLE_BANQUE += _nb(M_MAT, 'Nombres complexes', [
+    ("Soit z = 3 + 4i. Quel est le module de z ?", ['5', '7', '25', '√7'], 0, "|z| = √(a² + b²) = √(9 + 16) = √25 = 5.", "Le module, c'est la « longueur » du nombre complexe. On te demande d'appliquer la formule √(a² + b²) avec a = 3 et b = 4."),
+    ("Quel est le conjugué de z = 2 − 5i ?", ['−2 + 5i', '2 + 5i', '−2 − 5i', '5 − 2i'], 1, "Le conjugué garde la partie réelle et change le signe de la partie imaginaire : 2 + 5i.", "Conjugué = on change seulement le signe devant le i."),
+    ("Combien vaut i² ?", ['1', '−1', 'i', '0'], 1, "Par définition, i est le nombre tel que i² = −1.", "C'est la définition de base à connaître par cœur."),
+    ("Calculer (1 + 2i)(3 − i).", ['5 + 5i', '3 − 2i', '1 + 5i', '5 − 5i'], 0, "On développe : 3 − i + 6i − 2i² = 3 + 5i + 2 = 5 + 5i (car i² = −1).", "On te demande de développer comme une double distributivité, puis de remplacer i² par −1."),
+    ("En électricité, pourquoi écrit-on j à la place de i ?", ['Parce que j est plus grand que i', 'Pour ne pas confondre avec l\'intensité du courant i', 'Parce que j² = 1', 'C\'est une autre unité'], 1, "En électricité, i désigne déjà l'intensité. On note donc j le nombre tel que j² = −1.", "Question de notation : c'est le même nombre, avec une autre lettre."),
+    ("L'équation z² + 2z + 5 = 0 a pour discriminant Δ = −16. Quelles sont ses solutions ?", ['−1 + 2i et −1 − 2i', '1 + 2i et 1 − 2i', '−2 + 4i et −2 − 4i', 'Aucune solution'], 0, "Δ < 0 : z = (−b ± i√|Δ|)/(2a) = (−2 ± 4i)/2 = −1 ± 2i.", "Quand Δ est négatif, il y a deux solutions complexes conjuguées. On applique la formule avec i√|Δ|."),
+    ("Quel est un argument de z = i ?", ['0', 'π/2', 'π', '−π/2'], 1, "Le point d'affixe i est sur l'axe vertical, vers le haut : l'angle avec l'axe des réels est π/2.", "L'argument, c'est l'angle entre l'axe horizontal et la flèche qui va vers le point."),
+    ("Un nombre complexe a pour module 2 et pour argument π/3. Quelle est sa forme exponentielle ?", ['2e^(iπ/3)', 'e^(2iπ/3)', '2 + iπ/3', '(π/3)e^(2i)'], 0, "Forme exponentielle : z = |z| × e^(iθ) = 2e^(iπ/3).", "On te demande juste d'écrire module × e^(i × argument)."),
+    ("Quelle est la partie réelle de z = 4 − 7i ?", ['−7', '4', '7', '−7i'], 1, "Dans z = a + ib, la partie réelle est a = 4 et la partie imaginaire est b = −7.", "Partie réelle = le nombre sans i."),
+    ("Pour écrire (4 − i)/(1 + 2i) sous forme algébrique, quelle est la méthode ?", ['On multiplie en haut et en bas par le conjugué du dénominateur', 'On divise les parties réelles entre elles', 'On remplace i par −1', 'On calcule le module'], 0, "On multiplie numérateur et dénominateur par (1 − 2i) : le dénominateur devient un réel (1² + 2² = 5).", "On te demande la technique pour faire disparaître le i du bas de la fraction."),
+])
+NOUVELLE_BANQUE += _nb(M_MAT, 'Matrices', [
+    ("Soit A = [[1, 2], [3, 4]]. Combien vaut son déterminant ?", ['−2', '10', '2', '−5'], 0, "det = a×d − b×c = 1×4 − 2×3 = −2.", "Déterminant d'une matrice 2×2 : produit de la diagonale qui descend moins produit de l'autre diagonale."),
+    ("À quelle condition peut-on calculer le produit A × B ?", ['A et B ont la même taille', 'Le nombre de colonnes de A est égal au nombre de lignes de B', 'A et B sont carrées', 'Le déterminant de A est nul'], 1, "Le produit ligne × colonne exige que les lignes de A aient autant d'éléments que les colonnes de B.", "On te demande la règle de compatibilité des tailles."),
+    ("Calculer [[1, 2], [3, 4]] × [[1], [1]].", ['[[3], [7]]', '[[1], [3]]', '[[4], [6]]', '[[2], [4]]'], 0, "Ligne 1 : 1×1 + 2×1 = 3. Ligne 2 : 3×1 + 4×1 = 7.", "Chaque ligne de la première matrice est multipliée par la colonne, puis on additionne."),
+    ("Que vaut A × I, où I est la matrice identité ?", ['I', 'A', 'La matrice nulle', 'A²'], 1, "La matrice identité joue le rôle du nombre 1 dans la multiplication.", "I = des 1 sur la diagonale, des 0 ailleurs."),
+    ("À quelle condition une matrice carrée est-elle inversible ?", ['Son déterminant est différent de 0', 'Son déterminant vaut 0', 'Elle ne contient pas de 0', 'Elle est de taille 2×2'], 0, "Si det(A) ≠ 0, il existe A⁻¹ telle que A × A⁻¹ = I.", "Inversible = on peut « diviser » par cette matrice. Il faut regarder le déterminant."),
+    ("A est de taille 2×3 et B de taille 3×4. Quelle est la taille de A × B ?", ['3×3', '2×4', '3×4', '6×12'], 1, "On garde le nombre de lignes de A et le nombre de colonnes de B : 2×4.", "Taille (lignes × colonnes). Les deux nombres « du milieu » doivent être égaux et disparaissent."),
+])
+NOUVELLE_BANQUE += _nb(M_MAT, 'Dérivation', [
+    ("Quelle est la dérivée de f(x) = 3x² + 2x − 5 ?", ['6x + 2', '3x + 2', '6x − 5', 'x³ + x²'], 0, "(x²)' = 2x donc (3x²)' = 6x ; (2x)' = 2 ; une constante a pour dérivée 0.", "On dérive chaque morceau séparément avec les formules du cours."),
+    ("Quelle est la dérivée de f(x) = e^(2x) ?", ['e^(2x)', '2e^(2x)', '2x·e^(2x)', 'e^(2x)/2'], 1, "(e^u)' = u' × e^u avec u = 2x, u' = 2.", "Fonction composée : on multiplie par la dérivée de ce qui est dans l'exposant."),
+    ("Quelle est la dérivée de ln(x) ?", ['1/x', 'e^x', 'x·ln(x)', '1/x²'], 0, "(ln x)' = 1/x pour x > 0.", "Formule de cours à connaître."),
+    ("Si f'(x) > 0 sur un intervalle, alors sur cet intervalle f est…", ['décroissante', 'croissante', 'constante', 'négative'], 1, "Dérivée positive = la courbe monte.", "Le signe de la dérivée donne le sens de variation."),
+    ("Quelle est la dérivée de sin(x) ?", ['−cos(x)', 'cos(x)', '−sin(x)', 'tan(x)'], 1, "(sin x)' = cos x et (cos x)' = −sin x.", "Formule de cours."),
+    ("Quelle est la formule de la dérivée d'un produit u × v ?", ["u' × v'", "u'v + uv'", "u'v − uv'", "(u'v − uv')/v²"], 1, "(uv)' = u'v + uv'. La dernière proposition est celle du quotient.", "On te demande de reconnaître la bonne formule parmi celles du cours."),
+    ("Que représente f'(a) graphiquement ?", ['L\'ordonnée du point d\'abscisse a', 'Le coefficient directeur de la tangente à la courbe au point d\'abscisse a', 'L\'aire sous la courbe', 'Le maximum de f'], 1, "Le nombre dérivé est la pente de la tangente.", "Nombre dérivé = pente de la courbe à cet endroit."),
+])
+NOUVELLE_BANQUE += _nb(M_MAT, 'Calcul intégral', [
+    ("Quelle est une primitive de f(x) = 2x ?", ['2', 'x²', '2x²', 'x'], 1, "On cherche F telle que F' = f : (x²)' = 2x.", "Primitive = l'opération inverse de la dérivée."),
+    ("Combien vaut l'intégrale de 0 à 2 de la fonction constante 3 ?", ['3', '5', '6', '9'], 2, "Primitive : 3x. [3x] de 0 à 2 = 6 − 0 = 6. C'est l'aire d'un rectangle 2 × 3.", "L'intégrale d'une fonction positive, c'est l'aire sous sa courbe."),
+    ("Combien vaut l'intégrale de 0 à 1 de x ?", ['1', '1/2', '2', '0'], 1, "Primitive : x²/2. [x²/2] de 0 à 1 = 1/2.", "On cherche une primitive, puis on calcule F(1) − F(0)."),
+    ("Quelle est une primitive de 1/x sur ]0 ; +∞[ ?", ['ln(x)', '−1/x²', 'e^x', 'x'], 0, "(ln x)' = 1/x.", "Formule de cours."),
+    ("Comment calcule-t-on la valeur moyenne de f sur [a ; b] ?", ['f(a) + f(b)', '(1/(b − a)) × intégrale de a à b de f', 'f((a + b)/2)', 'L\'intégrale de a à b de f'], 1, "Valeur moyenne = aire divisée par la largeur de l'intervalle.", "Utile en électricité : la valeur moyenne d'une tension sur une période."),
+    ("Combien vaut l'intégrale de 0 à π de sin(x) ?", ['0', '1', '2', 'π'], 2, "Primitive : −cos x. [−cos x] de 0 à π = −(−1) − (−1) = 2.", "On calcule F(π) − F(0) avec F(x) = −cos(x)."),
+])
+NOUVELLE_BANQUE += _nb(M_MAT, 'Probabilités', [
+    ("Si P(A) = 0,3, combien vaut la probabilité de l'événement contraire ?", ['0,3', '0,7', '1,3', '0,09'], 1, "P(contraire de A) = 1 − P(A) = 0,7.", "Événement contraire = « A ne se produit pas »."),
+    ("On sait que P(A) = 0,5 et P(A ∩ B) = 0,2. Combien vaut P(B sachant A) ?", ['0,1', '0,4', '0,7', '2,5'], 1, "P_A(B) = P(A ∩ B)/P(A) = 0,2/0,5 = 0,4.", "Probabilité conditionnelle : parmi les cas où A est réalisé, quelle part réalise aussi B ?"),
+    ("Deux événements A et B sont indépendants si…", ['P(A ∩ B) = P(A) × P(B)', 'P(A ∩ B) = 0', 'P(A) + P(B) = 1', 'P(A) = P(B)'], 0, "Indépendants : la réalisation de l'un ne change pas la probabilité de l'autre.", "On te demande la formule qui définit l'indépendance (à ne pas confondre avec « incompatibles »)."),
+    ("X suit la loi binomiale B(10 ; 0,2). Quelle est son espérance ?", ['0,2', '2', '5', '8'], 1, "E(X) = n × p = 10 × 0,2 = 2.", "L'espérance, c'est la valeur moyenne qu'on obtient si on répète l'expérience un grand nombre de fois."),
+    ("X suit la loi binomiale B(100 ; 0,5). Quel est son écart type ?", ['5', '25', '50', '10'], 0, "V(X) = np(1 − p) = 25, donc σ = √25 = 5.", "Écart type = racine carrée de la variance n × p × (1 − p)."),
+    ("Dans quelle situation utilise-t-on la loi binomiale ?", ['On répète n fois la même épreuve à 2 issues, de façon indépendante, et on compte les succès', 'On mesure une durée de vie', 'On tire sans remise', 'On mesure une grandeur continue'], 0, "Schéma de Bernoulli : n épreuves identiques et indépendantes, succès de probabilité p.", "On te demande de reconnaître le « décor » de la loi binomiale."),
+    ("X suit une loi normale de moyenne μ et d'écart type σ. P(μ − 2σ ≤ X ≤ μ + 2σ) vaut environ…", ['0,50', '0,68', '0,95', '0,997'], 2, "Repères : 68 % à ±1σ, 95 % à ±2σ, 99,7 % à ±3σ.", "Valeurs repères de la courbe en cloche, à connaître."),
+    ("La durée de vie d'un composant suit une loi exponentielle de paramètre λ = 0,01 h⁻¹. Durée de vie moyenne ?", ['0,01 h', '10 h', '100 h', '1000 h'], 2, "E(X) = 1/λ = 1/0,01 = 100 h (c'est le MTBF).", "Pour la loi exponentielle, la moyenne est l'inverse du paramètre λ."),
+    ("On lance un dé équilibré à 6 faces. Probabilité d'obtenir un nombre pair ?", ['1/6', '1/3', '1/2', '2/3'], 2, "3 issues favorables (2, 4, 6) sur 6 : 3/6 = 1/2.", "Probabilité = nombre de cas favorables / nombre de cas possibles."),
+])
+NOUVELLE_BANQUE += _nb(M_MAT, 'Statistiques', [
+    ("Quelle est la moyenne de la série 8 ; 10 ; 12 ; 14 ?", ['10', '11', '12', '44'], 1, "(8 + 10 + 12 + 14)/4 = 44/4 = 11.", "Moyenne = somme des valeurs divisée par le nombre de valeurs."),
+    ("Quelle est la médiane de la série 3 ; 5 ; 7 ; 20 ; 100 ?", ['7', '27', '20', '5'], 0, "La série est rangée, il y a 5 valeurs : la médiane est la 3e, soit 7.", "Médiane = la valeur du milieu quand la série est rangée dans l'ordre."),
+    ("Que mesure l'écart type ?", ['La valeur la plus fréquente', 'La dispersion des valeurs autour de la moyenne', 'La valeur du milieu', 'Le nombre de valeurs'], 1, "Plus l'écart type est grand, plus les valeurs sont étalées.", "On te demande à quoi sert cet indicateur."),
+    ("Par quel point passe toujours la droite de régression de y en x ?", ['L\'origine du repère', 'Le point moyen G de coordonnées (moyenne des x ; moyenne des y)', 'Le premier point du nuage', 'Le point le plus haut'], 1, "La droite d'ajustement par les moindres carrés passe par le point moyen G.", "Statistiques à deux variables : la droite qui « résume » le nuage de points."),
+    ("Un coefficient de corrélation linéaire r proche de 1 signifie…", ['Aucun lien entre x et y', 'Les points sont presque alignés sur une droite qui monte', 'Les points sont presque alignés sur une droite qui descend', 'Une erreur de calcul'], 1, "r proche de 1 : fort lien linéaire croissant. r proche de −1 : décroissant. r proche de 0 : pas de lien linéaire.", "r indique si un ajustement par une droite est pertinent."),
+    ("L'écart type d'une série vaut 3. Combien vaut la variance ?", ['1,73', '3', '6', '9'], 3, "V = σ² = 9.", "Variance = écart type au carré."),
+])
+NOUVELLE_BANQUE += _nb(M_MAT, 'Trigonométrie & signaux', [
+    ("Combien vaut cos(0) ?", ['0', '1', '−1', '1/2'], 1, "Sur le cercle trigonométrique, l'angle 0 correspond au point (1 ; 0).", "cos = l'abscisse du point sur le cercle trigonométrique."),
+    ("Combien vaut sin(π/2) ?", ['0', '1', '−1', '√2/2'], 1, "L'angle π/2 correspond au point (0 ; 1).", "sin = l'ordonnée du point sur le cercle trigonométrique."),
+    ("Quelle est la période de la fonction sin(x) ?", ['π/2', 'π', '2π', '1'], 2, "sin(x + 2π) = sin(x) : la courbe se répète tous les 2π.", "Période = la durée au bout de laquelle la courbe recommence à l'identique."),
+    ("Un signal s'écrit u(t) = 5 sin(100π t). Quelle est sa fréquence ?", ['50 Hz', '100 Hz', '5 Hz', '314 Hz'], 0, "ω = 100π = 2πf, donc f = 50 Hz.", "Dans U sin(ωt), le nombre devant t est la pulsation ω. On te demande de passer de ω à f avec ω = 2πf."),
+    ("Pour tout x, cos²(x) + sin²(x) est égal à…", ['0', '1', '2', 'cos(2x)'], 1, "Relation fondamentale de la trigonométrie.", "Formule de cours."),
+])
+NOUVELLE_BANQUE += _nb(M_MAT, 'Équations différentielles', [
+    ("Quelles sont les solutions de l'équation y' = a·y ?", ['y = C·e^(ax)', 'y = ax + C', 'y = C·ln(ax)', 'y = a·x²'], 0, "Les solutions de y' = ay sont les fonctions x ↦ C·e^(ax), C constante.", "Une équation différentielle relie une fonction à sa dérivée. Formule de cours."),
+    ("Quelle est la solution de y' + 2y = 0 qui vérifie y(0) = 3 ?", ['y = 3e^(−2x)', 'y = 3e^(2x)', 'y = −2x + 3', 'y = e^(−2x) + 3'], 0, "y' = −2y donc y = C·e^(−2x). Avec y(0) = 3 : C = 3.", "Deux étapes : 1) forme générale C·e^(ax) ; 2) on trouve C grâce à la condition initiale."),
+])
+
+# ───────────────────────────── ÉLECTRONIQUE ─────────────────────────────
+NOUVELLE_BANQUE += _nb(M_ELE, 'Algèbre de Boole & logique', [
+    ("Dans l'algèbre de Boole, combien vaut a + ā (a OU NON a) ?", ['0', '1', 'a', 'ā'], 1, "Une variable ou son contraire : l'un des deux vaut forcément 1.", "Le + veut dire OU, la barre veut dire NON."),
+    ("Combien vaut a · ā (a ET NON a) ?", ['0', '1', 'a', 'ā'], 0, "Une variable et son contraire ne peuvent pas valoir 1 en même temps.", "Le point veut dire ET."),
+    ("D'après le théorème de De Morgan, le complément de (a · b) est égal à…", ['ā · b̄', 'ā + b̄', 'a + b', 'a · b̄'], 1, "NON(a ET b) = (NON a) OU (NON b).", "De Morgan : on coupe la barre et on change l'opérateur (ET devient OU)."),
+    ("D'après De Morgan, le complément de (a + b) est égal à…", ['ā · b̄', 'ā + b̄', 'a · b', 'ā + b'], 0, "NON(a OU b) = (NON a) ET (NON b).", "De Morgan : on coupe la barre et on change l'opérateur (OU devient ET)."),
+    ("Quand la sortie d'une porte XOR (OU exclusif) vaut-elle 1 ?", ['Quand les deux entrées sont à 1', 'Quand les deux entrées sont différentes', 'Quand les deux entrées sont identiques', 'Toujours'], 1, "XOR : 1 si une seule des deux entrées est à 1.", "OU exclusif = l'un ou l'autre, mais pas les deux."),
+    ("Que vaut la sortie d'une porte NAND dont les deux entrées sont à 1 ?", ['0', '1', 'Indéterminé', 'Haute impédance'], 0, "NAND = NON(ET). ET(1,1) = 1 donc NAND = 0.", "NAND = on fait un ET puis on inverse le résultat."),
+    ("Simplifier l'expression a + a·b.", ['a', 'b', 'a·b', 'a + b'], 0, "Absorption : a + a·b = a·(1 + b) = a·1 = a.", "On te demande d'utiliser les propriétés de Boole pour écrire plus court."),
+    ("Dans une expression logique, quel est l'ordre de priorité ?", ['OU, puis ET, puis NON', 'Parenthèses, puis NON, puis ET, puis OU', 'De gauche à droite', 'ET, puis NON, puis OU'], 1, "Comme en calcul : parenthèses, complément, produit (ET), somme (OU).", "Même logique que « la multiplication avant l'addition »."),
+    ("À quoi sert un tableau de Karnaugh ?", ['À convertir du binaire en hexadécimal', 'À simplifier une fonction logique en regroupant les 1 voisins', 'À calculer une tension', 'À dessiner un chronogramme'], 1, "On regroupe les cases à 1 adjacentes par paquets de 1, 2, 4, 8… pour obtenir l'expression la plus simple.", "Outil graphique de simplification."),
+    ("Combien vaut a + 1 dans l'algèbre de Boole ?", ['a', '0', '1', 'ā'], 2, "1 est l'élément absorbant du OU : n'importe quoi OU vrai = vrai.", "+ veut dire OU."),
+])
+NOUVELLE_BANQUE += _nb(M_ELE, 'Numération & codage', [
+    ("Que vaut le nombre binaire 1010 en décimal ?", ['5', '10', '12', '20'], 1, "1×8 + 0×4 + 1×2 + 0×1 = 10.", "Chaque chiffre binaire a un poids : 8, 4, 2, 1 de gauche à droite."),
+    ("Que vaut 0xFF en décimal ?", ['15', '127', '255', '256'], 2, "F = 15, donc 15×16 + 15 = 255.", "0x indique de l'hexadécimal (base 16)."),
+    ("Que vaut 0x2A en décimal ?", ['42', '32', '210', '26'], 0, "2×16 + 10 = 42 (A = 10).", "On multiplie le chiffre de gauche par 16 et on ajoute celui de droite."),
+    ("Combien de valeurs différentes peut-on coder sur 1 octet ?", ['8', '16', '255', '256'], 3, "1 octet = 8 bits, soit 2^8 = 256 valeurs (de 0 à 255).", "Nombre de valeurs = 2 puissance (nombre de bits)."),
+    ("Comment s'écrit 13 en binaire ?", ['1011', '1101', '1110', '1100'], 1, "13 = 8 + 4 + 1 = 1101.", "On décompose en puissances de 2."),
+    ("Comment s'écrit le binaire 1111 0000 en hexadécimal ?", ['0x0F', '0xF0', '0xFF', '0x78'], 1, "On découpe par paquets de 4 bits : 1111 = F et 0000 = 0.", "1 chiffre hexadécimal = 4 bits."),
+    ("En complément à 2 sur 8 bits, comment est codé −1 ?", ['0x01', '0x80', '0xFF', '0x81'], 2, "On inverse les bits de 0000 0001 puis on ajoute 1 : 1111 1111 = 0xFF.", "Le complément à 2 est la façon de coder les nombres négatifs."),
+    ("Quel est le code ASCII de la lettre 'A' ?", ['41 en décimal', '65 en décimal (0x41)', '97 en décimal', '0x65'], 1, "'A' = 65 = 0x41 ; 'a' = 97 = 0x61.", "La table ASCII associe un nombre à chaque caractère."),
+])
+NOUVELLE_BANQUE += _nb(M_ELE, 'Fiches savoir : PWM, pull-up, interruptions, mémoire', [
+    ("Un signal PWM 0–5 V a un rapport cyclique de 25 %. Quelle est sa tension moyenne ?", ['1,25 V', '2,5 V', '3,75 V', '5 V'], 0, "Umoy = α × Vmax = 0,25 × 5 = 1,25 V.", "Rapport cyclique = part du temps où le signal est à l'état haut."),
+    ("Sur un Arduino UNO, analogWrite(pin, 127) donne un rapport cyclique d'environ…", ['12,7 %', '25 %', '50 %', '100 %'], 2, "La valeur va de 0 à 255 : 127/255 ≈ 50 %.", "analogWrite prend un nombre entre 0 (0 %) et 255 (100 %)."),
+    ("À quoi sert une résistance de pull-up sur une entrée numérique ?", ['À limiter le courant dans une LED', 'À fixer l\'entrée à l\'état haut quand rien ne la commande', 'À augmenter la tension', 'À protéger contre les surtensions'], 1, "Sans elle, l'entrée est « flottante » et lit n'importe quoi.", "Pull-up = « tirer vers le haut »."),
+    ("Avec pinMode(2, INPUT_PULLUP) et un bouton relié à la masse, que lit-on quand on appuie ?", ['HIGH', 'LOW', 'Une valeur aléatoire', '1023'], 1, "Au repos la pull-up donne HIGH ; l'appui relie la broche à GND : LOW.", "Logique inversée : appuyé = LOW."),
+    ("Sur un Arduino UNO, quelles broches acceptent les interruptions externes (attachInterrupt) ?", ['0 et 1', '2 et 3', '9 et 10', 'A0 et A1'], 1, "INT0 = broche 2, INT1 = broche 3.", "Interruption = le programme s'arrête un instant pour traiter un événement urgent."),
+    ("Quel mot-clé faut-il pour une variable modifiée dans une routine d'interruption (ISR) ?", ['const', 'static', 'volatile', 'extern'], 2, "volatile oblige le compilateur à relire la variable en mémoire à chaque fois.", "La variable peut changer « dans le dos » du programme principal."),
+    ("Comment doit être une routine d'interruption (ISR) ?", ['Longue, avec des delay()', 'La plus courte possible, sans delay() ni Serial.print()', 'Elle doit contenir la loop()', 'Elle doit renvoyer une valeur'], 1, "Pendant l'ISR, le reste est bloqué : on y met le minimum (par exemple lever un drapeau).", "ISR = la fonction appelée lors de l'interruption."),
+    ("Sur l'ATmega328P de l'UNO R3, où est stocké le programme ?", ['En SRAM (2 Ko)', 'En mémoire Flash (32 Ko)', 'En EEPROM (1 Ko)', 'Sur la carte SD'], 1, "Flash 32 Ko = programme ; SRAM 2 Ko = variables ; EEPROM 1 Ko = données conservées hors tension.", "Trois mémoires, trois rôles."),
+    ("Quelle mémoire de l'UNO conserve des réglages quand on coupe l'alimentation, sans reprogrammer ?", ['La SRAM', 'L\'EEPROM', 'Le registre PORTB', 'La pile'], 1, "L'EEPROM est non volatile et modifiable par le programme.", "Non volatile = ne s'efface pas à l'extinction."),
+])
+NOUVELLE_BANQUE += _nb(M_ELE, 'Fiches savoir : capteurs, relais, LED', [
+    ("Dans une boucle 4-20 mA, que signifie un courant de 0 mA ?", ['La mesure vaut 0 %', 'Il y a un défaut (fil coupé ou capteur en panne)', 'La mesure vaut 100 %', 'Le capteur est en veille'], 1, "Le minimum normal est 4 mA : 0 mA révèle une rupture de la boucle.", "C'est l'intérêt de commencer à 4 et pas à 0."),
+    ("Un capteur 4-20 mA mesure de 0 à 100 °C. Il délivre 12 mA. Quelle température ?", ['12 °C', '50 °C', '60 °C', '75 °C'], 1, "(12 − 4)/(20 − 4) = 8/16 = 50 % de l'étendue, soit 50 °C.", "On enlève d'abord les 4 mA de départ, puis on fait une règle de trois sur 16 mA."),
+    ("Quelle résistance convertit une boucle 4-20 mA en tension 1-5 V ?", ['100 Ω', '250 Ω', '500 Ω', '1 kΩ'], 1, "U = R × I : 250 × 0,004 = 1 V et 250 × 0,020 = 5 V.", "Loi d'Ohm appliquée aux deux extrémités de la plage."),
+    ("Quelle est la différence entre résolution et précision d'un capteur ?", ['C\'est la même chose', 'Résolution = plus petite variation détectable ; précision = écart avec la vraie valeur', 'Résolution = écart avec la vraie valeur ; précision = nombre de bits', 'La précision ne dépend que du CAN'], 1, "Un capteur peut afficher beaucoup de chiffres (bonne résolution) et être faux (mauvaise précision).", "Deux qualités différentes à ne pas confondre."),
+    ("Pourquoi place-t-on une diode de roue libre aux bornes de la bobine d'un relais ?", ['Pour allumer un voyant', 'Pour protéger le transistor de la surtension à la coupure', 'Pour augmenter le courant', 'Pour inverser la polarité'], 1, "À la coupure, la bobine génère une forte tension inverse ; la diode l'écoule.", "Une bobine « n'aime pas » que le courant s'arrête d'un coup."),
+    ("Quel est l'intérêt principal d'un relais ?", ['Amplifier un signal audio', 'Commander une forte puissance avec un petit signal, avec isolation galvanique', 'Mesurer un courant', 'Convertir de l\'analogique en numérique'], 1, "Le circuit de commande et le circuit de puissance ne sont pas reliés électriquement.", "Isolation galvanique = aucun contact électrique entre les deux côtés."),
+    ("LED rouge (2 V, 15 mA) alimentée en 5 V. Quelle résistance en série ?", ['33 Ω', '200 Ω', '333 Ω', '1 kΩ'], 1, "R = (5 − 2)/0,015 = 200 Ω.", "La résistance doit « absorber » la tension en trop : (Valim − Vled) / I."),
+    ("À quoi sert un pont en H ?", ['À redresser une tension alternative', 'À inverser le sens de rotation d\'un moteur à courant continu', 'À mesurer une résistance', 'À filtrer un signal'], 1, "4 interrupteurs (transistors) permettent d'inverser la polarité aux bornes du moteur.", "Son nom vient de la forme du schéma."),
+])
+NOUVELLE_BANQUE += _nb(M_ELE, 'Signaux, gain & impédances', [
+    ("Un amplificateur multiplie la tension par 10. Gain en décibels ?", ['10 dB', '20 dB', '40 dB', '100 dB'], 1, "En tension : G = 20 × log(10) = 20 dB.", "20 log pour les tensions, 10 log pour les puissances."),
+    ("Un amplificateur multiplie la tension par 100. Gain en décibels ?", ['20 dB', '40 dB', '100 dB', '200 dB'], 1, "G = 20 × log(100) = 20 × 2 = 40 dB.", "log(100) = 2."),
+    ("À la fréquence de coupure d'un filtre, le gain a chuté de…", ['1 dB', '3 dB', '10 dB', '20 dB'], 1, "Fréquence de coupure à −3 dB : la tension est divisée par √2, la puissance par 2.", "Définition à connaître."),
+    ("Quelle est l'impédance complexe d'une bobine d'inductance L ?", ['R', 'jLω', '1/(jCω)', 'L/ω'], 1, "Z_L = jLω : elle augmente avec la fréquence.", "Impédance = « résistance » en régime sinusoïdal."),
+    ("Quelle est l'impédance complexe d'un condensateur de capacité C ?", ['jCω', '1/(jCω)', 'C/ω', 'R·C'], 1, "Z_C = 1/(jCω) : elle diminue quand la fréquence augmente.", "Le condensateur bloque le continu et laisse passer les hautes fréquences."),
+    ("Fréquence de coupure d'un filtre RC ?", ['fc = RC', 'fc = 1/(2πRC)', 'fc = 2πRC', 'fc = R/C'], 1, "fc = 1/(2πRC).", "Formule de cours."),
+    ("La tension secteur a une valeur maximale de 325 V. Quelle est sa valeur efficace ?", ['≈ 230 V', '≈ 460 V', '≈ 162 V', '325 V'], 0, "Ueff = Umax/√2 = 325/1,414 ≈ 230 V.", "Pour un sinus, on divise la valeur max par √2."),
+    ("Une batterie de 2000 mAh alimente un montage qui consomme 500 mA. Autonomie théorique ?", ['1 h', '2,5 h', '4 h', '10 h'], 2, "t = capacité/courant = 2000/500 = 4 h.", "mAh = milliampères × heures."),
+])
+NOUVELLE_BANQUE += _nb(M_ELE, 'NFC / RFID', [
+    ("À quelle fréquence fonctionne le NFC ?", ['125 kHz', '13,56 MHz', '868 MHz', '2,4 GHz'], 1, "Le NFC est un RFID haute fréquence (HF) à 13,56 MHz.", "Fréquence de référence à connaître."),
+    ("Quelle est la portée typique du NFC ?", ['Quelques centimètres', 'Environ 10 mètres', 'Environ 100 mètres', 'Plusieurs kilomètres'], 0, "Champ proche : quelques cm, ce qui limite l'écoute à distance.", "NFC = Near Field Communication, communication en champ proche."),
+    ("Comment est alimenté un tag RFID passif ?", ['Par une pile bouton', 'Par le champ électromagnétique émis par le lecteur', 'Par un panneau solaire', 'Par le port USB'], 1, "Le lecteur induit un courant dans l'antenne du tag (couplage inductif).", "Passif = pas de source d'énergie à l'intérieur."),
+    ("Qu'est-ce que l'UID d'un tag ?", ['Sa clé de chiffrement', 'Son identifiant unique', 'Sa fréquence', 'Sa puissance d\'émission'], 1, "UID = Unique IDentifier, lu par le lecteur lors de la détection.", "UID = numéro de série du badge."),
+    ("Quelle bande RFID permet de lire des étiquettes à plusieurs mètres (logistique) ?", ['LF 125 kHz', 'HF 13,56 MHz', 'UHF 860-960 MHz', 'Aucune'], 2, "L'UHF offre plusieurs mètres de portée, pratique pour les palettes.", "LF et HF = courte portée, UHF = longue portée."),
+])
+
+# ───────────────────────────── RÉSEAUX ─────────────────────────────
+NOUVELLE_BANQUE += _nb(M_NET, 'Fiches savoir : liaison série (bauds, XON/XOFF)', [
+    ("Que mesure le débit en bauds ?", ['Le nombre de bits par seconde', 'Le nombre de symboles transmis par seconde', 'Le nombre d\'octets par seconde', 'La tension de la ligne'], 1, "Baud = symboles/s. Si un symbole code 1 bit, bauds = bit/s ; s'il en code plusieurs, bit/s > bauds.", "Symbole = un état du signal sur la ligne."),
+    ("Liaison série 9600 bauds en 8N1. Combien de caractères par seconde ?", ['9600', '1200', '960', '800'], 2, "8N1 = 1 start + 8 données + 1 stop = 10 bits par caractère : 9600/10 = 960.", "8N1 : 8 bits de données, pas de parité, 1 bit de stop. Ne pas oublier le bit de start."),
+    ("XON/XOFF est un contrôle de flux…", ['matériel, avec les fils RTS/CTS', 'logiciel, avec des caractères spéciaux envoyés dans les données', 'par parité', 'par CRC'], 1, "Le récepteur envoie XOFF pour demander une pause et XON pour reprendre.", "Contrôle de flux = éviter que le récepteur soit débordé."),
+    ("Quel caractère demande à l'émetteur de se mettre en pause ?", ['XON (0x11)', 'XOFF (0x13)', 'ACK (0x06)', 'CR (0x0D)'], 1, "XOFF = 0x13 (DC3) : stop. XON = 0x11 (DC1) : reprise.", "OFF = on arrête."),
+    ("Quel est le contrôle de flux matériel d'une liaison RS-232 ?", ['XON/XOFF', 'RTS/CTS', 'SYN/ACK', 'TX/RX'], 1, "RTS (Request To Send) et CTS (Clear To Send) sont deux fils dédiés.", "Matériel = avec des fils en plus."),
+])
+NOUVELLE_BANQUE += _nb(M_NET, 'Fiches savoir : routage', [
+    ("Quelle est la notation de la route par défaut ?", ['127.0.0.1/8', '0.0.0.0/0', '255.255.255.255/32', '192.168.0.0/16'], 1, "0.0.0.0/0 correspond à toutes les destinations : on l'utilise quand aucune route plus précise n'existe.", "Route par défaut = « si je ne sais pas où envoyer, j'envoie là »."),
+    ("Deux routes correspondent à la destination. Laquelle le routeur choisit-il ?", ['La première de la table', 'Celle dont le masque est le plus long (la plus précise)', 'Celle dont le masque est le plus court', 'Au hasard'], 1, "Règle de la correspondance la plus longue (longest prefix match).", "/24 est plus précis que /16."),
+    ("Que fait un routeur avec le champ TTL d'un paquet IP ?", ['Il l\'augmente de 1', 'Il le diminue de 1 et détruit le paquet s\'il arrive à 0', 'Il ne le touche pas', 'Il le remet à 255'], 1, "Le TTL évite qu'un paquet tourne indéfiniment en cas de boucle.", "TTL = durée de vie du paquet, comptée en nombre de routeurs."),
+    ("Que fait : ip route 192.168.2.0 255.255.255.0 10.0.0.2 ?", ['Elle crée un VLAN', 'Elle ajoute une route statique vers 192.168.2.0/24 en passant par 10.0.0.2', 'Elle donne une adresse à une interface', 'Elle active OSPF'], 1, "Syntaxe Cisco : ip route [réseau] [masque] [prochain saut].", "On te demande de lire la commande morceau par morceau."),
+    ("À quoi sert la passerelle par défaut d'un PC ?", ['À traduire les noms en adresses IP', 'À joindre les machines qui ne sont pas dans son réseau', 'À attribuer les adresses IP', 'À chiffrer le trafic'], 1, "Si la destination est hors du réseau local, le PC envoie la trame au routeur.", "Passerelle = la porte de sortie du réseau."),
+    ("Combien d'hôtes peut-on adresser dans un réseau /27 ?", ['14', '30', '32', '62'], 1, "32 − 27 = 5 bits hôtes : 2^5 − 2 = 30.", "On enlève 2 adresses : celle du réseau et celle de diffusion."),
+    ("Quelle est l'adresse de diffusion du réseau 192.168.1.64/26 ?", ['192.168.1.95', '192.168.1.127', '192.168.1.128', '192.168.1.255'], 1, "/26 = blocs de 64 adresses : 64 à 127. La dernière est la diffusion.", "Diffusion (broadcast) = dernière adresse du bloc."),
+    ("Quels ports utilisent SSH, DNS et HTTPS ?", ['22, 53 et 443', '23, 53 et 80', '21, 25 et 443', '22, 67 et 8080'], 0, "SSH 22, DNS 53, HTTPS 443 (HTTP 80, Telnet 23, DHCP 67/68).", "Numéros de ports à connaître par cœur."),
+    ("Quelle différence entre TCP et UDP ?", ['TCP est fiable et connecté ; UDP est rapide, sans connexion ni garantie', 'UDP est fiable ; TCP ne l\'est pas', 'TCP est en couche 3', 'Aucune'], 0, "TCP : poignée de main, accusés de réception. UDP : pas de contrôle, idéal pour le temps réel.", "Deux protocoles de la couche Transport."),
+    ("À quoi sert le protocole ARP ?", ['À trouver l\'adresse MAC qui correspond à une adresse IP', 'À trouver l\'adresse IP d\'un nom de domaine', 'À attribuer une adresse IP', 'À router les paquets'], 0, "ARP fait le lien entre couche 3 (IP) et couche 2 (MAC) sur le réseau local.", "Ne pas confondre avec DNS (nom → IP) et DHCP (attribution d'IP)."),
+])
+NOUVELLE_BANQUE += _nb(M_NET, 'Fibre optique', [
+    ("Quel type de fibre pour une liaison de plusieurs dizaines de kilomètres ?", ['Multimode OM3', 'Monomode (cœur d\'environ 9 µm)', 'Câble cuivre cat. 6', 'Fibre plastique'], 1, "Un seul mode de propagation : très peu de dispersion.", "Monomode = longue distance ; multimode = bâtiment, datacenter."),
+    ("Sur quel principe physique la lumière reste-t-elle dans le cœur de la fibre ?", ['La diffraction', 'La réflexion totale interne', 'L\'effet Joule', 'L\'induction'], 1, "L'indice du cœur est supérieur à celui de la gaine.", "La lumière « rebondit » sur la paroi."),
+    ("En quelle unité exprime-t-on l'atténuation linéique d'une fibre ?", ['dB/km', 'Ω/m', 'Mbit/s', 'nm'], 0, "Par exemple 0,2 dB/km à 1550 nm en monomode.", "Atténuation = ce que le signal perd par kilomètre."),
+])
+
+# ───────────────────────────── CYBERSÉCURITÉ ─────────────────────────────
+NOUVELLE_BANQUE += _nb(M_CYB, 'EBIOS RM, PIA & gouvernance', [
+    ("Combien d'ateliers comporte la méthode EBIOS Risk Manager ?", ['3', '4', '5', '7'], 2, "1 Cadrage et socle, 2 Sources de risque, 3 Scénarios stratégiques, 4 Scénarios opérationnels, 5 Traitement du risque.", "EBIOS RM = méthode d'analyse de risques de l'ANSSI."),
+    ("Que signifie DICP ?", ['Disponibilité, Intégrité, Confidentialité, Preuve', 'Données, Internet, Cloud, Protocole', 'Détection, Isolation, Correction, Prévention', 'Domaine, Identité, Certificat, Politique'], 0, "Les 4 critères de sécurité (Preuve = traçabilité).", "Les 4 besoins de sécurité d'une information."),
+    ("Un rançongiciel chiffre les fichiers d'un serveur. Quel critère est d'abord touché ?", ['La confidentialité', 'La disponibilité', 'La preuve', 'Aucun'], 1, "Les données ne sont plus accessibles.", "On te demande de relier une attaque à un critère DICP."),
+    ("Qu'est-ce qu'un PIA (ou AIPD) ?", ['Un pare-feu applicatif', 'Une analyse d\'impact sur la protection des données personnelles, exigée par le RGPD pour les traitements à risque', 'Un protocole de chiffrement', 'Un type de certificat'], 1, "La CNIL fournit une méthode et un outil pour la mener.", "PIA = Privacy Impact Assessment."),
+    ("Dans EBIOS RM, qu'est-ce qu'une « source de risque » ?", ['Une vulnérabilité logicielle', 'L\'acteur à l\'origine de la menace (par exemple un cybercriminel)', 'Une mesure de sécurité', 'Un bien support'], 1, "On l'associe à un objectif visé (couple SR/OV).", "Qui pourrait nous attaquer, et pourquoi ?"),
+])
+NOUVELLE_BANQUE += _nb(M_CYB, 'PKI, chiffrement & pfSense', [
+    ("Dans une PKI, qui signe les certificats ?", ['Le navigateur', 'L\'autorité de certification (AC / CA)', 'Le serveur DNS', 'L\'utilisateur final'], 1, "L'AC garantit le lien entre une identité et une clé publique.", "PKI = l'organisation qui gère les certificats."),
+    ("Avec quelle clé signe-t-on numériquement un document ?", ['Sa propre clé privée', 'Sa propre clé publique', 'La clé publique du destinataire', 'Une clé symétrique partagée'], 0, "On signe avec sa clé privée ; tout le monde vérifie avec la clé publique.", "Signature = prouver que c'est bien moi."),
+    ("Avec quelle clé chiffre-t-on un message pour que seul le destinataire le lise ?", ['Sa propre clé privée', 'La clé publique du destinataire', 'La clé privée du destinataire', 'La clé publique de l\'AC'], 1, "Seule la clé privée du destinataire pourra déchiffrer.", "Chiffrement asymétrique : une clé pour fermer, une autre pour ouvrir."),
+    ("À quoi sert une CRL ?", ['À lister les certificats révoqués', 'À chiffrer les mots de passe', 'À répartir la charge', 'À stocker les clés privées'], 0, "CRL = Certificate Revocation List ; OCSP permet la vérification en ligne.", "Révoqué = annulé avant sa date d'expiration."),
+    ("Lequel de ces algorithmes est symétrique ?", ['RSA', 'AES', 'ECDSA', 'Diffie-Hellman'], 1, "AES : même clé pour chiffrer et déchiffrer, très rapide.", "Symétrique = une seule clé partagée."),
+    ("Dans pfSense, comment sont évaluées les règles d'une interface ?", ['De bas en haut', 'De haut en bas, la première règle qui correspond s\'applique', 'Toutes les règles s\'additionnent', 'Au hasard'], 1, "L'ordre compte ; ce qui n'est pas autorisé est bloqué par défaut.", "First match = la première règle qui correspond gagne."),
+    ("Qu'est-ce qu'une DMZ ?", ['Une zone réseau isolée qui héberge les serveurs accessibles depuis Internet', 'Un protocole de chiffrement', 'Un antivirus', 'Une adresse de diffusion'], 0, "Si un serveur exposé est compromis, le LAN reste protégé par le pare-feu.", "Zone tampon entre Internet et le réseau interne."),
+    ("Quelle propriété doit avoir une fonction de hachage comme SHA-256 ?", ['Être réversible', 'Être à sens unique : impossible de retrouver le message à partir de l\'empreinte', 'Utiliser une clé publique', 'Produire une empreinte de longueur variable'], 1, "Empreinte de taille fixe, à sens unique, résistante aux collisions.", "Hacher n'est pas chiffrer : on ne peut pas revenir en arrière."),
+])
+
+# ───────────────────────────── SYSTÈME ─────────────────────────────
+NOUVELLE_BANQUE += _nb(M_SYS, 'Linux & Bash', [
+    ("Que signifie chmod 750 fichier ?", ['rwx pour tous', 'rwx propriétaire, r-x groupe, rien pour les autres', 'rw- propriétaire, r-- groupe, r-- autres', 'r-x pour tous'], 1, "7 = rwx (4+2+1), 5 = r-x (4+1), 0 = ---.", "Chaque chiffre = une somme : lecture 4, écriture 2, exécution 1."),
+    ("En Bash, que contient la variable $? ?", ['Le PID du script', 'Le code de retour de la dernière commande (0 = succès)', 'Le nombre d\'arguments', 'Le nom du script'], 1, "$? vaut 0 si la commande a réussi.", "Variable spéciale du shell."),
+    ("À quoi sert le caractère | (pipe) ?", ['À écrire dans un fichier', 'À envoyer la sortie d\'une commande vers l\'entrée de la suivante', 'À lancer en arrière-plan', 'À commenter une ligne'], 1, "Exemple : ps aux | grep ssh.", "Pipe = tuyau entre deux commandes."),
+    ("Quelle est la première ligne d'un script Bash ?", ['#!/bin/bash', '// bash', 'import bash', '<bash>'], 0, "Le shebang indique quel interpréteur exécute le script.", "Shebang = la ligne #! tout en haut."),
+    ("Quelle ligne crontab lance une tâche tous les jours à 2 h du matin ?", ['2 0 * * *', '0 2 * * *', '* * 2 * *', '0 0 2 * *'], 1, "Ordre : minute, heure, jour du mois, mois, jour de la semaine.", "On lit les 5 champs de gauche à droite."),
+    ("Quelle commande cherche un mot dans tous les fichiers d'un dossier ?", ['find -name mot', 'grep -r "mot" dossier/', 'ls -l mot', 'cat mot'], 1, "grep cherche dans le contenu ; -r parcourt les sous-dossiers. find cherche des noms de fichiers.", "Contenu = grep ; nom de fichier = find."),
+    ("Quelle différence entre > et >> ?", ['> écrase le fichier, >> ajoute à la fin', '> ajoute, >> écrase', 'Aucune', '>> redirige les erreurs'], 0, "> remplace le contenu, >> ajoute à la suite.", "Deux redirections de sortie."),
+])
+NOUVELLE_BANQUE += _nb(M_SYS, 'Virtualisation, Docker, GLPI & services', [
+    ("Quelle différence entre une image et un conteneur Docker ?", ['L\'image est le modèle figé, le conteneur est une instance en cours d\'exécution', 'Aucune', 'Le conteneur est le modèle, l\'image est l\'instance', 'L\'image est une machine virtuelle complète'], 0, "Une image peut lancer plusieurs conteneurs.", "Image = la recette ; conteneur = le plat préparé."),
+    ("Quelle commande liste les conteneurs en cours d'exécution ?", ['docker images', 'docker ps', 'docker run', 'docker build'], 1, "docker ps (avec -a pour voir aussi ceux arrêtés).", "ps = processus."),
+    ("Qu'est-ce qu'un hyperviseur de type 1 ?", ['Un logiciel installé sur un système hôte', 'Un hyperviseur installé directement sur le matériel (ESXi, Proxmox, Hyper-V)', 'Un conteneur', 'Un émulateur de terminal'], 1, "Type 1 = bare metal ; type 2 = hébergé (VirtualBox, VMware Workstation).", "Bare metal = directement sur la machine."),
+    ("À quoi sert GLPI ?", ['À superviser le trafic réseau', 'À gérer le parc informatique et les tickets d\'assistance', 'À chiffrer les disques', 'À compiler du code'], 1, "Outil ITSM libre : inventaire, helpdesk, suivi des interventions.", "Gestion de parc + assistance."),
+    ("Dans quel ordre se déroulent les 4 échanges DHCP ?", ['Offer, Discover, Ack, Request', 'Discover, Offer, Request, Ack', 'Request, Offer, Discover, Ack', 'Discover, Request, Offer, Ack'], 1, "DORA : Discover, Offer, Request, Acknowledge.", "Moyen mnémotechnique : DORA."),
+    ("De quel service Active Directory ne peut-il pas se passer ?", ['FTP', 'DNS', 'SMTP', 'Telnet'], 1, "Les clients trouvent les contrôleurs de domaine grâce aux enregistrements SRV du DNS.", "Sans DNS, impossible de joindre le domaine."),
+    ("Quel enregistrement DNS associe un nom à une adresse IPv4 ?", ['A', 'AAAA', 'MX', 'CNAME'], 0, "A = IPv4, AAAA = IPv6, MX = messagerie, CNAME = alias.", "Types d'enregistrements DNS."),
+])
+
+# ───────────────────────────── DÉVELOPPEMENT ─────────────────────────────
+NOUVELLE_BANQUE += _nb(M_DEV, 'Git & environnement de développement', [
+    ("Quelle commande Git enregistre les modifications indexées dans l'historique local ?", ['git push', 'git commit', 'git pull', 'git clone'], 1, "git add prépare, git commit enregistre en local, git push envoie au serveur.", "Trois étapes : add, commit, push."),
+    ("Que fait git pull ?", ['Envoie les commits vers le serveur', 'Récupère les commits du dépôt distant et les fusionne dans la branche locale', 'Crée une branche', 'Supprime l\'historique'], 1, "pull = fetch + merge.", "Pull = tirer vers soi."),
+    ("À quoi sert une branche Git ?", ['À sauvegarder sur une clé USB', 'À développer une fonctionnalité en parallèle sans toucher à la branche principale', 'À compresser le dépôt', 'À supprimer des fichiers'], 1, "On fusionne ensuite avec git merge.", "Branche = une ligne de travail séparée."),
+    ("À quoi sert le fichier .gitignore ?", ['À lister les fichiers que Git ne doit pas suivre', 'À stocker les mots de passe', 'À décrire le projet', 'À lister les contributeurs'], 0, "Fichiers compilés, dépendances, secrets…", "Ignore = à ne pas prendre en compte."),
+    ("Qu'est-ce qu'un test unitaire ?", ['Un test du système complet par le client', 'Un test automatisé qui vérifie une petite partie du code isolément', 'Un test de charge', 'Une relecture de code'], 1, "Exemple : une fonction pytest avec des assert.", "Unitaire = une seule « unité » de code à la fois."),
+])
+NOUVELLE_BANQUE += _nb(M_DEV, 'C / C++ / Python : bases à ne pas rater', [
+    ("En C/C++, que représente &x ?", ['La valeur de x', 'L\'adresse mémoire de x', 'Le double de x', 'Le type de x'], 1, "& donne l'adresse ; * donne la valeur pointée.", "Adresse = l'endroit où la variable est rangée en mémoire."),
+    ("Avec int *p = &x; que vaut *p ?", ['L\'adresse de x', 'La valeur de x', 'La taille de x', '0'], 1, "*p déréférence le pointeur.", "Pointeur = une variable qui contient une adresse."),
+    ("Quelle différence entre struct et union en C ?", ['Aucune', 'Dans une struct chaque champ a sa place ; dans une union tous les champs partagent la même zone mémoire', 'Une union contient des fonctions', 'Une struct ne contient qu\'un type'], 1, "La taille d'une union est celle de son plus grand champ.", "Union = un seul champ utilisable à la fois."),
+    ("En C++, que fait un constructeur ?", ['Il libère la mémoire', 'Il initialise l\'objet lors de sa création', 'Il copie un fichier', 'Il compile la classe'], 1, "Même nom que la classe, pas de type de retour. Le destructeur (~Classe) fait le ménage.", "Appelé automatiquement à la création de l'objet."),
+    ("En Python, quelle méthode de socket met un serveur TCP en attente d'un client ?", ['connect()', 'accept()', 'send()', 'close()'], 1, "Serveur : bind(), listen(), accept(). Client : connect().", "On te demande l'étape côté serveur."),
+    ("Que vaut l'expression 0b1100 & 0b1010 ?", ['0b1110', '0b1000', '0b0110', '0b0000'], 1, "ET bit à bit : 1 seulement là où les deux bits valent 1.", "& = ET bit à bit, souvent utilisé pour les masques."),
+    ("Sur un registre 8 bits, que fait : reg |= (1 << 3); ?", ['Met le bit 3 à 0', 'Met le bit 3 à 1 sans toucher aux autres', 'Inverse tous les bits', 'Décale le registre de 3 bits'], 1, "(1 << 3) = 0b00001000 ; le OU force ce bit à 1.", "Technique classique de masque."),
+])
+
+# ───────────────────────────── UML / SysML ─────────────────────────────
+NOUVELLE_BANQUE += _nb(M_UML, 'UML / SysML : lecture de diagrammes', [
+    ("En UML, que représente un losange plein côté classe A relié à B ?", ['Un héritage', 'Une composition : B est une partie de A et disparaît avec lui', 'Une dépendance', 'Une interface'], 1, "Losange plein = composition ; losange vide = agrégation.", "On te demande de reconnaître un symbole du diagramme de classes."),
+    ("Dans un diagramme de classes, que signifie le signe − devant un attribut ?", ['Public', 'Privé', 'Protégé', 'Statique'], 1, "+ public, − privé, # protégé.", "Visibilité de l'attribut."),
+    ("Quel diagramme montre les échanges de messages dans le temps ?", ['Classes', 'Séquence', 'Cas d\'utilisation', 'BDD'], 1, "Le temps s'écoule de haut en bas le long des lignes de vie.", "Séquence = l'ordre chronologique."),
+    ("En SysML, quel diagramme décrit la structure du système en blocs ?", ['Le diagramme d\'exigences', 'Le BDD (Block Definition Diagram)', 'Le diagramme d\'états', 'Le diagramme de séquence'], 1, "Le BDD montre les blocs ; l'IBD montre les connexions internes.", "BDD = de quoi est fait le système."),
+    ("Que montre un diagramme de cas d'utilisation ?", ['Le code des classes', 'Ce que le système permet de faire à chaque acteur', 'Le câblage', 'Les trames échangées'], 1, "Acteurs (bonshommes) reliés aux fonctions offertes (ovales).", "Vision « utilisateur » du système."),
+])
+
+# Glossaire Vocabulaire_BTS (16 thèmes, 742 mots) repris de Vocabulaire_BTS_V3.html
+VOCAB_BTS = [{'t': 'Getting a job',
+  'f': 'Trouver un emploi',
+  'w': [['an ability', 'une capacité'],
+        ['an appointment', 'un rendez-vous'],
+        ['apprenticeship', "l'apprentissage"],
+        ['available', 'disponible'],
+        ['career prospects', 'des perspectives de carrière'],
+        ['to carry out a work placement', 'faire un stage professionnel'],
+        ['classified ads', 'les petites annonces'],
+        ['contracting', 'employer pour une durée déterminée'],
+        ['a cover letter', 'une lettre de motivation / candidature'],
+        ['a curriculum vitae / a CV / a résumé', 'un CV'],
+        ['a diploma', 'un diplôme'],
+        ['efficiency', "l'efficacité"],
+        ['flexibility', 'la flexibilité'],
+        ['to hire', 'embaucher'],
+        ['a job applicant', 'un(e) candidat(e)'],
+        ['a job centre', "une agence pour l'emploi"],
+        ['job hunting', "la recherche d'emploi"],
+        ['a job interview', "un entretien d'embauche"],
+        ['a job offer', "une offre d'emploi"],
+        ['a job seeker', "un(e) demandeur(euse) d'emploi"],
+        ['language fluency', 'la maîtrise linguistique'],
+        ['on-the-job training', 'la formation sur le tas'],
+        ['on probation', "à l'essai"],
+        ['a position', 'un poste'],
+        ['a qualification', 'une qualification'],
+        ['qualified', 'qualifié(e)'],
+        ['to recruit', 'recruter'],
+        ['a reference', 'une référence'],
+        ['self-educated / self-taught', 'autodidacte'],
+        ['skills', 'des compétences'],
+        ['to shortlist', 'présélectionner'],
+        ['a trainee (UK) / an intern (US)', 'un(e) stagiaire'],
+        ['training', 'la formation'],
+        ['a training session', 'un stage, une formation'],
+        ['two-year degree', 'BTS'],
+        ['unskilled', 'non qualifié(e)'],
+        ['vocational training', 'la formation professionnelle'],
+        ['a work placement / an internship (US) / a training programme (UK)', 'un stage'],
+        ['a work-study contract', 'un contrat en alternance']]},
+ {'t': 'Working conditions',
+  'f': 'Conditions de travail',
+  'w': [['advancement', 'la promotion'],
+        ['allowances', 'des indemnités'],
+        ['to award compensation', 'accorder des dommages et intérêts'],
+        ['a bonus', 'une prime'],
+        ['to climb the career ladder', 'gravir les échelons'],
+        ['collective bargaining', 'les négociations collectives'],
+        ['to commute / commuting', 'faire la navette entre le domicile et le travail'],
+        ['to downsize', 'dégraisser'],
+        ['to earn money', "gagner de l'argent"],
+        ['to empower', 'donner du pouvoir à'],
+        ['to fire, to sack', 'virer, renvoyer'],
+        ['glass ceiling', 'le plafond de verre'],
+        ['industrial disputes', 'des conflits sociaux'],
+        ['labour court', "les prud'hommes"],
+        ['labour force / manpower', "la main-d'œuvre"],
+        ['to lay off, laid, laid', 'licencier'],
+        ['minimum wage', 'le salaire minimum'],
+        ['to meet demands', 'satisfaire des revendications'],
+        ['on the dole', 'inscrit(e) au chômage'],
+        ['overworked', 'surchargé(e) de travail'],
+        ['pay', 'la paie'],
+        ['perks', 'des avantages en nature'],
+        ['a prejudice', 'un préjugé'],
+        ['to reach an agreement', 'trouver un accord'],
+        ['redundancy', 'le licenciement économique'],
+        ['a redundancy plan', 'un plan de licenciement'],
+        ['to resign', 'démissionner'],
+        ['responsibility', 'la responsabilité'],
+        ['responsible for', 'responsable de'],
+        ['to reward', 'récompenser'],
+        ['a salary rise', 'une augmentation de salaire'],
+        ['to settle a dispute', 'régler un conflit'],
+        ['social unrest', 'le malaise social'],
+        ['to stage a strike', 'organiser une grève'],
+        ['team spirit', "l'esprit d'équipe"],
+        ['a trade union', 'un syndicat'],
+        ['underpaid', 'sous-payé(e)'],
+        ['the unemployed', 'les chômeurs'],
+        ['unemployment', 'le chômage'],
+        ['unemployment benefits', 'les allocations chômage'],
+        ['wages / wage', 'les rémunérations, la rémunération'],
+        ['workload', 'la charge de travail']]},
+ {'t': 'Working time',
+  'f': 'Temps de travail',
+  'w': [['annual leave', 'des congés annuels'],
+        ['a break', 'une pause'],
+        ['a day off', 'un jour de congé'],
+        ['flextime', 'des horaires flexibles'],
+        ['free time', 'du temps libre, le temps libre'],
+        ['full-time', 'à plein temps'],
+        ['a gap year, a sabbatical year', 'une année sabbatique'],
+        ['maternity/paternity leave', 'le congé de maternité / paternité'],
+        ['moonlighting / undeclared work', 'le travail au noir'],
+        ['overtime', 'des heures supplémentaires'],
+        ['a part-time job / part-time', 'un emploi à temps partiel, à temps partiel'],
+        ['a pension', 'une retraite'],
+        ['a pensioner', 'un(e) retraité(e)'],
+        ['to rest', 'se reposer'],
+        ['to retire', 'prendre sa retraite'],
+        ['severance pay', 'des indemnités de licenciement'],
+        ['shift work', 'le travail posté ou par roulement'],
+        ['sickness leave', 'le congé maladie'],
+        ['teleworking', 'le télétravail'],
+        ['temp(orary) work', "l'intérim"],
+        ['a temp', 'un(e) intérimaire'],
+        ['a 35-hour week', 'une semaine de 35 heures'],
+        ['time off', 'du temps libre'],
+        ['a working week', 'une semaine de travail']]},
+ {'t': 'Companies',
+  'f': 'Entreprises',
+  'w': [['a blue-collar worker', 'un col-bleu, un(e) ouvrier(ère)'],
+        ['a chairman / a chair(wo)man', 'un(e) directeur(trice), président(e)'],
+        ['a chief executive', 'un(e) dirigeant(e)'],
+        ['competition', 'la concurrence'],
+        ['competitiveness', 'la compétitivité'],
+        ['corporate culture', "la culture d'entreprise"],
+        ['coworking', 'le travail collaboratif'],
+        ['an employee', 'un(e) employé(e)'],
+        ['an engineer', 'un(e) ingénieur(e)'],
+        ['a family business', 'une entreprise familiale'],
+        ['a firm', 'une société'],
+        ['the headquarters', 'le siège'],
+        ['an independent worker', 'un(e) travailleur(se) indépendant(e)'],
+        ['a junior executive', 'un(e) jeune cadre'],
+        ['management', 'la direction'],
+        ['a manager', 'un(e) directeur(rice)'],
+        ['overtime', 'des heures supplémentaires'],
+        ['a parent company', 'une maison mère'],
+        ['a partnership', 'un partenariat'],
+        ['a plant manager', "un(e) directeur(rice) d'usine"],
+        ['a private-owned company', 'une société privée'],
+        ['senior management', 'les cadres supérieurs'],
+        ['to set up a company', 'monter une entreprise'],
+        ['a shareholder / stockholder', 'un(e) actionnaire'],
+        ['small and medium-sized companies', 'des petites et moyennes entreprises'],
+        ['staff', 'le personnel'],
+        ['a start-up', 'une jeune pousse'],
+        ['a subsidiary', 'une filiale'],
+        ['a technician', 'un(e) technicien(ne)'],
+        ['a white-collar worker', 'un col blanc, un(e) employé(e)'],
+        ['workforce', "la main-d'œuvre"]]},
+ {'t': 'Factories',
+  'f': 'Usines',
+  'w': [['an assembly plant', "une usine d'assemblage"],
+        ['a car factory', 'une usine automobile'],
+        ['a carmaker', 'un constructeur automobile'],
+        ['a chemical plant', 'une usine de produits chimiques'],
+        ['a coal-fired power station', 'une centrale à charbon'],
+        ['a components factory / an electronic components factory', 'une usine de composants électroniques'],
+        ['a computer plant', "une fabrique d'ordinateurs"],
+        ['a cutting workshop', 'un atelier de décolletage'],
+        ['a design department', "un bureau d'étude"],
+        ['an electrical production shop', 'un atelier de fabrications électriques'],
+        ['an electrical works', 'une usine électrique'],
+        ['a manufacturing/production facility', 'une unité de production'],
+        ['a gasworks', 'une usine à gaz'],
+        ['a hydropower station', 'une centrale hydroélectrique'],
+        ['an industrial facility', 'une installation industrielle'],
+        ['an industrial manufacturer', 'un fabricant industriel'],
+        ['an ironworks', 'une fonderie'],
+        ['a machining workshop', "un atelier d'usinage"],
+        ['to manufacture', 'fabriquer'],
+        ['a nuclear power plant', 'une centrale nucléaire'],
+        ['a power plant', 'une centrale électrique'],
+        ['a procurement department', 'un service des approvisionnements'],
+        ['a production floor', 'un atelier de production'],
+        ['a research and development department', 'un département de recherche et développement'],
+        ['a steelworks', 'une aciérie'],
+        ['a testing department', 'un département qualité et contrôle'],
+        ['a thermal power station', 'une centrale thermique'],
+        ['a turnkey plant', 'une usine clés en main'],
+        ['a warehouse', 'un entrepôt'],
+        ['to work on the assembly line', 'travailler à la chaîne'],
+        ['a workshop', 'un atelier'],
+        ['a work sequencing department', "un bureau de l'ordonnancement"]]},
+ {'t': 'Sport and technology',
+  'f': 'Sport et technologie',
+  'w': [['to achieve', 'accomplir'],
+        ['addicted to', 'accro à'],
+        ['an arena, a stadium', 'une arène, un stade'],
+        ['to attend an event', 'assister à un événement'],
+        ['to break a record', 'battre un record'],
+        ['a championship', 'un championnat'],
+        ['to cheat', 'tricher'],
+        ['to cheer', 'acclamer'],
+        ['a coach', 'un(e) entraîneur(se)'],
+        ['to compete', 'concourir, disputer'],
+        ['confident', 'confiant(e)'],
+        ['a disability', 'un handicap'],
+        ['disabled', 'handicapé(e)'],
+        ['dishonest', 'malhonnête'],
+        ['to disrespect', 'manquer de respect à'],
+        ['doping', 'le dopage'],
+        ['embedded', 'embarqué(e)'],
+        ['to enhance', 'améliorer'],
+        ['entertainment', 'les divertissements, le divertissement'],
+        ['fair', 'juste'],
+        ['fatigue', "l'épuisement"],
+        ['a field', 'un terrain (de sport)'],
+        ['fit / in good shape', 'en forme'],
+        ['to fund', 'financer'],
+        ['gifted', 'doué(e)'],
+        ['to give a boost', 'donner un coup de pouce'],
+        ['leisure', 'les loisirs'],
+        ['to lose, lost, lost', 'perdre'],
+        ['a loser', 'un(e) perdant(e)'],
+        ['to make a dream come true', 'réaliser un rêve'],
+        ['a multiplayer game', 'un jeu multijoueur'],
+        ['an online tournament', 'un tournoi en ligne'],
+        ['on the field', 'sur le terrain'],
+        ['to practise', 'pratiquer'],
+        ['a prosthesis', 'une prothèse'],
+        ['a race', 'une course'],
+        ['to recover', 'récupérer'],
+        ['to rely on, to count on', 'compter sur'],
+        ['rewarding', 'gratifiant(e)'],
+        ['to set a record', 'établir un record'],
+        ['to skew the results', 'fausser les résultats'],
+        ['a smart watch', 'une montre intelligente'],
+        ['strength', 'la force'],
+        ['to support', 'soutenir'],
+        ['to take part in a trial', 'participer à une épreuve'],
+        ['to target', 'cibler'],
+        ['teammates', 'des co-équipiers(ères)'],
+        ['tech-savvy', 'compétent(e) en technologie, branché(e)'],
+        ['thrilling', 'passionnant(e)'],
+        ['to train', "s'entraîner, entraîner"],
+        ['unfair', 'injuste, déloyal(e)'],
+        ['wearable technology', 'la technologie portable'],
+        ['to win, won, won', 'gagner'],
+        ['a winner', 'un(e) gagnant(e)']]},
+ {'t': 'Information technology (IT)',
+  'f': "Technologies de l'information",
+  'w': [['an app(lication)', 'une appli(cation)'],
+        ['an attached file', 'un fichier joint'],
+        ['to back up, to save', 'sauvegarder'],
+        ['a chip', 'une puce'],
+        ['a computer technician', 'un(e) informaticien(ne)'],
+        ['computer literacy', 'la compétence en informatique'],
+        ['to computerise', 'informatiser'],
+        ['computing', "l'informatique"],
+        ['a database', 'une base de données'],
+        ['to delete', 'supprimer'],
+        ['a desktop computer', 'un ordinateur de bureau'],
+        ['digital', 'numérique'],
+        ['to digitalise', 'numériser'],
+        ['a directory', 'un répertoire'],
+        ['to display', 'afficher'],
+        ['to download, to upload', 'télécharger'],
+        ['a drive', 'un lecteur'],
+        ['email', 'le courrier électronique, le courriel'],
+        ['to erase', 'effacer'],
+        ['a file', 'un fichier'],
+        ['a folder', 'un dossier'],
+        ['a hard disk', 'un disque dur'],
+        ['hardware', 'du matériel informatique'],
+        ['an icon', 'une icône'],
+        ['to import', 'importer'],
+        ['junk mail', 'le courrier publicitaire'],
+        ['a key', 'une touche'],
+        ['a keyboard', 'un clavier'],
+        ['a laptop computer', 'un ordinateur portable'],
+        ['a mailbox', 'une boîte de courriel'],
+        ['a memory', 'une mémoire'],
+        ['to monitor', 'contrôler'],
+        ['a mouse', 'une souris'],
+        ['a mouse pad', 'un tapis de souris'],
+        ['multimedia', 'multimédia'],
+        ['an Optical Character Reader (OCR)', 'un lecteur optique'],
+        ['a personal computer (PC)', 'un micro-ordinateur'],
+        ['a piece of software', 'un logiciel'],
+        ['a pop-up window', 'une fenêtre contextuelle'],
+        ['to print', 'imprimer'],
+        ['a printer', 'une imprimante'],
+        ['privacy settings', 'des paramètres de confidentialité'],
+        ['to process data', 'traiter des données'],
+        ['to reboot', 'redémarrer'],
+        ['to remove', 'déplacer'],
+        ['to restart', 'relancer'],
+        ['to save as', 'enregistrer sous'],
+        ['to scan', 'scanner'],
+        ['a screen', 'un écran'],
+        ['a scroll bar', 'une barre de défilement'],
+        ['to scroll down/up', 'défiler vers le bas/haut'],
+        ['a shortcut', 'un raccourci clavier'],
+        ['software', 'des logiciels'],
+        ['a spreadsheet', 'un tableur'],
+        ['a text message', 'un texto'],
+        ['a touch pad', 'un pavé tactile'],
+        ['to type', 'dactylographier'],
+        ['underscore', 'le soulignement'],
+        ['to update', 'mettre à jour'],
+        ['a USB stick', 'une clé USB'],
+        ['user-friendly', 'facile à utiliser, convivial(e)'],
+        ['virtual', 'virtuel(le)'],
+        ['a word processor', 'un traitement de texte']]},
+ {'t': 'Digital systems',
+  'f': 'Systèmes numériques',
+  'w': [['an alarm', 'une alerte'],
+        ['an algorithm', 'un algorithme'],
+        ['to chart a specification book/brief/note', 'rédiger un cahier des charges'],
+        ['cloud computing', "l'informatique en nuage"],
+        ['coding', "l'encodage"],
+        ['complex components', 'des composants complexes'],
+        ['a compliance test', 'un test de conformité'],
+        ['a correction system', 'un dispositif de correction'],
+        ['an electronic device', 'un dispositif électronique'],
+        ['electronic know-how', 'le savoir-faire électronique'],
+        ['an embedded system', 'un système embarqué'],
+        ['to enter data', 'entrer des données'],
+        ['frequency bands', 'des fréquences'],
+        ['to identify the points to be tested', 'recenser les points à tester'],
+        ['to install an operating system', "installer un système d'exploitation"],
+        ['interconnected', 'interconnecté(e)'],
+        ['an Information Technology advisory / an IT advisory', 'une entreprise de services du numérique (ESN)'],
+        ['an Information Technology consulting service', "une société de services et d'ingénierie en informatique (SSII)"],
+        ['to modelise a product', 'modéliser un produit'],
+        ['a network', 'un réseau'],
+        ['to optimise energy consumption', 'optimiser la consommation énergétique'],
+        ['an Original Equipment Manufacturer (OEM)', 'un équipementier électronique'],
+        ['a peripheral device', 'un périphérique'],
+        ['a project approach', 'une démarche de projet'],
+        ['production constraints', 'des contraintes de production'],
+        ['to program instructions', 'programmer des instructions'],
+        ['safeguarding, securing', 'la sécurisation'],
+        ['safety', 'la sécurité'],
+        ['a software library', 'une bibliothèque logicielle'],
+        ['a software upgrade system', 'un dispositif de mise à jour de logiciels'],
+        ['system programming', 'la programmation des systèmes'],
+        ['telecommunication equipment', 'du matériel de télécommunication'],
+        ['to transmit data', 'transmettre des données'],
+        ['a trial', 'un essai'],
+        ['a whole number', 'un nombre entier'],
+        ['wired', 'câblé(e)'],
+        ['wireless', 'sans fil']]},
+ {'t': 'The Internet',
+  'f': 'Internet',
+  'w': [['an access provider', "un fournisseur d'accès"],
+        ['an asymmetric bit rate', 'un débit asymétrique'],
+        ['an Internet backbone', 'une dorsale Internet'],
+        ['a bookmark', 'un signet'],
+        ['to bookmark', 'ajouter aux signets'],
+        ['to browse the Web', 'naviguer sur le Web / Internet'],
+        ['a browser', 'un navigateur'],
+        ['a chat room', 'un forum de discussion'],
+        ['to connect to', 'se connecter à'],
+        ['a cookie', 'un témoin (de connexion), un mouchard'],
+        ['to crack a code', 'déchiffrer, décrypter un code'],
+        ['a cracker', 'un pirate'],
+        ['cyberbullying', 'la cyberintimidation'],
+        ['a cybernaut', 'un internaute'],
+        ['a domain name', 'un nom de domaine'],
+        ['to download', 'télécharger'],
+        ['to drag and drop', 'glisser-déposer, glisser'],
+        ['extranet', 'extranet'],
+        ['a firewall', 'une barrière de sécurité'],
+        ['a forum', 'un forum'],
+        ['a frame', 'un cadre'],
+        ['a gateway', 'une passerelle'],
+        ['to hack', 'pirater'],
+        ['a hacker', "un pirate de l'Internet"],
+        ['a hate site', 'un site incitant à la haine'],
+        ['high-speed access', 'un accès à haut débit'],
+        ['a hotlist', 'une liste de signets'],
+        ['a home page', "une page d'accueil"],
+        ['hosting', "l'hébergement"],
+        ['a hyperlink', 'un hyperlien'],
+        ['a hypertext', 'un hypertexte'],
+        ['a hub', 'un concentrateur'],
+        ['identity theft', "le vol d'identité"],
+        ['illegal downloading', 'le téléchargement illégal'],
+        ['information highways', "des autoroutes de l'information"],
+        ['intranet', 'intranet'],
+        ['a login', "un code d'accès"],
+        ['to network', 'travailler en réseau'],
+        ['a news article/item/posting', 'un article de forum, une contribution'],
+        ['a newsgroup', 'un groupe de discussion'],
+        ['online', 'en ligne'],
+        ['an online multiplayer game', 'un jeu multijoueur en ligne'],
+        ['a password', 'un mot de passe'],
+        ['peer-to-peer', 'pair-à-pair'],
+        ['phishing', "l'hameçonnage par courriel"],
+        ['a platform', 'une plateforme'],
+        ['a plug-in', "un module d'extension"],
+        ['a proxy server, proxy', 'un serveur mandataire, mandataire'],
+        ['a search engine', 'un moteur de recherche'],
+        ['a server / an online data service', 'un serveur'],
+        ['social media', 'des réseaux sociaux'],
+        ['techlash', "l'animosité contre les GAFA"],
+        ['a thread', 'un fil de discussion'],
+        ['a viewer', 'un(e) visionneur(se)'],
+        ['Webcasting, netcasting', 'la diffusion sur la toile'],
+        ['a Web conference', 'une cyberconférence'],
+        ['a Webmaster', 'un administrateur de site, de serveur'],
+        ['a Webpage', 'une page sur la toile'],
+        ['a Web-savvy', 'un(e) connaisseur(se) en matière de web'],
+        ['a Website', 'un site de/sur la toile'],
+        ['World Wide Web', 'la toile mondiale']]},
+ {'t': 'Mobility',
+  'f': 'Mobilité',
+  'w': [['affordable', 'abordable'],
+        ['an aircraft, airplane', 'un avion'],
+        ['an airfield', "un terrain d'aviation"],
+        ['an airliner', 'un avion de ligne'],
+        ['automated', 'automatisé(e)'],
+        ['autonomous', 'autonome'],
+        ['to board', 'monter à bord (avion, train)'],
+        ['to book', 'réserver'],
+        ['a bus lane', 'une voie de bus'],
+        ['bustling', 'grouillant(e), trépidant(e)'],
+        ['car ownership', "la possession d'une voiture"],
+        ['to conduct a trial', 'mener un essai'],
+        ['convenient, practical', 'pratique'],
+        ['a convoy', 'un convoi'],
+        ['cruising speed', 'la vitesse de croisière'],
+        ['a cyclist', 'un(e) cycliste'],
+        ['a domestic flight', 'un vol intérieur'],
+        ['an e-bike', 'un vélo électrique'],
+        ['an emergency lane', "une bande d'arrêt d'urgence"],
+        ['feasibility', 'la faisabilité'],
+        ['features', 'des caractéristiques'],
+        ['a flight', 'un vol'],
+        ['flight speed', 'la vitesse de vol'],
+        ['to fly, flew, flown', 'voler'],
+        ['a flying car', 'une voiture volante'],
+        ['a flow', 'un flux'],
+        ['hypersonic', 'hypersonique'],
+        ['a jet plane', 'un avion à réaction'],
+        ['to land', 'atterrir'],
+        ['means of transportation', 'des moyens de transport'],
+        ['obstacle detection', "la détection d'obstacles"],
+        ['peak hours', 'les heures de pointe'],
+        ['a pedestrian', 'un(e) piéton(ne)'],
+        ['to plan a trip', 'organiser un voyage'],
+        ['a pod', 'une capsule'],
+        ['public transport (PT)', 'les transports publics'],
+        ['a railroad', 'un chemin de fer'],
+        ['range / autonomy', "l'autonomie"],
+        ['reliable', 'fiable'],
+        ['a ride', 'un trajet'],
+        ['road safety', 'la sécurité routière'],
+        ['a road sign', 'un panneau routier'],
+        ['a route', 'un itinéraire'],
+        ['safe', 'sûr(e)'],
+        ['a schedule', 'un horaire'],
+        ['self-driving', 'autonome'],
+        ['a sensor', 'un capteur'],
+        ['to share', 'partager'],
+        ['a spaceship/craft', 'un vaisseau spatial'],
+        ['a station', 'une gare'],
+        ['take-off', 'le décollage'],
+        ['to take the wheel', 'prendre le volant'],
+        ['a ticket', 'un billet, une contravention'],
+        ['traffic', 'la circulation'],
+        ['traffic congestion', 'des embouteillages'],
+        ['traffic lights', 'des feux tricolores'],
+        ['a transportation hub', 'une plaque tournante du transport'],
+        ['a traveller', 'un(e) voyageur(se)'],
+        ['an urbanite, a city-dweller', 'un(e) citadin(e)']]},
+ {'t': 'Energy',
+  'f': 'Énergie',
+  'w': [['alternative sources of energy', 'des énergies alternatives'],
+        ['biofuels', 'des biocarburants'],
+        ['biomass', 'la biomasse'],
+        ['coal', 'le charbon'],
+        ['cooling', 'le refroidissement'],
+        ['crude oil', 'le pétrole brut'],
+        ['a dam', 'un barrage'],
+        ['diesel', 'le diésel'],
+        ['to extract', 'extraire'],
+        ['flex fuels', 'des polycarburants'],
+        ['fuel', 'le combustible'],
+        ['gaseous', 'gazeux(se)'],
+        ['to generate power', "générer de l'énergie"],
+        ['geothermal energy', 'la géothermie'],
+        ['a grid / a network', 'un réseau'],
+        ['to harness', 'maîtriser'],
+        ['heat', 'la chaleur'],
+        ['hydroelectricity', "l'énergie hydraulique"],
+        ['hydrogen', "l'hydrogène"],
+        ['light', 'la lumière'],
+        ['liquid', 'liquide'],
+        ['natural gas', 'le gaz naturel'],
+        ['nuclear-generated power', "l'énergie nucléaire"],
+        ['off-grid power', "l'énergie hors réseau"],
+        ['an oil rig', 'une plateforme pétrolière'],
+        ['a petroleum-based fuel', 'un carburant à base de pétrole'],
+        ['a power failure', 'une panne de courant'],
+        ['to produce electricity', "produire de l'électricité"],
+        ['solar energy', "l'énergie solaire"],
+        ['a solar panel', 'un panneau solaire'],
+        ['to spin, spun, spun', 'tournoyer'],
+        ['to tap', 'exploiter'],
+        ['tidal energy', "l'énergie marémotrice"],
+        ['a wind farm', "un champ d'éoliennes"],
+        ['a wind turbine', 'une éolienne'],
+        ['wind power', "l'énergie éolienne"]]},
+ {'t': 'The environment',
+  'f': "L'environnement",
+  'w': [['carbon dioxide (CO2)', 'le dioxyde de carbone (CO2)'],
+        ['chemicals', 'les produits chimiques'],
+        ['to clean up', 'nettoyer'],
+        ['climate change', 'le changement climatique'],
+        ['conservation', 'la préservation'],
+        ['to contaminate', 'contaminer'],
+        ['to curb', 'limiter'],
+        ['damage', 'les dégâts'],
+        ['disposable', 'jetable'],
+        ['to dispose of', 'se débarrasser de'],
+        ['drought', 'la sécheresse'],
+        ['to dump into', 'déverser dans'],
+        ['emissions', 'les émissions'],
+        ['environmentally friendly', "respectueux(se) de l'environnement"],
+        ['an environmentalist', 'un(e) écologiste'],
+        ['exhaust fumes', "les gaz d'échappement"],
+        ['fossil fuels', 'les énergies fossiles'],
+        ['to foul the air', "souiller l'air"],
+        ['to fuel', 'alimenter'],
+        ['global warming', 'le réchauffement climatique'],
+        ['greenhouse gases', 'les gaz à effet de serre'],
+        ['greenwashing', "l'écoblanchiment"],
+        ['harmful', 'dangereux(se)'],
+        ['a landfill', 'une décharge'],
+        ['to lower emissions', 'baisser les émissions'],
+        ['non-polluting', 'non polluant(e)'],
+        ['noxious', 'nocif(ve)'],
+        ['organic', 'bio'],
+        ['to poison', 'empoisonner'],
+        ['pollution', 'la pollution'],
+        ['raw materials', 'les matières premières'],
+        ['to recycle', 'recycler'],
+        ['to reduce, to lower', 'réduire'],
+        ['to refurbish', 'rénover'],
+        ['renewable energies', 'les énergies renouvelables'],
+        ['to repurpose', 'reconvertir'],
+        ['resources', 'les ressources'],
+        ['rubbish, garbage', 'les ordures'],
+        ['selective sorting', 'le tri sélectif'],
+        ['to sort', 'trier'],
+        ['to spew', 'cracher'],
+        ['steam', 'la vapeur'],
+        ['sustainable development', 'le développement durable'],
+        ['a threat to', 'une menace pour'],
+        ['to threaten', 'menacer'],
+        ['toxic waste', 'les déchets toxiques'],
+        ['to use up', 'épuiser'],
+        ['to wipe out', 'anéantir'],
+        ['wildlife', 'la faune, la vie sauvage']]},
+ {'t': 'Robotics',
+  'f': 'Robotique',
+  'w': [['absolute data', 'des données absolues'],
+        ['an active compliant robot', 'un robot actif conforme'],
+        ['an actuator', 'un actionneur'],
+        ['arc welding', "la soudure à l'arc"],
+        ['an articulated manipulator', 'un manipulateur articulé'],
+        ['artificial intelligence (AI)', "l'intelligence artificielle (IA)"],
+        ['automation', "l'automatisation"],
+        ['autonomy', "l'autonomie"],
+        ['a burn-in test', 'un test de vieillissement'],
+        ['Cartesian coordinates', 'des coordonnées cartésiennes'],
+        ['clamping force', 'la force de serrage'],
+        ['closed-loop', 'en circuit fermé'],
+        ['compliance', 'la conformité'],
+        ['computer aided design (CAD)', 'la conception assistée par ordinateur (CAO)'],
+        ['computer-controlled', 'commandé(e) par ordinateur'],
+        ['an exoskeleton', 'un exosquelette'],
+        ['an expert system', 'un système expert'],
+        ['fingerprint identification / finger print identification', "l'identification par empreinte digitale"],
+        ['a force-torque sensor', "un capteur d'effort"],
+        ['fuzzy logic', 'la logique floue'],
+        ['a gantry robot', 'un robot portique'],
+        ['a gripper arm', 'un bras préhenseur'],
+        ['to keep logs', 'tenir un journal de bord'],
+        ['an inference engine', "un moteur d'inférence"],
+        ['image analysis', "l'analyse d'images"],
+        ['a lithium battery', 'une batterie au lithium'],
+        ['a joint', 'une articulation'],
+        ['load capacity', 'la capacité de charge'],
+        ['machine learning', "l'apprentissage machine"],
+        ['math calculations', 'des calculs mathématiques'],
+        ['Optical Character Recognition (OCR)', 'la reconnaissance optique de caractères'],
+        ['parallel processing', 'le traitement parallèle'],
+        ['pattern recognition', 'la reconnaissance de formes'],
+        ['to perform tasks', 'réaliser des tâches'],
+        ['pick-and-place', 'prise et pose'],
+        ['pitch', 'le tangage'],
+        ['a robot soldier', 'un soldat robot'],
+        ['roll', 'le roulis'],
+        ['a rotation matrix', 'une matrice de rotation'],
+        ['to self-determine', 'autodéterminer'],
+        ['a slip sensor', 'un capteur de glissement'],
+        ['a smart appliance', 'un appareil intelligent'],
+        ['sophisticated', 'sophistiqué(e)'],
+        ['speech recognition', 'la reconnaissance vocale'],
+        ['speech synthesis software', 'un logiciel de synthèse vocale'],
+        ['a spot weld gun', 'des pinces à souder par points'],
+        ['a surveillance drone', 'un drone de surveillance'],
+        ['a teach pendant', 'un boîtier de commande'],
+        ['a tendon drive robot', 'un robot à câbles'],
+        ['a torque', 'un couple'],
+        ['a vacuum gripper', 'une pince à aspiration'],
+        ['visual servoing', "l'asservissement visuel"],
+        ['a yaw', 'un lacet']]},
+ {'t': 'Health and safety',
+  'f': 'Santé et sécurité',
+  'w': [['abuse', 'la maltraitance'],
+        ['backache', 'le mal de dos'],
+        ['balanced', 'équilibré(e)'],
+        ['boots', 'des bottes'],
+        ['a burden', 'un fardeau'],
+        ['to burn, burnt, burnt', 'brûler'],
+        ['a burn', 'une brûlure'],
+        ['burnout', 'le surmenage'],
+        ['to check', 'vérifier'],
+        ['child labour', 'le travail des enfants'],
+        ['Corporate Social Responsibility (CSR)', 'la responsabilité sociale des entreprises (RSE)'],
+        ['coveralls', 'une combinaison de travail'],
+        ['an earplug', "un bouchon d'oreille"],
+        ['an electric shock', 'un choc électrique'],
+        ['an electrocution', 'une électrocution'],
+        ['an emergency', 'une urgence'],
+        ['a dust mask', 'un masque anti-poussière'],
+        ['ear muffs', 'des coquilles anti-bruit'],
+        ['to face risks', 'faire face au risque'],
+        ['fairness', "l'équité"],
+        ['fast-paced', 'au rythme rapide'],
+        ['a fire exit', 'une issue de secours'],
+        ['gloves', 'des gants'],
+        ['to jeopardise', 'mettre en danger'],
+        ['to handle pressure', 'gérer la pression'],
+        ['harassment', 'le harcèlement'],
+        ['a hard hat', 'un casque de sécurité'],
+        ['a hazard', 'un danger'],
+        ['hazardous', 'dangereux(se)'],
+        ['health care cover', 'la couverture médicale'],
+        ['a heavy load', 'une charge lourde'],
+        ['a helmet', 'un casque'],
+        ['hi-vis', 'à haute visibilité'],
+        ['to hurt, hurt, hurt', 'faire mal'],
+        ['to injure', 'blesser'],
+        ['an injury', 'une blessure'],
+        ['a jumpsuit', 'une combinaison'],
+        ['to manage the risk', 'gérer le risque'],
+        ['medication, treatment', 'un traitement'],
+        ['mental health condition', 'un trouble de la santé mentale'],
+        ['metal barriers', 'des barrières métalliques'],
+        ['a naked wire', 'un fil électrique dénudé'],
+        ['a nervous breakdown', 'une dépression nerveuse'],
+        ['overworked', 'surchargé(e) de travail'],
+        ['a pandemic', 'une pandémie'],
+        ['Personal Protective Equipment (PPE)', "l'équipement personnel de protection"],
+        ['to prevent an accident', 'empêcher un accident'],
+        ['to protect', 'protéger'],
+        ['reflective stripes', 'des bandes réfléchissantes'],
+        ['to report a hazard', 'rapporter un danger'],
+        ['responsible for', 'responsable de'],
+        ['a risk', 'un risque'],
+        ['a rubber sole', 'une semelle en caoutchouc'],
+        ['safe', 'sûr(e)'],
+        ['safety goggles', 'des lunettes de sécurité'],
+        ['a safety switch', 'un interrupteur de sécurité'],
+        ['to signal for help', 'envoyer un signal de détresse'],
+        ['steel-toed boots / shoes', "des chaussures à embout d'acier"],
+        ['to tidy up', 'ranger'],
+        ['traumatised', 'traumatisé(e)'],
+        ['to trip', 'trébucher'],
+        ['trust', 'la confiance'],
+        ['to unplug', 'débrancher'],
+        ['unsafe', 'dangereux(se)'],
+        ['a warning sign', "un panneau d'avertissement"],
+        ["to watch one's steps", "faire attention où l'on marche"],
+        ['welfare', 'le bien-être'],
+        ['workload', 'la charge de travail'],
+        ['a wound', 'une plaie']]},
+ {'t': 'Technical documentation',
+  'f': 'Documentation technique',
+  'w': [['assembly instructions', 'une notice de montage'],
+        ['a blueprint', 'un plan détaillé, une épure'],
+        ['a connecting diagram', 'un schéma de montage'],
+        ['a dimensional drawing', 'un dessin coté'],
+        ['directions for use', "un mode d'emploi"],
+        ['dismantling instructions', 'une notice de démontage'],
+        ['a failure/malfunction report', "un rapport d'incident"],
+        ['a fault-finding chart', 'un tableau de dépannage'],
+        ['a follow-up sheet', 'une fiche de suivi'],
+        ['general procedure', 'la marche à suivre'],
+        ['hints/notes on use', "des conseils/consignes d'utilisation"],
+        ['a history file', "un historique (des rapports de visite, d'une machine)"],
+        ['a how-to book', 'un guide pratique'],
+        ['an illustrated parts list (IPL)', 'une liste de composants illustrée'],
+        ['an inspection report', "un rapport d'inspection"],
+        ['instructions for use', "une notice d'utilisation"],
+        ['maintenance documentation', 'la documentation de maintenance'],
+        ['maintenance instructions', 'une notice de maintenance'],
+        ['a maintenance logbook', "un carnet d'entretien"],
+        ['manufacturing dimensions', 'des cotes de fabrication'],
+        ['a manufacturing drawing', 'un plan de fabrication'],
+        ['a memorandum/memo', 'une note de service'],
+        ['operating documentation', "des consignes d'utilisation"],
+        ['an operational handbook/manual', "un manuel d'utilisation"],
+        ['an operations guide', 'un guide des unités de production'],
+        ["an operator's guide", "un guide d'utilisateur"],
+        ['an order book', 'un carnet de commandes'],
+        ['a parts and service manual', "un manuel d'entretien et de réparation"],
+        ['a parts list', 'une nomenclature de pièces'],
+        ['precautions for use', "des précautions d'emploi"],
+        ['a product brief', 'un dossier de produit'],
+        ['a production file', 'un dossier de fabrication'],
+        ['a progress report', "un rapport d'état d'avancement, un état périodique"],
+        ['a registration plate', 'une plaque minéralogique'],
+        ['a repair sheet', "une fiche d'intervention"],
+        ['a replacements manual', 'un catalogue de pièces de rechange'],
+        ['a runbook', "un dossier d'exploitation (de progiciel)"],
+        ['running instructions', 'des consignes de marche'],
+        ['a service handbook', "un carnet d'entretien"],
+        ['a specification manual', 'un cahier des charges'],
+        ['a specification sheet', 'une fiche technique / signalétique'],
+        ['technical data/features/particulars', 'des caractéristiques techniques'],
+        ['a troubleshooting guide', 'une notice de recherche de pannes'],
+        ["a user's reference manual", "un manuel de l'utilisateur"],
+        ['a wiring diagram', 'un schéma de câblage']]},
+ {'t': 'Quality control',
+  'f': 'Contrôle qualité',
+  'w': [['to activate', 'activer'],
+        ['to check', 'vérifier'],
+        ['a contraption', 'un appareil, truc, machin'],
+        ['to control', 'contrôler'],
+        ['convenience', 'la convenance'],
+        ['designed to', 'conçu(e) pour'],
+        ['to detect a flaw', 'détecter un défaut'],
+        ['to detect issues', 'détecter des problèmes'],
+        ['a device', 'un dispositif'],
+        ['efficiency', "l'efficacité"],
+        ['to ensure, to make sure', "s'assurer que"],
+        ['erroneous', 'erroné(e)'],
+        ['an error rate', "un taux d'erreur"],
+        ['an expert', 'un(e) expert(e)'],
+        ['fabricated data', 'des données fabriquées'],
+        ['to falsify data', 'falsifier des données'],
+        ['faulty', 'défectueux(se)'],
+        ['a flaw, a defect, a fault', 'un défaut, une faille'],
+        ['to improve', 'améliorer'],
+        ['an improvement', 'une amélioration'],
+        ['to insert', 'insérer'],
+        ['instructions for use', "un mode d'emploi"],
+        ['an issue, a problem', 'un problème'],
+        ['to meet standards / meeting standards', 'se conformer aux normes, conforme aux normes'],
+        ['to monitor', 'contrôler'],
+        ['practical, convenient', 'pratique'],
+        ['to press', 'appuyer sur'],
+        ['to pull', 'tirer'],
+        ['random', 'aléatoire'],
+        ['to rectify', 'rectifier, corriger'],
+        ['reliability', 'la fiabilité'],
+        ['to remove', 'retirer'],
+        ['to report', 'signaler'],
+        ['to reset', 'réinitialiser'],
+        ['to run checks', 'mener des vérifications'],
+        ['safe', 'sûr(e)'],
+        ['safety', 'la sécurité'],
+        ['sharp', 'pointu(e)'],
+        ['to slide, slid, slid', 'glisser'],
+        ['spare parts', 'des pièces détachées'],
+        ['specifications', 'des caractéristiques'],
+        ['step by step', 'pas à pas'],
+        ['to tailor', 'adapter sur mesure'],
+        ['to take steps', 'prendre des mesures'],
+        ['to trigger', 'déclencher'],
+        ['to turn on/off, to switch on/off', 'allumer / éteindre'],
+        ['up to standard', 'répondant aux normes'],
+        ['within reach of', 'à la portée de']]}]
+VOCAB_NOTES = {'to resign': 'Faux ami : se résigner = to resign oneself to.',
+ 'a pension': 'Faux ami : une pension (hôtel) = a boarding house.',
+ 'to rest': 'Faux ami : rester = to stay.',
+ 'to retire': 'Faux ami : retirer = to remove, to withdraw.',
+ 'a position': "Dans une offre d'emploi, a position = un poste.",
+ 'advancement': 'Promotion dans la hiérarchie. Une promo en magasin = a special offer.',
+ 'to support': 'Faux ami : supporter (tolérer) = to bear, to stand.',
+ 'to achieve': 'Faux ami : achever = to finish, to complete.',
+ 'to attend an event': 'Faux ami : attendre = to wait (for).',
+ 'a coach': 'Autre sens : un autocar.',
+ 'to practise': "Le verbe prend un s (GB), le nom s'écrit practice.",
+ 'to recover': 'Faux ami : recouvrir = to cover.',
+ 'to lose, lost, lost': 'Ne pas confondre avec loose (lâche, desserré).',
+ 'a chip': 'Autre sens : chips (GB) = des frites.',
+ 'a key': 'Autre sens : une clé.',
+ 'a file': "Autres sens : une lime, un classeur. Une file d'attente = a queue.",
+ 'a directory': 'Autre sens : un annuaire.',
+ 'a memory': 'Autre sens : un souvenir.',
+ 'to remove': 'Sens le plus courant : retirer, enlever. Le glossaire donne aussi « déplacer » en informatique.',
+ 'to type': 'On dit plutôt « taper » au clavier.',
+ 'to digitalise': 'On dit aussi to digitise.',
+ 'junk mail': 'Synonyme : spam.',
+ 'software': 'Indénombrable : jamais « a software ». Un logiciel = a piece of software.',
+ 'hardware': 'Indénombrable : jamais « a hardware ».',
+ 'a software library': 'Faux ami : library = bibliothèque. Une librairie = a bookshop.',
+ 'a trial': 'Autre sens : un procès.',
+ 'a route': 'Faux ami : une route = a road.',
+ 'traffic': 'Le trafic (de drogue) se dit trafficking.',
+ 'to book': 'To book a ticket = réserver un billet.',
+ 'range / autonomy': 'Pour un véhicule ou une batterie, on dit range.',
+ 'to tap': 'Sens courant : tapoter. A tap = un robinet.',
+ 'organic': 'Faux ami : organique. Organic food = aliments bio.',
+ 'to dispose of': "Faux ami : disposer de (avoir) = to have at one's disposal.",
+ 'damage': 'Indénombrable, sans s. Damages = dommages et intérêts.',
+ 'resources': 'Un seul s au début : resources.',
+ 'a hazard': 'Faux ami : le hasard = chance, luck.',
+ 'to injure': 'Faux ami : injurier = to insult.',
+ 'abuse': 'Faux ami : abuser (exagérer) = to go too far.',
+ 'to trip': 'Autre sens : a trip = un voyage.',
+ 'harassment': 'Orthographe : un seul r, deux s.',
+ 'a device': 'Faux ami : une devise = a motto, a currency.',
+ 'an issue, a problem': 'Faux ami : une issue (sortie) = an exit.',
+ 'to control': 'To control = maîtriser, commander. Vérifier = to check, surveiller = to monitor.',
+ 'to monitor': 'To monitor = surveiller dans la durée. Un moniteur (écran) = a monitor.',
+ 'sharp': 'Autres sens : tranchant, aiguisé.',
+ 'staff': 'Indénombrable : jamais « staffs ».',
+ 'a subsidiary': 'Faux ami : un subside = a subsidy.',
+ 'a power plant': 'Plant = usine, centrale. Autre sens : une plante.',
+ 'competition': 'Autres sens : une compétition, un concours.',
+ 'the headquarters': 'Toujours avec s. Abréviation : HQ.',
+ 'a chief executive': 'On dit aussi CEO (Chief Executive Officer).',
+ 'on the dole': 'Familier, britannique.',
+ 'to fire, to sack': 'Familier. Licenciement économique = to lay off, to make redundant.',
+ 'wages / wage': "Wages = paie à l'heure ou à la semaine. Salary = salaire mensuel.",
+ 'a curriculum vitae / a CV / a résumé': 'CV (GB), résumé (US). Faux ami : un résumé = a summary.',
+ 'a work placement / an internship (US) / a training programme (UK)': 'Faux ami : a stage = une scène, une étape.',
+ 'training': 'Indénombrable : jamais « a training ». Une formation = a training course.',
+ 'pitch': 'Les 3 axes de rotation : pitch (tangage), roll (roulis), yaw (lacet).',
+ 'roll': 'Les 3 axes de rotation : pitch (tangage), roll (roulis), yaw (lacet).',
+ 'a yaw': 'Les 3 axes de rotation : pitch (tangage), roll (roulis), yaw (lacet).',
+ 'a joint': 'Autre sens : un joint, une jointure.',
+ 'to lay off, laid, laid': 'Verbe irrégulier : lay, laid, laid.'}
+
+# ══════════════════════════════════════════════════════════════════════════════
+# V31 — MOTEUR DE RÉVISION (répétition espacée, carnet d'erreurs, examen blanc,
+#        vocabulaire anglais, décodeur d'énoncés, formulaire de maths)
+# ══════════════════════════════════════════════════════════════════════════════
+import re as _re
+import time as _time
+import hashlib as _hashlib
+import unicodedata as _ud
+from datetime import date as _date
+
+APP_VERSION = 'v31'
+DATE_BTS_BLANC_DEFAUT = '2026-12-09'
+LEITNER_JOURS = {1: 1, 2: 2, 3: 4, 4: 8, 5: 16}   # boîte -> nombre de jours avant de revoir
+NOUVELLES_CARTES_PAR_JOUR = 15
+NOUVEAUX_MOTS_PAR_JOUR = 20
+
+MOD_TO_MASTERY = {
+    M_NET: 'Réseaux & Télécoms',
+    M_CYB: 'Cybersécurité & Hardening',
+    M_DEV: 'Programmation C++ & Python',
+    M_SYS: 'Administration Système & AD',
+    M_ELE: 'Électronique & Bus',
+    M_MAT: 'Mathématiques Appliquées',
+    M_UML: 'Modélisation SysML & E6',
+}
+MOD_COURT = {M_NET: 'Réseaux', M_CYB: 'Cybersécurité', M_DEV: 'Prog', M_SYS: 'SysAdmin', M_ELE: 'Elec', M_MAT: 'Maths', M_UML: 'UML'}
+
+
+# ───────────────────────────── outils généraux ─────────────────────────────
+def _today():
+    return _date.today()
+
+
+def _iso(d):
+    return d.strftime('%Y-%m-%d')
+
+
+def _qid(txt):
+    return _hashlib.md5(txt.encode('utf-8')).hexdigest()[:12]
+
+
+def clean_q(txt):
+    """Enlève le « Q12 : » collé au début de certaines questions."""
+    return _re.sub(r'^\s*Q\s*\d+\s*[:.\-–]\s*', '', str(txt)).strip()
+
+
+def _session_seed():
+    if 'v31_seed' not in st.session_state:
+        st.session_state.v31_seed = random.randint(1, 10 ** 9)
+    return st.session_state.v31_seed
+
+
+def _shuffle_options_in_place(q):
+    """Mélange les propositions (la bonne réponse était en 2e position 3 fois sur 4)."""
+    for key in ('options', 'opts'):
+        if isinstance(q.get(key), list):
+            rnd = random.Random(f"{_session_seed()}|{q.get('q', '')}")
+            rnd.shuffle(q[key])
+            other = 'opts' if key == 'options' else 'options'
+            if other in q:
+                q[other] = q[key]
+            return
+
+
+for _q in GRAND_QUIZ_DATA:
+    _shuffle_options_in_place(_q)
+for _ql in MINI_QUIZ_COURS.values():
+    for _q in _ql:
+        _shuffle_options_in_place(_q)
+for _ql in QUIZZES_BANK_10.values():
+    for _q in _ql:
+        _shuffle_options_in_place(_q)
+for _q in NOUVELLE_BANQUE:
+    _shuffle_options_in_place(_q)
+
+
+def _guess_mod(chap):
+    c = chap.lower()
+    if any(k in c for k in ('active directory', 'linux', 'virtualisation', 'gpo')):
+        return M_SYS
+    if any(k in c for k in ('crypto', 'owasp', 'sécuris', 'vpn', 'pki')):
+        return M_CYB
+    if any(k in c for k in ('c++', 'python', 'langage c', 'structures')):
+        return M_DEV
+    if any(k in c for k in ('uml', 'sysml')):
+        return M_UML
+    if any(k in c for k in ('échantillon', 'électricité', 'bus série', 'mqtt', 'lora')):
+        return M_ELE
+    return M_NET
+
+
+def build_question_pool():
+    """Rassemble TOUTES les questions de l'app dans un format unique."""
+    pool, seen = [], set()
+
+    def add(q, mod, chap):
+        opts = q.get('options') or q.get('opts') or []
+        txt = clean_q(q.get('q', ''))
+        qid = _qid(txt)
+        if not txt or qid in seen or q.get('rep') not in opts:
+            return
+        seen.add(qid)
+        pool.append({'id': qid, 'q': txt, 'opts': list(opts), 'rep': q['rep'], 'expl': q.get('expl', ''),
+                     'aide': q.get('aide', ''), 'mod': mod, 'chap': chap})
+
+    for q in GRAND_QUIZ_DATA:
+        add(q, q.get('mod', M_NET), q.get('chap', ''))
+    chap2mod = {chap: mod for mod, chaps in COURS_BASE.items() for chap in chaps}
+    for chap, ql in MINI_QUIZ_COURS.items():
+        for q in ql:
+            add(q, chap2mod.get(chap) or _guess_mod(chap), chap)
+    bank_meta = {'Suites': (M_MAT, 'Suites numériques'), 'Fonctions': (M_MAT, 'Fonctions exp, ln & décibels'),
+                 'Kirchhoff': (M_ELE, "Lois de l'électricité"), 'Oscilloscope': (M_ELE, 'Oscilloscope & mesures'),
+                 'CAN_ADC': (M_ELE, 'Échantillonnage & CAN')}
+    for key, ql in QUIZZES_BANK_10.items():
+        mod, chap = bank_meta.get(key, (M_NET, key))
+        for q in ql:
+            add(q, mod, chap)
+    for q in NOUVELLE_BANQUE:
+        add(q, q['mod'], q['chap'])
+    return pool
+
+
+QUESTION_POOL = build_question_pool()
+POOL_BY_ID = {q['id']: q for q in QUESTION_POOL}
+POOL_MODS = list(dict.fromkeys(q['mod'] for q in QUESTION_POOL))
+
+
+# ───────────────────────────── données utilisateur ─────────────────────────────
+def _ud_get():
+    """Profil actif, complété avec les champs de la v31 (compatible avec les anciennes sauvegardes)."""
+    d = get_active_user_data()
+    d.setdefault('srs', {})          # flashcards : {id: [boîte, date ISO de prochaine révision]}
+    d.setdefault('vocab', {})        # mots anglais : {id: [boîte, date ISO, nb justes, nb faux]}
+    d.setdefault('errors', {})       # carnet d'erreurs : {id question: [nb erreurs, série de bonnes réponses, date]}
+    d.setdefault('qstats', {})       # {module: [justes, total]}
+    d.setdefault('days', [])         # jours où l'on a révisé
+    d.setdefault('exam_date', DATE_BTS_BLANC_DEFAUT)
+    d.setdefault('fc_mastered', [])
+    return d
+
+
+def _mark_day(d):
+    t = _iso(_today())
+    if t not in d['days']:
+        d['days'].append(t)
+        d['days'] = d['days'][-400:]
+
+
+def serie_de_jours(d):
+    """Nombre de jours consécutifs de révision (aujourd'hui ou hier inclus)."""
+    days = set(d.get('days', []))
+    cur = _today()
+    if _iso(cur) not in days:
+        cur = cur - timedelta(days=1)
+    n = 0
+    while _iso(cur) in days:
+        n += 1
+        cur = cur - timedelta(days=1)
+    return n
+
+
+def record_answers(results):
+    """results : liste de (question du pool, bool juste). Met à jour carnet d'erreurs et maîtrise réelle."""
+    if not results:
+        return
+    d = _ud_get()
+    t = _iso(_today())
+    for q, ok in results:
+        st_mod = d['qstats'].setdefault(q['mod'], [0, 0])
+        st_mod[1] += 1
+        if ok:
+            st_mod[0] += 1
+        e = d['errors'].get(q['id'])
+        if ok:
+            if e:
+                e[1] += 1
+                e[2] = t
+                if e[1] >= 2:            # réussie 2 fois de suite : elle sort du carnet
+                    del d['errors'][q['id']]
+        else:
+            if e:
+                e[0] += 1
+                e[1] = 0
+                e[2] = t
+            else:
+                d['errors'][q['id']] = [1, 0, t]
+    for mod, (ok_n, tot) in d['qstats'].items():
+        key = MOD_TO_MASTERY.get(mod)
+        if key and tot >= 5:
+            d.setdefault('domain_mastery', {})[key] = int(round(100 * ok_n / tot))
+    _mark_day(d)
+    update_active_user_data(d)
+
+
+def _leitner_update(entry, ok, hesitant=False):
+    """entry = [boîte, date]. Renvoie la nouvelle entrée."""
+    box = entry[0] if entry else 0
+    if ok and not hesitant:
+        box = min(5, max(1, box + 1))
+        due = _today() + timedelta(days=LEITNER_JOURS[box])
+    elif hesitant:
+        box = max(1, box)
+        due = _today() + timedelta(days=1)
+    else:
+        box = 1
+        due = _today()                  # à revoir dès aujourd'hui
+    return [box, _iso(due)]
+
+
+def srs_counts(d):
+    t = _iso(_today())
+    due = sum(1 for v in d['srs'].values() if v[1] <= t)
+    new = sum(1 for f in FLASHCARDS_DATA if str(f['id']) not in d['srs'])
+    known = sum(1 for v in d['srs'].values() if v[0] >= 4)
+    return due, new, known
+
+
+# ───────────────────────────── aide « en mots simples » ─────────────────────────────
+GLOSSAIRE_SIMPLE = {
+    'PDU': "le nom donné au « paquet » de données à une couche précise (bit, trame, paquet, segment)",
+    'encapsulation': "chaque couche emballe les données de la couche du dessus en ajoutant son en-tête",
+    'masque': "le nombre qui sépare la partie réseau et la partie machine d'une adresse IP",
+    'sous-réseau': "un morceau d'un réseau plus grand, obtenu en allongeant le masque",
+    'sous-réseaux': "des morceaux d'un réseau plus grand, obtenus en allongeant le masque",
+    'VLSM': "découper un réseau en sous-réseaux de tailles différentes",
+    'CIDR': "la notation /24, /26… qui donne le nombre de bits du masque",
+    'broadcast': "l'adresse qui permet de parler à toutes les machines du réseau en même temps",
+    'diffusion': "l'adresse qui permet de parler à toutes les machines du réseau en même temps",
+    'passerelle': "le routeur par lequel on sort de son réseau",
+    'VLAN': "un réseau virtuel : on sépare les machines en groupes sur le même switch",
+    'trunk': "un lien entre switchs qui transporte plusieurs VLAN à la fois",
+    '802.1Q': "la norme qui ajoute une étiquette de VLAN dans la trame",
+    'trame': "le bloc de données de la couche 2 (Ethernet)",
+    'NAT': "remplacer les adresses privées par une adresse publique pour sortir sur Internet",
+    'PAT': "un NAT où plusieurs machines partagent une seule adresse publique grâce aux ports",
+    'DHCP': "le service qui distribue automatiquement les adresses IP",
+    'DNS': "l'annuaire qui transforme un nom (site.fr) en adresse IP",
+    'ARP': "le protocole qui trouve l'adresse MAC à partir de l'adresse IP",
+    'TTL': "la durée de vie d'un paquet, diminuée de 1 à chaque routeur",
+    'OSPF': "un protocole de routage dynamique : les routeurs s'échangent leurs routes tout seuls",
+    'Modbus': "un protocole industriel maître/esclave pour lire et écrire des registres",
+    'RS485': "une liaison série différentielle sur 2 fils, pour les longues distances",
+    'RS-485': "une liaison série différentielle sur 2 fils, pour les longues distances",
+    'CRC': "un code calculé sur la trame pour détecter les erreurs de transmission",
+    'monomode': "fibre à cœur très fin (9 µm), pour les longues distances",
+    'multimode': "fibre à cœur plus large (50 µm), pour les courtes distances",
+    'hachage': "calcul d'une empreinte de taille fixe ; impossible de revenir en arrière",
+    'symétrique': "chiffrement avec une seule clé partagée (ex. AES)",
+    'asymétrique': "chiffrement avec deux clés : une publique et une privée (ex. RSA)",
+    'certificat': "une carte d'identité numérique signée par une autorité",
+    'PKI': "l'organisation qui crée, distribue et révoque les certificats",
+    'OWASP': "l'organisme qui publie la liste des 10 failles web les plus courantes",
+    'injection SQL': "glisser du code SQL dans un champ de formulaire pour tromper la base",
+    'XSS': "faire exécuter du JavaScript malveillant dans le navigateur d'une victime",
+    'VPN': "un tunnel chiffré entre deux réseaux à travers Internet",
+    'DMZ': "une zone isolée pour les serveurs visibles depuis Internet",
+    'pare-feu': "l'équipement qui autorise ou bloque les flux réseau selon des règles",
+    'EBIOS': "la méthode d'analyse de risques de l'ANSSI",
+    'RGPD': "le règlement européen sur la protection des données personnelles",
+    'pointeur': "une variable qui contient l'adresse d'une autre variable",
+    'référence': "un autre nom pour une variable existante (C++)",
+    'héritage': "une classe fille récupère les attributs et méthodes de la classe mère",
+    'polymorphisme': "le même appel de méthode donne un comportement différent selon l'objet",
+    'virtual': "mot-clé C++ : la méthode pourra être redéfinie dans une classe fille",
+    'constructeur': "la méthode appelée automatiquement à la création d'un objet",
+    'destructeur': "la méthode appelée automatiquement à la destruction d'un objet",
+    'mutex': "un verrou : un seul thread à la fois dans la zone protégée",
+    'thread': "un fil d'exécution : plusieurs tâches en parallèle dans un même programme",
+    'socket': "le point de connexion réseau d'un programme (adresse IP + port)",
+    'union': "en C, plusieurs champs qui partagent la même zone mémoire",
+    'pile': "zone mémoire des variables locales, gérée automatiquement (stack)",
+    'tas': "zone mémoire réservée à la main avec new / malloc (heap)",
+    'GPO': "une stratégie de groupe : des réglages imposés aux postes d'un domaine Windows",
+    'Active Directory': "l'annuaire Windows qui centralise utilisateurs, ordinateurs et droits",
+    'Kerberos': "le protocole d'authentification par tickets d'Active Directory",
+    'SUID': "droit spécial : le programme s'exécute avec les droits de son propriétaire",
+    'umask': "le masque qui retire des droits aux nouveaux fichiers",
+    'ACL': "une liste de droits plus fine que le simple rwx",
+    'hyperviseur': "le logiciel qui fait tourner des machines virtuelles",
+    'quantum': "le plus petit écart de tension que le CAN peut distinguer",
+    'Shannon': "règle : échantillonner au moins 2 fois plus vite que la fréquence max du signal",
+    'échantillonnage': "prendre des mesures du signal à intervalles réguliers",
+    'CAN': "selon le contexte : Convertisseur Analogique-Numérique, ou bus de terrain CAN",
+    'CNA': "Convertisseur Numérique-Analogique",
+    'I2C': "bus série à 2 fils (SDA, SCL) avec des adresses",
+    'SPI': "bus série rapide à 4 fils (MOSI, MISO, SCK, CS)",
+    'UART': "liaison série asynchrone à 2 fils (TX, RX)",
+    'MQTT': "protocole léger de messages pour l'IoT : on publie et on s'abonne à des sujets",
+    'broker': "le serveur MQTT qui redistribue les messages aux abonnés",
+    'QoS': "le niveau de garantie de livraison d'un message",
+    'LoRaWAN': "réseau radio longue portée et très basse consommation pour objets connectés",
+    'BDD': "en SysML : diagramme de définition de blocs (la structure du système)",
+    'IBD': "en SysML : diagramme de blocs internes (comment les blocs sont reliés)",
+    'cas d\'utilisation': "ce qu'un acteur peut faire avec le système",
+    'agrégation': "relation « contient », mais les parties peuvent exister seules",
+    'composition': "relation « contient » forte : les parties disparaissent avec le tout",
+    'rapport cyclique': "la part du temps où un signal carré est à l'état haut",
+    'impédance': "l'équivalent de la résistance en régime alternatif",
+    'valeur efficace': "la tension continue qui produirait le même échauffement",
+    'raison': "le nombre qu'on ajoute (suite arithmétique) ou par lequel on multiplie (géométrique)",
+    'dérivée': "la fonction qui donne la pente de la courbe en chaque point",
+    'primitive': "l'inverse de la dérivée",
+    'module': "pour un nombre complexe : sa « longueur », √(a² + b²)",
+    'argument': "pour un nombre complexe : l'angle qu'il fait avec l'axe horizontal",
+    'conjugué': "le même nombre complexe avec le signe du i inversé",
+    'espérance': "la valeur moyenne attendue sur un grand nombre d'essais",
+    'écart type': "un nombre qui mesure si les valeurs sont regroupées ou étalées",
+    'déterminant': "un nombre calculé à partir d'une matrice carrée (ad − bc en 2×2)",
+}
+_GLOSS_PATTERNS = [(k, _re.compile(r'(?<![\wÀ-ÿ])' + _re.escape(k) + r'(?![\wÀ-ÿ])', _re.IGNORECASE if not k.isupper() else 0))
+                   for k in sorted(GLOSSAIRE_SIMPLE, key=len, reverse=True)]
+
+CONSIGNES_SIMPLES = [
+    (r'\bcombien\b|\bque vaut\b|\bquelle (tension|fréquence|puissance|résistance|température|autonomie|énergie)\b|\bquelle est (la|sa) (valeur|fréquence|période|raison|taille|moyenne|médiane)\b|\bquel est (le|son) (module|quantum|gain|rapport cyclique|déterminant)\b', "On te demande **un nombre** : repère les données chiffrées de l'énoncé, puis la formule qui les relie."),
+    (r'\b(calcule[rz]?|détermine[rz]?)\b', "On te demande **de trouver une valeur** par un calcul : note les données, choisis la formule, puis calcule."),
+    (r'\bquelle commande\b|\bquelle ligne\b', "On te demande **la commande exacte** à taper : pense à l'outil (Cisco, Linux, Git…) et à ce que fait chaque mot."),
+    (r'\bdifférence\b', "On te demande **de comparer deux notions** : cherche ce que l'une a et que l'autre n'a pas."),
+    (r'\bà quoi sert\b|\bquel est le rôle\b|\bque fait\b|\bque permet\b', "On te demande **à quoi ça sert** : dis-le d'abord avec tes mots, puis cherche la proposition qui dit la même chose."),
+    (r'\bque signifie\b|\bqu\'est-ce qu', "On te demande **une définition** : reformule le mot avec tes propres mots avant de lire les propositions."),
+    (r'\bpourquoi\b', "On te demande **une raison** : la bonne réponse explique une cause, pas une conséquence."),
+    (r'\bdans quel ordre\b', "On te demande **de remettre des étapes dans l'ordre** : retrouve la première et la dernière, le reste suit."),
+]
+
+
+def aide_question(q):
+    """Texte d'aide : la consigne en mots simples + les mots difficiles expliqués."""
+    lignes = []
+    low = q['q'].lower()
+    for pat, txt in CONSIGNES_SIMPLES:
+        if _re.search(pat, low):
+            lignes.append(f"**Ce qu'on te demande :** {txt}")
+            break
+    else:
+        lignes.append("**Ce qu'on te demande :** choisir la seule proposition juste. Élimine d'abord celles qui sont clairement fausses.")
+    if q.get('aide'):
+        lignes.append(f"**Coup de pouce :** {q['aide']}")
+    mots, deja = [], set()
+    for k, pat in _GLOSS_PATTERNS:
+        if pat.search(q['q']) and k.lower() not in deja:
+            deja.add(k.lower())
+            mots.append(f"- **{k}** : {GLOSSAIRE_SIMPLE[k]}")
+        if len(mots) >= 4:
+            break
+    if mots:
+        lignes.append("**Mots à comprendre dans la question :**\n" + "\n".join(mots))
+    return "\n\n".join(lignes)
+
+
+def _cours_pour(q):
+    try:
+        return COURS_BASE[q['mod']][q['chap']]
+    except Exception:
+        return None
+
+
+def _pick_questions(n, mods=None, prioriser_faibles=False, chap=None):
+    d = _ud_get()
+    pool = [q for q in QUESTION_POOL if (not mods or q['mod'] in mods) and (not chap or q['chap'] == chap)]
+    if not pool:
+        return []
+    n = min(n, len(pool))
+    if not prioriser_faibles:
+        return random.sample(pool, n)
+    errs = [q for q in pool if q['id'] in d['errors']]
+    random.shuffle(errs)
+    reste = [q for q in pool if q['id'] not in d['errors']]
+
+    def faiblesse(q):
+        ok_n, tot = d['qstats'].get(q['mod'], [0, 0])
+        return (ok_n / tot if tot else 0.0) + random.random() * 0.35
+    reste.sort(key=faiblesse)
+    return (errs[: n // 2] + reste)[:n]
+
+
+def _render_correction(q, choix, numero=None):
+    ok = (choix == q['rep'])
+    titre = f"Question {numero} — " if numero else ""
+    if ok:
+        st.success(f"✅ **{titre}Juste.** {q['q']}\n\n**{q['rep']}**\n\n💡 {q['expl']}")
+    else:
+        rep_user = choix if choix is not None else "pas de réponse"
+        st.error(f"❌ **{titre}À revoir.** {q['q']}\n\nTa réponse : *{rep_user}*\n\nBonne réponse : **{q['rep']}**\n\n💡 {q['expl']}")
+    return ok
+
+
+# ───────────────────────────── PAGE : séance du jour (bandeau d'accueil) ─────────────────────────────
+def render_today_panel():
+    d = _ud_get()
+    due, new, known = srs_counts(d)
+    t = _iso(_today())
+    voc_due = sum(1 for v in d['vocab'].values() if v[1] <= t)
+    voc_known = sum(1 for v in d['vocab'].values() if v[0] >= 4)
+    try:
+        jours = (datetime.strptime(d['exam_date'], '%Y-%m-%d').date() - _today()).days
+    except Exception:
+        jours = None
+    if jours is None:
+        j_txt = '—'
+    elif jours > 0:
+        j_txt = f"J-{jours}"
+    elif jours == 0:
+        j_txt = "Jour J"
+    else:
+        j_txt = "Passé"
+    a_faire = due + min(new, NOUVELLES_CARTES_PAR_JOUR)
+    st.markdown(f"""
+    <div class='ciel-card' style='border-left: 5px solid #fb923c !important;'>
+        <h3 style='color:#fb923c; margin-top:0; font-size:1.25rem;'>📌 Ta séance d'aujourd'hui</h3>
+        <div style='display:flex; flex-wrap:wrap; gap:14px;'>
+            <div class='stat-box' style='flex:1; min-width:140px;'><div class='stat-number'>{j_txt}</div><div class='stat-label'>Avant l'échéance ({d['exam_date']})</div></div>
+            <div class='stat-box' style='flex:1; min-width:140px;'><div class='stat-number'>{a_faire}</div><div class='stat-label'>Flashcards à revoir</div></div>
+            <div class='stat-box' style='flex:1; min-width:140px;'><div class='stat-number'>{len(d['errors'])}</div><div class='stat-label'>Erreurs à corriger</div></div>
+            <div class='stat-box' style='flex:1; min-width:140px;'><div class='stat-number'>{voc_due}</div><div class='stat-label'>Mots d'anglais à revoir</div></div>
+            <div class='stat-box' style='flex:1; min-width:140px;'><div class='stat-number'>{serie_de_jours(d)} 🔥</div><div class='stat-label'>Jours de suite</div></div>
+        </div>
+        <p style='color:#cbd5e1; margin:14px 0 0 0; font-size:0.95rem;'>
+            Ordre conseillé (environ 30 min) : <b>1.</b> Révision du jour → <b>2.</b> Carnet d'erreurs → <b>3.</b> 10 minutes de vocabulaire anglais.
+            Tout est dans le hub <b>🚀 Révision intelligente</b> du menu de gauche.
+            Acquis à ce jour : <b>{known}</b> / {len(FLASHCARDS_DATA)} flashcards et <b>{voc_known}</b> / {VOCAB_TOTAL} mots d'anglais.
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+    with st.expander("📅 Changer la date de l'échéance (BTS blanc, épreuve…)"):
+        try:
+            cur = datetime.strptime(d['exam_date'], '%Y-%m-%d').date()
+        except Exception:
+            cur = _today()
+        nd = st.date_input("Date visée :", value=cur, key='v31_exam_date')
+        if st.button("Enregistrer la date", key='v31_exam_date_btn'):
+            d['exam_date'] = _iso(nd)
+            update_active_user_data(d)
+            st.rerun()
+
+
+# ───────────────────────────── PAGE : révision du jour (flashcards espacées) ─────────────────────────────
+def render_page_revision_du_jour():
+    st.markdown("<div class='hero-title'>🧠 Révision du jour — répétition espacée</div>", unsafe_allow_html=True)
+    st.markdown("<p style='color:#94a3b8;'>L'app te représente chaque carte juste avant que tu l'oublies : une carte sue revient dans 1, 2, 4, 8 puis 16 jours. Une carte ratée revient tout de suite.</p>", unsafe_allow_html=True)
+    d = _ud_get()
+    t = _iso(_today())
+    mods = ['Tous les domaines'] + list(dict.fromkeys(f['module'] for f in FLASHCARDS_DATA))
+    sel = st.selectbox("Domaine :", mods, key='v31_srs_mod')
+    cards = [f for f in FLASHCARDS_DATA if sel == 'Tous les domaines' or f['module'] == sel]
+
+    if 'v31_srs_queue' not in st.session_state or st.session_state.get('v31_srs_sel') != sel:
+        due = [f['id'] for f in cards if str(f['id']) in d['srs'] and d['srs'][str(f['id'])][1] <= t]
+        due.sort(key=lambda i: d['srs'][str(i)][0])
+        new = [f['id'] for f in cards if str(f['id']) not in d['srs']][:NOUVELLES_CARTES_PAR_JOUR]
+        st.session_state.v31_srs_queue = due + new
+        st.session_state.v31_srs_sel = sel
+        st.session_state.v31_srs_done = 0
+        st.session_state.v31_srs_show = False
+
+    queue = st.session_state.v31_srs_queue
+    boxes = [0] * 6
+    for f in cards:
+        boxes[d['srs'].get(str(f['id']), [0])[0]] += 1
+    cols = st.columns(6)
+    labels = ['Jamais vues', 'Boîte 1 (demain)', 'Boîte 2 (2 j)', 'Boîte 3 (4 j)', 'Boîte 4 (8 j)', 'Boîte 5 (16 j)']
+    for c, lab, n in zip(cols, labels, boxes):
+        c.metric(lab, n)
+
+    if not queue:
+        st.success(f"🎉 Séance terminée pour aujourd'hui ({st.session_state.v31_srs_done} cartes revues). Reviens demain : les cartes reviendront toutes seules au bon moment.")
+        if st.button("➕ Faire quand même 10 cartes de plus", key='v31_srs_more'):
+            extra = [f['id'] for f in cards if str(f['id']) not in d['srs']][:10]
+            if not extra:
+                extra = sorted([f['id'] for f in cards], key=lambda i: d['srs'].get(str(i), [0, ''])[1])[:10]
+            st.session_state.v31_srs_queue = extra
+            st.rerun()
+        return
+
+    card = next((f for f in FLASHCARDS_DATA if f['id'] == queue[0]), None)
+    if card is None:
+        st.session_state.v31_srs_queue = queue[1:]
+        st.rerun()
+        return
+    st.progress(st.session_state.v31_srs_done / max(1, st.session_state.v31_srs_done + len(queue)))
+    st.caption(f"Carte en cours — il en reste **{len(queue)}** dans la séance · `{card['module']}` · *{card['chap']}*")
+    st.markdown(f"<div class='ciel-card' style='border-left: 6px solid #38bdf8 !important;'><h3 style='color:#38bdf8; margin-top:0;'>❓ Question</h3><p style='font-size:1.15rem; color:#f8fafc;'>{card['q']}</p></div>", unsafe_allow_html=True)
+    st.text_area("✍️ Écris ta réponse (ou dis-la à voix haute) avant de regarder :", key=f"v31_srs_txt_{card['id']}_{st.session_state.v31_srs_done}", height=80)
+
+    if not st.session_state.v31_srs_show:
+        if st.button("👁️ Voir la réponse", type='primary', key='v31_srs_reveal', use_container_width=True):
+            st.session_state.v31_srs_show = True
+            st.rerun()
+        return
+
+    st.markdown(f"<div class='ciel-card' style='border-left: 6px solid #34d399 !important;'><h3 style='color:#34d399; margin-top:0;'>✅ Réponse attendue</h3><p style='font-size:1.05rem; color:#f8fafc;'>{card['a']}</p></div>", unsafe_allow_html=True)
+    if card.get('note'):
+        st.markdown(card['note'])
+    if card.get('v_id'):
+        st.link_button(f"▶️ Vidéo : {card.get('v_title', 'leçon')}", 'https://www.youtube.com/watch?v=' + card['v_id'])
+    st.markdown("**Sois honnête avec toi-même, c'est ce qui rend la méthode efficace :**")
+    b1, b2, b3 = st.columns(3)
+    choix = None
+    if b1.button("❌ Je ne savais pas", key='v31_srs_ko', use_container_width=True):
+        choix = 'ko'
+    if b2.button("🤔 J'ai hésité", key='v31_srs_mid', use_container_width=True):
+        choix = 'mid'
+    if b3.button("✅ Je savais", key='v31_srs_ok', use_container_width=True):
+        choix = 'ok'
+    if choix:
+        cid = str(card['id'])
+        d['srs'][cid] = _leitner_update(d['srs'].get(cid), ok=(choix != 'ko'), hesitant=(choix == 'mid'))
+        mastered = set(d.get('fc_mastered', []))
+        if d['srs'][cid][0] >= 4:
+            mastered.add(card['id'])
+        elif choix == 'ko':
+            mastered.discard(card['id'])
+        d['fc_mastered'] = sorted(mastered)
+        _mark_day(d)
+        update_active_user_data(d)
+        st.session_state.fc_mastered = set(d['fc_mastered'])
+        rest = queue[1:]
+        if choix == 'ko':
+            rest.append(card['id'])          # elle revient à la fin de la séance
+        st.session_state.v31_srs_queue = rest
+        st.session_state.v31_srs_done += 1
+        st.session_state.v31_srs_show = False
+        st.rerun()
+
+
+# ───────────────────────────── PAGE : grand quiz (remplace l'ancien) ─────────────────────────────
+def _domain_details(results):
+    det = {v: 0 for v in MOD_COURT.values()}
+    for q, ok in results:
+        if ok:
+            det[MOD_COURT.get(q['mod'], 'Réseaux')] += 1
+    return det
+
+
+def _table_par_domaine(results):
+    rows = {}
+    for q, ok in results:
+        r = rows.setdefault(q['mod'], [0, 0])
+        r[1] += 1
+        r[0] += 1 if ok else 0
+    data = [{'Domaine': m, 'Justes': a, 'Questions': b, 'Réussite': f"{100 * a / b:.0f} %"} for m, (a, b) in rows.items()]
+    data.sort(key=lambda r: float(r['Réussite'].split()[0]))
+    st.dataframe(pd.DataFrame(data), use_container_width=True, hide_index=True)
+    if data:
+        st.info(f"🎯 **Priorité de révision : {data[0]['Domaine']}** ({data[0]['Réussite']} de réussite sur cette série).")
+
+
+def render_page_grand_quiz():
+    st.markdown("<div class='hero-title'>📝 Grand Quiz d'entraînement</div>", unsafe_allow_html=True)
+    st.markdown(f"<p style='color:#94a3b8;'>{len(QUESTION_POOL)} questions réunies (cours, annales, fiches savoir, maths). Les propositions sont mélangées et aucune n'est pré-cochée. Chaque erreur part dans ton carnet d'erreurs.</p>", unsafe_allow_html=True)
+    c1, c2, c3 = st.columns([1, 1.6, 1.2])
+    with c1:
+        nb = st.selectbox("Nombre de questions :", [10, 20, 30, 40], key='v31_gq_nb')
+    with c2:
+        mod_sel = st.selectbox("Domaine :", ['Tous les domaines'] + POOL_MODS, key='v31_gq_mod')
+    with c3:
+        faibles = st.checkbox("Insister sur mes points faibles", value=True, key='v31_gq_weak')
+        aide_on = st.checkbox("Aide « en mots simples »", value=True, key='v31_gq_aide')
+    chaps = ['Tous les chapitres']
+    if mod_sel != 'Tous les domaines':
+        chaps += list(dict.fromkeys(q['chap'] for q in QUESTION_POOL if q['mod'] == mod_sel))
+    chap_sel = st.selectbox("Chapitre :", chaps, key=f'v31_gq_chap_{mod_sel}')
+
+    if st.button("🚀 Générer un questionnaire", type='primary', key='v31_gq_gen') or 'v31_gq' not in st.session_state:
+        mods = None if mod_sel == 'Tous les domaines' else [mod_sel]
+        chap = None if chap_sel == 'Tous les chapitres' else chap_sel
+        st.session_state.v31_gq = {'ids': [q['id'] for q in _pick_questions(nb, mods, faibles, chap)],
+                                   'done': False, 'ans': {}, 'saved': False, 'run': random.randint(1, 10 ** 6)}
+        st.rerun()
+
+    gq = st.session_state.v31_gq
+    qs = [POOL_BY_ID[i] for i in gq['ids'] if i in POOL_BY_ID]
+    if not qs:
+        st.warning("Aucune question pour ces critères. Choisis un autre domaine.")
+        return
+
+    if not gq['done']:
+        with st.form(key=f"v31_gq_form_{gq['run']}"):
+            answers = {}
+            for i, q in enumerate(qs):
+                st.markdown(f"#### Question {i + 1} / {len(qs)}")
+                st.caption(f"{q['mod']} · {q['chap']}")
+                st.markdown(f"**{q['q']}**")
+                if aide_on:
+                    with st.expander("🔎 Je ne comprends pas la question"):
+                        st.markdown(aide_question(q))
+                answers[q['id']] = st.radio("Ta réponse :", q['opts'], index=None, key=f"v31_gq_{gq['run']}_{i}", label_visibility='collapsed')
+                st.markdown("---")
+            if st.form_submit_button("📥 Valider mes réponses", type='primary', use_container_width=True):
+                gq['ans'] = answers
+                gq['done'] = True
+                st.rerun()
+        return
+
+    results = [(q, gq['ans'].get(q['id']) == q['rep']) for q in qs]
+    score = sum(1 for _, ok in results if ok)
+    if not gq['saved']:
+        save_score(score, len(qs), _domain_details(results), quiz_name=f"Grand Quiz ({mod_sel})")
+        record_answers(results)
+        add_user_points(score * 3, f"gq_{_iso(_today())}_{gq['run']}")
+        gq['saved'] = True
+    pct = score / len(qs)
+    st.markdown("## 📊 Ton bilan")
+    st.progress(pct)
+    st.markdown(f"<div style='font-size:1.6rem; font-weight:800; color:#38bdf8;'>{score} / {len(qs)} — soit {20 * pct:.1f} / 20</div>", unsafe_allow_html=True)
+    if pct >= 0.8:
+        st.success("🏆 Très solide. Passe à l'examen blanc chronométré pour te tester en conditions réelles.")
+    elif pct >= 0.5:
+        st.info("👍 La base est là. Les erreurs ci-dessous sont dans ton carnet : refais-les demain.")
+    else:
+        st.warning("⚠️ Fragile sur cette série. Relis les fiches proposées sous chaque erreur, puis refais un quiz sur le même domaine.")
+    _table_par_domaine(results)
+    st.markdown("### Correction détaillée")
+    for i, (q, ok) in enumerate(results):
+        _render_correction(q, gq['ans'].get(q['id']), i + 1)
+        if not ok:
+            cours = _cours_pour(q)
+            if cours:
+                with st.expander(f"📖 Relire la fiche de cours : {q['chap']}"):
+                    st.markdown(cours)
+    if st.button("🔄 Nouveau questionnaire", key='v31_gq_new', use_container_width=True):
+        del st.session_state['v31_gq']
+        st.rerun()
+
+
+# ───────────────────────────── PAGE : carnet d'erreurs ─────────────────────────────
+def render_page_carnet_erreurs():
+    st.markdown("<div class='hero-title'>📕 Carnet d'erreurs</div>", unsafe_allow_html=True)
+    st.markdown("<p style='color:#94a3b8;'>Toutes les questions que tu as ratées sont gardées ici. Une question sort du carnet quand tu la réussis <b>2 fois de suite</b>. C'est la révision la plus rentable : tu ne travailles que ce que tu ne sais pas encore.</p>", unsafe_allow_html=True)
+    d = _ud_get()
+    errs = [(POOL_BY_ID[i], v) for i, v in d['errors'].items() if i in POOL_BY_ID]
+    if not errs:
+        st.success("Ton carnet est vide. Fais un Grand Quiz ou un examen blanc : les erreurs viendront s'y ranger automatiquement.")
+        return
+    errs.sort(key=lambda x: (-x[1][0], x[1][1]))
+    par_mod = {}
+    for q, v in errs:
+        par_mod[q['mod']] = par_mod.get(q['mod'], 0) + 1
+    cols = st.columns(max(1, min(4, len(par_mod))))
+    for i, (m, n) in enumerate(sorted(par_mod.items(), key=lambda x: -x[1])):
+        cols[i % len(cols)].metric(m, f"{n} erreur(s)")
+
+    tab1, tab2 = st.tabs(["🎯 Les retravailler", "📋 Tout voir"])
+    with tab1:
+        if 'v31_err' not in st.session_state:
+            st.session_state.v31_err = {'ids': [q['id'] for q, _ in errs[:10]], 'done': False, 'ans': {}, 'saved': False, 'run': random.randint(1, 10 ** 6)}
+        es = st.session_state.v31_err
+        qs = [POOL_BY_ID[i] for i in es['ids'] if i in POOL_BY_ID]
+        if not es['done']:
+            st.info(f"Série de {len(qs)} questions tirées de ton carnet (les plus souvent ratées d'abord).")
+            with st.form(key=f"v31_err_form_{es['run']}"):
+                answers = {}
+                for i, q in enumerate(qs):
+                    st.markdown(f"**{i + 1}. {q['q']}**")
+                    st.caption(f"{q['mod']} · {q['chap']} · ratée {d['errors'].get(q['id'], [1])[0]} fois")
+                    with st.expander("🔎 Je ne comprends pas la question"):
+                        st.markdown(aide_question(q))
+                    opts = list(q['opts'])
+                    random.Random(f"{es['run']}{q['id']}").shuffle(opts)
+                    answers[q['id']] = st.radio("Ta réponse :", opts, index=None, key=f"v31_err_{es['run']}_{i}", label_visibility='collapsed')
+                    st.markdown("---")
+                if st.form_submit_button("Valider", type='primary', use_container_width=True):
+                    es['ans'] = answers
+                    es['done'] = True
+                    st.rerun()
+        else:
+            results = [(q, es['ans'].get(q['id']) == q['rep']) for q in qs]
+            if not es['saved']:
+                record_answers(results)
+                es['saved'] = True
+            sc = sum(1 for _, ok in results if ok)
+            st.markdown(f"### {sc} / {len(qs)} corrigées cette fois-ci")
+            for i, (q, ok) in enumerate(results):
+                _render_correction(q, es['ans'].get(q['id']), i + 1)
+                if not ok:
+                    cours = _cours_pour(q)
+                    if cours:
+                        with st.expander(f"📖 Relire la fiche : {q['chap']}"):
+                            st.markdown(cours)
+            if st.button("➡️ Série suivante", key='v31_err_next', type='primary'):
+                del st.session_state['v31_err']
+                st.rerun()
+    with tab2:
+        for q, v in errs:
+            with st.expander(f"❌ ×{v[0]} · {q['q'][:110]}"):
+                st.caption(f"{q['mod']} · {q['chap']} · dernière fois : {v[2]} · bonnes réponses de suite : {v[1]}/2")
+                st.markdown(f"**Bonne réponse :** {q['rep']}")
+                st.markdown(f"💡 {q['expl']}")
+        if st.button("🗑️ Vider tout le carnet", key='v31_err_clear'):
+            d['errors'] = {}
+            update_active_user_data(d)
+            st.session_state.pop('v31_err', None)
+            st.rerun()
+
+
+# ───────────────────────────── PAGE : examen blanc chronométré ─────────────────────────────
+def _countdown_html(fin_ts):
+    reste = max(0, int(fin_ts - _time.time()))
+    return f"""
+    <div id='v31cd' style='font-family: monospace; font-size: 1.5rem; font-weight: 700; color: #fb923c; background: #0d1324;
+         border: 1px solid rgba(251,146,60,0.4); border-radius: 12px; padding: 10px 16px; text-align: center;'>⏱️ --:--</div>
+    <script>
+      var r = {reste};
+      function tick() {{
+        var m = Math.floor(r / 60), s = r % 60;
+        var el = document.getElementById('v31cd');
+        el.textContent = (r > 0 ? '⏱️ Temps restant : ' : '⏰ Temps écoulé — valide ta copie ') + (r > 0 ? (m + ':' + (s < 10 ? '0' : '') + s) : '');
+        if (r <= 60) {{ el.style.color = '#f87171'; }}
+        if (r > 0) {{ r -= 1; setTimeout(tick, 1000); }}
+      }}
+      tick();
+    </script>"""
+
+
+def render_page_examen_blanc():
+    st.markdown("<div class='hero-title'>⏱️ Examen blanc chronométré</div>", unsafe_allow_html=True)
+    st.markdown("<p style='color:#94a3b8;'>Conditions d'épreuve : temps limité, aucune aide, aucune correction avant la fin. Tu obtiens une note sur 20 et le détail par domaine.</p>", unsafe_allow_html=True)
+    ex = st.session_state.get('v31_exam')
+
+    if not ex:
+        formats = {
+            'Flash — 20 questions, 15 min': (20, 15),
+            'Standard — 40 questions, 35 min': (40, 35),
+            'Marathon — 60 questions, 55 min': (60, 55),
+        }
+        c1, c2 = st.columns(2)
+        with c1:
+            fmt = st.radio("Format :", list(formats.keys()), index=1, key='v31_ex_fmt')
+        with c2:
+            mods = st.multiselect("Domaines évalués (vide = tous) :", POOL_MODS, key='v31_ex_mods')
+            st.caption("Les questions sont réparties à parts égales entre les domaines choisis.")
+        hist = [h for h in load_scores() if str(h.get('quiz', '')).startswith('Examen blanc')]
+        if hist:
+            st.markdown("**Tes derniers examens blancs :** " + " · ".join(f"{20 * h['score'] / max(1, h['total']):.1f}/20 ({h['date'][:10]})" for h in hist[-5:]))
+        if st.button("▶️ Démarrer l'épreuve", type='primary', key='v31_ex_start', use_container_width=True):
+            n, minutes = formats[fmt]
+            chosen = mods or POOL_MODS
+            per = max(1, n // len(chosen))
+            ids = []
+            for m in chosen:
+                pm = [q for q in QUESTION_POOL if q['mod'] == m]
+                ids += [q['id'] for q in random.sample(pm, min(per, len(pm)))]
+            reste = [q['id'] for q in QUESTION_POOL if q['mod'] in chosen and q['id'] not in ids]
+            random.shuffle(reste)
+            ids = (ids + reste)[:n]
+            random.shuffle(ids)
+            st.session_state.v31_exam = {'ids': ids, 'start': _time.time(), 'dur': minutes * 60, 'done': False, 'ans': {},
+                                         'saved': False, 'run': random.randint(1, 10 ** 6), 'fmt': fmt, 'used': 0}
+            st.rerun()
+        return
+
+    qs = [POOL_BY_ID[i] for i in ex['ids'] if i in POOL_BY_ID]
+    if not ex['done']:
+        try:
+            import streamlit.components.v1 as _components
+            _components.html(_countdown_html(ex['start'] + ex['dur']), height=70)
+        except Exception:
+            reste = max(0, int(ex['start'] + ex['dur'] - _time.time()))
+            st.warning(f"⏱️ Temps restant : {reste // 60} min {reste % 60:02d} s")
+        with st.form(key=f"v31_ex_form_{ex['run']}"):
+            answers = {}
+            for i, q in enumerate(qs):
+                st.markdown(f"**Question {i + 1} / {len(qs)}** — {q['q']}")
+                answers[q['id']] = st.radio("Réponse :", q['opts'], index=None, key=f"v31_ex_{ex['run']}_{i}", label_visibility='collapsed')
+                st.markdown("---")
+            if st.form_submit_button("📥 Rendre ma copie", type='primary', use_container_width=True):
+                ex['ans'] = answers
+                ex['used'] = _time.time() - ex['start']
+                ex['done'] = True
+                st.rerun()
+        if st.button("Abandonner l'épreuve (rien ne sera enregistré)", key='v31_ex_quit'):
+            del st.session_state['v31_exam']
+            st.rerun()
+        return
+
+    results = [(q, ex['ans'].get(q['id']) == q['rep']) for q in qs]
+    score = sum(1 for _, ok in results if ok)
+    note = 20 * score / max(1, len(qs))
+    if not ex['saved']:
+        save_score(score, len(qs), _domain_details(results), quiz_name=f"Examen blanc {ex['fmt'].split(' — ')[0]}")
+        record_answers(results)
+        add_user_points(score * 4, f"exam_{_iso(_today())}_{ex['run']}")
+        ex['saved'] = True
+    retard = ex['used'] > ex['dur'] + 5
+    vides = sum(1 for q in qs if ex['ans'].get(q['id']) is None)
+    c1, c2, c3 = st.columns(3)
+    c1.metric("Note", f"{note:.1f} / 20")
+    c2.metric("Bonnes réponses", f"{score} / {len(qs)}")
+    c3.metric("Temps utilisé", f"{int(ex['used'] // 60)} min {int(ex['used'] % 60):02d} s", delta="hors délai" if retard else "dans les temps", delta_color='inverse' if retard else 'normal')
+    if retard:
+        st.warning("Tu as dépassé le temps imparti. Le jour de l'épreuve, la copie est ramassée : entraîne-toi à passer une question qui bloque et à y revenir à la fin.")
+    if vides:
+        st.info(f"{vides} question(s) laissée(s) sans réponse. À un QCM sans points négatifs, il vaut toujours mieux répondre.")
+    if note >= 14:
+        st.success("🏆 Niveau très confortable.")
+    elif note >= 10:
+        st.info("👍 Au-dessus de la moyenne. Regarde le domaine le plus faible ci-dessous.")
+    else:
+        st.warning("⚠️ En dessous de la moyenne sur cette épreuve. Travaille d'abord le domaine en tête du tableau.")
+    _table_par_domaine(results)
+    st.markdown("### Correction")
+    seulement_err = st.checkbox("Afficher seulement mes erreurs", value=True, key='v31_ex_only')
+    for i, (q, ok) in enumerate(results):
+        if ok and seulement_err:
+            continue
+        _render_correction(q, ex['ans'].get(q['id']), i + 1)
+    if st.button("🔄 Nouvel examen blanc", key='v31_ex_new', type='primary'):
+        del st.session_state['v31_exam']
+        st.rerun()
+
+
+# ───────────────────────────── PAGE : vocabulaire anglais ─────────────────────────────
+VOCAB_WORDS = []          # [{'id','en','fr','t' (index thème)}]
+for _ti, _th in enumerate(VOCAB_BTS):
+    for _wi, _w in enumerate(_th['w']):
+        VOCAB_WORDS.append({'id': f"{_ti}-{_wi}", 'en': _w[0], 'fr': _w[1], 't': _ti})
+VOCAB_BY_ID = {w['id']: w for w in VOCAB_WORDS}
+VOCAB_TOTAL = len(VOCAB_WORDS)
+VOCAB_GROUPES = [("Emploi & entreprise", [0, 1, 2, 3]), ("Industrie & technique", [4, 12, 13, 14, 15]),
+                 ("Numérique", [6, 7, 8]), ("Société & mobilité", [5, 9, 10, 11])]
+
+
+_ART_FR = r"^(?:(?:une|un|des|les|le|la|du|de la|se)\s+|(?:s'|l'|d')\s*)"
+
+
+def _norm(s):
+    s = _ud.normalize('NFD', str(s).lower())
+    s = ''.join(c for c in s if _ud.category(c) != 'Mn')
+    s = _re.sub(r'\([^)]*\)', ' ', s)
+    s = _re.sub(r"[^a-z0-9' -]", ' ', s)
+    return _re.sub(r'\s+', ' ', s).strip()
+
+
+def _variantes(texte, anglais=True):
+    """Toutes les réponses acceptées pour une entrée du type « to fire, to sack » ou « a trainee (UK) / an intern (US) »."""
+    out = set()
+    for part in _re.split(r'\s*/\s*|\s*,\s*|\s*;\s*', texte):
+        n = _norm(part)
+        if not n:
+            continue
+        out.add(n)
+        if anglais:
+            out.add(_re.sub(r'^(to|a|an|the) ', '', n))
+        else:
+            out.add(_re.sub(_ART_FR, '', n))
+    out.discard('')
+    return out
+
+
+def vocab_juste(saisie, attendu, anglais=True):
+    s = _norm(saisie)
+    if not s:
+        return False
+    var = _variantes(attendu, anglais)
+    s2 = _re.sub(r'^(to|a|an|the) ', '', s) if anglais else _re.sub(_ART_FR, '', s)
+    return s in var or s2 in var
+
+
+def _vocab_update(d, wid, ok):
+    e = d['vocab'].get(wid, [0, _iso(_today()), 0, 0])
+    box, due = _leitner_update(e[:2], ok)
+    d['vocab'][wid] = [box, due, e[2] + (1 if ok else 0), e[3] + (0 if ok else 1)]
+
+
+def _vocab_pick(d, words, n):
+    """Choisit n mots : d'abord ceux à revoir, puis les faibles, puis des nouveaux."""
+    t = _iso(_today())
+    due = [w for w in words if w['id'] in d['vocab'] and d['vocab'][w['id']][1] <= t]
+    due.sort(key=lambda w: d['vocab'][w['id']][0])
+    new = [w for w in words if w['id'] not in d['vocab']]
+    random.shuffle(new)
+    later = [w for w in words if w['id'] in d['vocab'] and d['vocab'][w['id']][1] > t]
+    random.shuffle(later)
+    pick = (due + new + later)[:n]
+    random.shuffle(pick)
+    return pick
+
+
+def render_page_vocabulaire():
+    st.markdown("<div class='hero-title'>🇬🇧 Vocabulaire anglais BTS — entraînement</div>", unsafe_allow_html=True)
+    st.markdown(f"<p style='color:#94a3b8;'>Les {VOCAB_TOTAL} mots de ton glossaire Vocabulaire_BTS, rangés en {len(VOCAB_BTS)} thèmes. L'app retient ce que tu sais et te repose en priorité les mots qui ne rentrent pas.</p>", unsafe_allow_html=True)
+    d = _ud_get()
+
+    c1, c2 = st.columns([2, 1])
+    with c1:
+        noms = [f"{i + 1:02d}. {th['t']} — {th['f']} ({len(th['w'])})" for i, th in enumerate(VOCAB_BTS)]
+        choix_groupes = ['Un seul thème'] + [g[0] for g in VOCAB_GROUPES] + ['Tout le glossaire']
+        portee = st.selectbox("Je révise :", choix_groupes, key='v31_voc_scope')
+        if portee == 'Un seul thème':
+            ti = noms.index(st.selectbox("Thème :", noms, key='v31_voc_theme'))
+            themes = [ti]
+        elif portee == 'Tout le glossaire':
+            themes = list(range(len(VOCAB_BTS)))
+        else:
+            themes = dict(VOCAB_GROUPES)[portee]
+    with c2:
+        sens = st.radio("Sens :", ['Anglais → Français', 'Français → Anglais'], key='v31_voc_sens')
+    en2fr = sens.startswith('Anglais')
+    words = [w for w in VOCAB_WORDS if w['t'] in themes]
+    sus = sum(1 for w in words if d['vocab'].get(w['id'], [0])[0] >= 4)
+    vus = sum(1 for w in words if w['id'] in d['vocab'])
+    st.progress(sus / max(1, len(words)))
+    st.caption(f"Sélection : **{len(words)} mots** · déjà travaillés : {vus} · acquis (boîte 4 ou 5) : **{sus}**")
+    scope_key = f"{portee}|{themes}|{en2fr}"
+
+    tab_l, tab_c, tab_q, tab_e, tab_p = st.tabs(["📖 Liste", "🎴 Cartes", "✅ QCM", "⌨️ J'écris le mot", "📊 Ma progression"])
+
+    with tab_l:
+        cacher = st.radio("Pour t'interroger tout seul :", ['Tout afficher', 'Cacher le français', "Cacher l'anglais"], horizontal=True, key='v31_voc_hide')
+        for ti in themes:
+            th = VOCAB_BTS[ti]
+            with st.expander(f"{ti + 1:02d}. {th['t']} — {th['f']} ({len(th['w'])} mots)", expanded=(len(themes) == 1)):
+                rows = []
+                for wi, w in enumerate(th['w']):
+                    box = d['vocab'].get(f"{ti}-{wi}", [0])[0]
+                    rows.append({'': '🟢' if box >= 4 else ('🟠' if box >= 1 else '⚪'),
+                                 'English': '• • •' if cacher == "Cacher l'anglais" else w[0],
+                                 'Français': '• • •' if cacher == 'Cacher le français' else w[1],
+                                 'Piège': VOCAB_NOTES.get(w[0], '')})
+                st.dataframe(pd.DataFrame(rows), use_container_width=True, hide_index=True)
+        st.caption("⚪ jamais travaillé · 🟠 en cours · 🟢 acquis")
+
+    with tab_c:
+        if st.session_state.get('v31_vc_scope') != scope_key or 'v31_vc_queue' not in st.session_state:
+            st.session_state.v31_vc_queue = [w['id'] for w in _vocab_pick(d, words, NOUVEAUX_MOTS_PAR_JOUR)]
+            st.session_state.v31_vc_scope = scope_key
+            st.session_state.v31_vc_show = False
+            st.session_state.v31_vc_done = 0
+        vq = st.session_state.v31_vc_queue
+        if not vq:
+            st.success(f"Série terminée ({st.session_state.v31_vc_done} cartes).")
+            if st.button("Nouvelle série de 20", key='v31_vc_again', type='primary'):
+                st.session_state.pop('v31_vc_queue', None)
+                st.rerun()
+        else:
+            w = VOCAB_BY_ID[vq[0]]
+            recto, verso = (w['en'], w['fr']) if en2fr else (w['fr'], w['en'])
+            st.caption(f"Il reste {len(vq)} cartes · thème : {VOCAB_BTS[w['t']]['t']}")
+            st.markdown(f"<div class='ciel-card' style='text-align:center; padding:34px !important;'><div style='font-size:1.7rem; font-weight:800; color:#f8fafc;'>{recto}</div></div>", unsafe_allow_html=True)
+            if not st.session_state.v31_vc_show:
+                if st.button("👁️ Retourner la carte", key='v31_vc_flip', type='primary', use_container_width=True):
+                    st.session_state.v31_vc_show = True
+                    st.rerun()
+            else:
+                st.markdown(f"<div class='ciel-card' style='text-align:center; border-left:6px solid #34d399 !important;'><div style='font-size:1.5rem; font-weight:700; color:#34d399;'>{verso}</div></div>", unsafe_allow_html=True)
+                if VOCAB_NOTES.get(w['en']):
+                    st.warning(f"⚠️ {VOCAB_NOTES[w['en']]}")
+                k1, k2 = st.columns(2)
+                res = None
+                if k1.button("❌ Je ne savais pas", key='v31_vc_ko', use_container_width=True):
+                    res = False
+                if k2.button("✅ Je savais", key='v31_vc_ok', use_container_width=True):
+                    res = True
+                if res is not None:
+                    _vocab_update(d, w['id'], res)
+                    _mark_day(d)
+                    update_active_user_data(d)
+                    rest = vq[1:]
+                    if not res:
+                        rest.append(w['id'])
+                    st.session_state.v31_vc_queue = rest
+                    st.session_state.v31_vc_show = False
+                    st.session_state.v31_vc_done += 1
+                    st.rerun()
+
+    with tab_q:
+        vqz = st.session_state.get('v31_vqz')
+        if not vqz or vqz.get('scope') != scope_key:
+            if len(words) < 4:
+                st.info("Il faut au moins 4 mots dans la sélection.")
+                vqz = None
+            else:
+                items = []
+                for w in _vocab_pick(d, words, 10):
+                    meme_theme = [x for x in VOCAB_WORDS if x['t'] == w['t'] and x['id'] != w['id']]
+                    bonne = w['fr'] if en2fr else w['en']
+                    fausses = []
+                    for x in random.sample(meme_theme, len(meme_theme)):
+                        cand = x['fr'] if en2fr else x['en']
+                        if cand != bonne and cand not in fausses:
+                            fausses.append(cand)
+                        if len(fausses) == 3:
+                            break
+                    opts = fausses + [bonne]
+                    random.shuffle(opts)
+                    items.append({'id': w['id'], 'opts': opts})
+                vqz = {'scope': scope_key, 'items': items, 'done': False, 'ans': {}, 'saved': False, 'run': random.randint(1, 10 ** 6)}
+                st.session_state.v31_vqz = vqz
+        if vqz and not vqz['done']:
+            with st.form(key=f"v31_vqz_form_{vqz['run']}"):
+                ans = {}
+                for i, it in enumerate(vqz['items']):
+                    w = VOCAB_BY_ID[it['id']]
+                    st.markdown(f"**{i + 1}. {w['en'] if en2fr else w['fr']}**")
+                    ans[it['id']] = st.radio("Traduction :", it['opts'], index=None, key=f"v31_vqz_{vqz['run']}_{i}", label_visibility='collapsed')
+                if st.form_submit_button("Valider", type='primary', use_container_width=True):
+                    vqz['ans'] = ans
+                    vqz['done'] = True
+                    st.rerun()
+        elif vqz:
+            sc = 0
+            for it in vqz['items']:
+                w = VOCAB_BY_ID[it['id']]
+                bonne = w['fr'] if en2fr else w['en']
+                ok = vqz['ans'].get(it['id']) == bonne
+                sc += 1 if ok else 0
+                if not vqz['saved']:
+                    _vocab_update(d, w['id'], ok)
+                ligne = f"**{w['en']}** = {w['fr']}"
+                note = f"\n\n⚠️ {VOCAB_NOTES[w['en']]}" if VOCAB_NOTES.get(w['en']) else ''
+                if ok:
+                    st.success(f"✅ {ligne}{note}")
+                else:
+                    st.error(f"❌ {ligne} — ta réponse : *{vqz['ans'].get(it['id']) or 'aucune'}*{note}")
+            if not vqz['saved']:
+                _mark_day(d)
+                update_active_user_data(d)
+                add_user_points(sc, f"voc_{_iso(_today())}_{vqz['run']}")
+                vqz['saved'] = True
+            st.markdown(f"### Score : {sc} / {len(vqz['items'])}")
+            if st.button("➡️ 10 autres mots", key='v31_vqz_next', type='primary'):
+                st.session_state.pop('v31_vqz', None)
+                st.rerun()
+
+    with tab_e:
+        st.caption("Le plus exigeant, et le plus proche de ce qu'on te demande à l'écrit : tu dois retrouver le mot sans aucune proposition. L'article (a, an, to…) et la casse ne comptent pas.")
+        ve = st.session_state.get('v31_ve')
+        if not ve or ve.get('scope') != scope_key:
+            ve = {'scope': scope_key, 'ids': [w['id'] for w in _vocab_pick(d, words, 8)], 'done': False, 'ans': {}, 'saved': False, 'run': random.randint(1, 10 ** 6)}
+            st.session_state.v31_ve = ve
+        if not ve['done']:
+            with st.form(key=f"v31_ve_form_{ve['run']}"):
+                ans = {}
+                for i, wid in enumerate(ve['ids']):
+                    w = VOCAB_BY_ID[wid]
+                    ans[wid] = st.text_input(f"{i + 1}. {w['en'] if en2fr else w['fr']}", key=f"v31_ve_{ve['run']}_{i}", placeholder='en français' if en2fr else 'in English')
+                if st.form_submit_button("Valider", type='primary', use_container_width=True):
+                    ve['ans'] = ans
+                    ve['done'] = True
+                    st.rerun()
+        else:
+            sc = 0
+            for wid in ve['ids']:
+                w = VOCAB_BY_ID[wid]
+                attendu = w['fr'] if en2fr else w['en']
+                ok = vocab_juste(ve['ans'].get(wid, ''), attendu, anglais=not en2fr)
+                sc += 1 if ok else 0
+                if not ve['saved']:
+                    _vocab_update(d, wid, ok)
+                note = f"\n\n⚠️ {VOCAB_NOTES[w['en']]}" if VOCAB_NOTES.get(w['en']) else ''
+                if ok:
+                    st.success(f"✅ **{w['en']}** = {w['fr']}{note}")
+                else:
+                    st.error(f"❌ **{w['en']}** = {w['fr']} — tu as écrit : *{ve['ans'].get(wid) or 'rien'}*{note}")
+            if not ve['saved']:
+                _mark_day(d)
+                update_active_user_data(d)
+                add_user_points(sc * 2, f"vocw_{_iso(_today())}_{ve['run']}")
+                ve['saved'] = True
+            st.markdown(f"### Score : {sc} / {len(ve['ids'])}")
+            st.caption("Si ta réponse était juste mais formulée autrement que dans le glossaire, elle a pu être comptée fausse : fie-toi à la correction affichée.")
+            if st.button("➡️ 8 autres mots", key='v31_ve_next', type='primary'):
+                st.session_state.pop('v31_ve', None)
+                st.rerun()
+
+    with tab_p:
+        rows = []
+        for ti, th in enumerate(VOCAB_BTS):
+            ids = [f"{ti}-{wi}" for wi in range(len(th['w']))]
+            acquis = sum(1 for i in ids if d['vocab'].get(i, [0])[0] >= 4)
+            cours_n = sum(1 for i in ids if 1 <= d['vocab'].get(i, [0])[0] < 4)
+            rows.append({'Thème': f"{ti + 1:02d}. {th['t']}", 'Mots': len(ids), 'Acquis': acquis, 'En cours': cours_n,
+                         'Jamais vus': len(ids) - acquis - cours_n, 'Avancement': f"{100 * acquis / len(ids):.0f} %"})
+        st.dataframe(pd.DataFrame(rows), use_container_width=True, hide_index=True)
+        difficiles = sorted([(v[3], k) for k, v in d['vocab'].items() if len(v) > 3 and v[3] >= 2 and k in VOCAB_BY_ID], reverse=True)[:20]
+        if difficiles:
+            st.markdown("#### 🔥 Tes mots les plus difficiles")
+            st.dataframe(pd.DataFrame([{'English': VOCAB_BY_ID[k]['en'], 'Français': VOCAB_BY_ID[k]['fr'], 'Erreurs': n} for n, k in difficiles]), use_container_width=True, hide_index=True)
+        st.markdown(f"#### ⚠️ Les {len(VOCAB_NOTES)} pièges et faux amis du glossaire")
+        st.dataframe(pd.DataFrame([{'English': k, 'Attention': v} for k, v in VOCAB_NOTES.items()]), use_container_width=True, hide_index=True)
+
+
+# ───────────────────────────── PAGE : décoder les énoncés ─────────────────────────────
+VERBES_ENONCE = [
+    ("Citer / Nommer / Donner", "Écrire le nom ou la valeur, sans explication.", "Un mot ou une courte liste suffit.", "« Citer deux protocoles de la couche transport. » → TCP, UDP."),
+    ("Identifier / Relever / Repérer", "Aller chercher l'information dans le document fourni.", "La réponse est déjà dans l'annexe : recopie-la et dis où tu l'as trouvée.", "« Relever l'adresse IP source dans la capture. »"),
+    ("Définir", "Dire ce que le mot veut dire.", "Une phrase précise, avec le vocabulaire du cours.", "« Définir le quantum d'un CAN. »"),
+    ("Décrire", "Dire ce qu'on voit ou ce qui se passe, étape par étape.", "Pas besoin de dire pourquoi : on raconte le déroulement.", "« Décrire l'échange DHCP. » → Discover, Offer, Request, Ack."),
+    ("Expliquer", "Dire comment ça marche ET pourquoi.", "Utilise « car », « donc », « ce qui permet de ».", "« Expliquer le rôle de la diode de roue libre. »"),
+    ("Justifier", "Prouver que ta réponse est juste.", "Réponse + la preuve : un calcul, une valeur de la doc, une règle du cours. Sans preuve, pas de point.", "« Justifier le choix d'un masque /26. » → besoin de 50 hôtes, /26 en offre 62."),
+    ("Calculer / Déterminer", "Trouver une valeur par un calcul.", "Écris la formule, remplace par les nombres, donne le résultat AVEC l'unité.", "« Déterminer le quantum. » → q = Vref/2^n = 5/1024 = 4,88 mV."),
+    ("En déduire", "Utiliser le résultat de la question d'avant.", "Ne repars pas de zéro : la réponse précédente est ton point de départ.", "« En déduire la fréquence. » → f = 1/T avec le T trouvé juste avant."),
+    ("Montrer que / Vérifier que", "Le résultat est donné : il faut prouver qu'on le retrouve.", "Fais le calcul complet et termine par la valeur annoncée.", "« Montrer que le débit utile vaut 960 caractères/s. »"),
+    ("Comparer", "Dire ce qui est pareil et ce qui est différent.", "Un petit tableau à deux colonnes marche très bien. Termine par une phrase de conclusion.", "« Comparer TCP et UDP. »"),
+    ("Analyser", "Découper un document ou une situation et dire ce que chaque partie signifie.", "Champ par champ, ligne par ligne.", "« Analyser la trame Modbus suivante. »"),
+    ("Compléter", "Remplir le document réponse (tableau, schéma, code).", "Écris directement sur le document réponse, pas sur la copie.", "« Compléter le tableau d'adressage. »"),
+    ("Proposer", "Donner une solution possible, et dire pourquoi elle convient.", "Plusieurs réponses peuvent être acceptées si elles sont justifiées.", "« Proposer une solution pour sécuriser l'accès distant. » → VPN, car…"),
+    ("Conclure / Valider", "Dire si l'objectif ou le cahier des charges est respecté.", "Compare ta valeur à celle exigée et réponds clairement par oui ou non.", "« Conclure sur la conformité du capteur. »"),
+    ("Coder / Écrire le programme", "Écrire les lignes de code demandées.", "Respecte les noms de variables de l'énoncé. Un code simple et juste vaut mieux qu'un code compliqué.", "« Écrire la méthode getTemperature(). »"),
+    ("Convertir", "Changer d'unité ou de base.", "Montre l'étape de conversion.", "« Convertir 0x2A en décimal. » → 2×16 + 10 = 42."),
+]
+MOTS_PIEGES = [
+    ("au minimum / au moins", "La plus petite valeur qui marche."),
+    ("au maximum / au plus", "La plus grande valeur possible, à ne pas dépasser."),
+    ("respectivement", "Dans le même ordre : le 1er avec le 1er, le 2e avec le 2e."),
+    ("à l'aide du document… / de l'annexe…", "La réponse (ou la donnée qu'il te faut) est dans ce document. Va le lire d'abord."),
+    ("on donne / on rappelle", "Une information offerte : elle sert forcément dans le calcul."),
+    ("on admet que", "Tu n'as pas à le démontrer : utilise-le tel quel."),
+    ("valeur approchée à 10⁻² près", "Arrondir à 2 chiffres après la virgule."),
+    ("exprimer en fonction de", "Répondre avec une formule contenant des lettres, pas avec un nombre."),
+    ("application numérique", "Maintenant on remplace les lettres par les nombres."),
+    ("le cas échéant", "Seulement si c'est nécessaire, si la situation se présente."),
+    ("a minima", "Au moins ça."),
+    ("nominal(e)", "La valeur normale de fonctionnement prévue par le constructeur."),
+]
+QUIZ_ENONCES = _b10([
+    ("Dans un sujet, « Justifier votre réponse » veut dire…", ['Recopier la question', 'Donner la réponse et la preuve (calcul, donnée, règle du cours)', 'Donner seulement la réponse', 'Donner son avis'], 1, "Sans la preuve, la réponse seule ne rapporte en général pas tous les points."),
+    ("« En déduire la fréquence du signal » : que dois-tu faire ?", ['Refaire toute la mesure', 'Utiliser le résultat de la question précédente', 'Chercher dans l\'annexe', 'Donner une valeur au hasard'], 1, "« En déduire » signale que le point de départ est ce que tu viens de trouver."),
+    ("« Relever la valeur de la tension d'alimentation dans la documentation » :", ['Il faut la calculer', 'Il faut la lire dans le document fourni', 'Il faut la mesurer', 'Il faut l\'inventer'], 1, "Relever = aller chercher l'information là où elle est écrite."),
+    ("« Montrer que le quantum vaut 4,88 mV » :", ['Le résultat est faux, il faut le corriger', 'Il faut écrire le calcul complet qui aboutit à 4,88 mV', 'Il suffit de recopier 4,88 mV', 'Il faut mesurer'], 1, "Le résultat est donné pour que tu puisses continuer même si tu bloques ; les points sont sur la démarche."),
+    ("« Exprimer la tension Vs en fonction de Ve, R1 et R2 » :", ['Donner un nombre en volts', 'Donner une formule avec les lettres Ve, R1 et R2', 'Tracer une courbe', 'Mesurer Vs'], 1, "« En fonction de » = une formule littérale, pas de valeur numérique."),
+    ("« Comparer les deux solutions » :", ['Décrire seulement la première', 'Dire les points communs et les différences, puis conclure', 'Choisir sans expliquer', 'Recopier la documentation'], 1, "Un tableau à deux colonnes puis une phrase de conclusion."),
+    ("« Donner le résultat à 10⁻² près » :", ['Arrondir à l\'unité', 'Garder 2 chiffres après la virgule', 'Multiplier par 100', 'Garder 2 chiffres en tout'], 1, "10⁻² = 0,01 : deux décimales."),
+    ("« Conclure quant au respect du cahier des charges » :", ['Refaire tous les calculs', 'Comparer ta valeur à celle exigée et dire clairement si c\'est conforme', 'Recopier le cahier des charges', 'Donner son opinion sur le sujet'], 1, "Une phrase nette : « La valeur obtenue (…) est inférieure au maximum exigé (…), donc l'exigence est respectée. »"),
+    ("L'énoncé dit « On donne : R = 250 Ω ». Cela signifie…", ['C\'est une donnée inutile', 'C\'est une donnée qui servira dans le calcul demandé', 'Il faut la démontrer', 'C\'est le résultat attendu'], 1, "Une donnée offerte est presque toujours nécessaire."),
+    ("« Proposer une solution » :", ['Il n\'y a qu\'une seule réponse acceptée', 'Donner une solution réaliste et dire pourquoi elle convient', 'Lister toutes les solutions existantes', 'Ne rien écrire si on n\'est pas sûr'], 1, "Plusieurs réponses peuvent convenir si elles sont justifiées."),
+])
+for _q in QUIZ_ENONCES:
+    _shuffle_options_in_place(_q)
+
+
+def render_page_decoder_enonces():
+    st.markdown("<div class='hero-title'>🧩 Décoder les énoncés</div>", unsafe_allow_html=True)
+    st.markdown("<p style='color:#94a3b8;'>Beaucoup de points se perdent parce qu'on n'a pas compris ce que la question demandait, pas parce qu'on ne savait pas. Chaque verbe d'un sujet d'examen attend une forme de réponse précise.</p>", unsafe_allow_html=True)
+    t1, t2, t3, t4 = st.tabs(["🔑 Les verbes de consigne", "🪤 Les petits mots pièges", "🧭 Méthode en 4 étapes", "✍️ Je m'entraîne"])
+    with t1:
+        st.dataframe(pd.DataFrame([{'Quand tu lis…': a, 'Ça veut dire…': b, 'Ce que tu dois écrire': c, 'Exemple': e} for a, b, c, e in VERBES_ENONCE]), use_container_width=True, hide_index=True)
+        st.markdown("#### Vue détaillée")
+        for a, b, c, e in VERBES_ENONCE:
+            with st.expander(f"**{a}**"):
+                st.markdown(f"**En mots simples :** {b}\n\n**Ce que le correcteur attend :** {c}\n\n**Exemple :** {e}")
+    with t2:
+        st.dataframe(pd.DataFrame([{'Expression': a, 'Sens': b} for a, b in MOTS_PIEGES]), use_container_width=True, hide_index=True)
+    with t3:
+        st.markdown("""
+#### Avant d'écrire quoi que ce soit
+
+1. **Souligne le verbe.** C'est lui qui dit quelle forme de réponse est attendue (voir le premier onglet).
+2. **Entoure les données.** Les nombres avec leur unité, les noms de documents (« annexe 3 », « document réponse 2 »).
+3. **Redis la question avec tes mots.** « En fait, on me demande de trouver… à partir de… ». Si tu n'y arrives pas, relis la phrase d'introduction de la partie : elle donne le contexte.
+4. **Regarde le barème et la place prévue.** 0,5 point = une valeur ou un mot. 2 points = un calcul rédigé ou une explication.
+
+#### Pendant que tu réponds
+
+- **Formule → valeurs → résultat → unité.** Toujours dans cet ordre.
+- Une question bloque ? **Passe à la suivante.** Les sujets donnent souvent le résultat (« montrer que… ») pour que tu puisses continuer.
+- Les parties d'un sujet E4 sont en général **indépendantes** : commence par celle où tu es le plus à l'aise.
+
+#### Avant de rendre
+
+- Chaque résultat a-t-il **son unité** ?
+- Ai-je répondu à **toutes** les demandes de la question (parfois deux verbes dans la même phrase : « calculer **et** conclure ») ?
+        """)
+    with t4:
+        st.caption("10 situations tirées de formulations de sujets. Le but : savoir ce qu'on attend de toi avant même de chercher la réponse.")
+        with st.form(key='v31_dec_form'):
+            ans = {}
+            for i, q in enumerate(QUIZ_ENONCES):
+                st.markdown(f"**{i + 1}. {q['q']}**")
+                ans[i] = st.radio("Réponse :", q['opts'], index=None, key=f"v31_dec_{i}", label_visibility='collapsed')
+            ok_btn = st.form_submit_button("Valider", type='primary')
+        if ok_btn:
+            sc = 0
+            for i, q in enumerate(QUIZ_ENONCES):
+                if ans[i] == q['rep']:
+                    sc += 1
+                    st.success(f"✅ {i + 1}. {q['rep']} — {q['expl']}")
+                else:
+                    st.error(f"❌ {i + 1}. Bonne réponse : **{q['rep']}** — {q['expl']}")
+            st.markdown(f"### {sc} / 10")
+            add_user_points(sc * 2, 'v31_decodeur_enonces')
+
+
+# ───────────────────────────── PAGE : formulaire de maths complet ─────────────────────────────
+def render_page_formulaire_maths():
+    st.markdown("<div class='hero-title'>📐 Maths : formulaire complet & méthodes guidées</div>", unsafe_allow_html=True)
+    st.markdown("<p style='color:#94a3b8;'>Tout le programme de maths du BTS CIEL, avec pour chaque chapitre : à quoi ça sert, les formules, et la méthode pas à pas. Les calculs, c'est toi qui les fais.</p>", unsafe_allow_html=True)
+    chapitres = ["Nombres complexes", "Matrices", "Dérivation", "Calcul intégral", "Probabilités", "Statistiques",
+                 "Trigonométrie & signaux", "Équations différentielles", "Suites numériques", "Exponentielle, logarithme & décibels"]
+    tabs = st.tabs(chapitres)
+
+    with tabs[0]:
+        st.markdown(r"""
+**À quoi ça sert ?** En électronique, un nombre complexe transporte deux informations d'un coup : l'amplitude d'un signal et son déphasage. C'est l'outil des impédances.
+
+| Notion | Formule | En mots simples |
+| :--- | :--- | :--- |
+| Forme algébrique | $z = a + ib$, avec $i^2 = -1$ | $a$ = partie réelle, $b$ = partie imaginaire |
+| Conjugué | $\bar z = a - ib$ | On change le signe devant $i$ |
+| Module | $\lvert z\rvert = \sqrt{a^2 + b^2}$ | La longueur de la flèche |
+| Argument | $\cos\theta = \dfrac{a}{\lvert z\rvert}$, $\sin\theta = \dfrac{b}{\lvert z\rvert}$ | L'angle de la flèche avec l'axe horizontal |
+| Forme trigonométrique | $z = \lvert z\rvert(\cos\theta + i\sin\theta)$ | |
+| Forme exponentielle | $z = \lvert z\rvert\, e^{i\theta}$ | Pratique pour multiplier et diviser |
+| Produit | $\lvert zz'\rvert = \lvert z\rvert\lvert z'\rvert$, $\arg(zz') = \arg z + \arg z'$ | Les modules se multiplient, les angles s'ajoutent |
+| Second degré, $\Delta < 0$ | $z = \dfrac{-b \pm i\sqrt{\lvert\Delta\rvert}}{2a}$ | Deux solutions conjuguées |
+
+⚠️ En électricité, on écrit $j$ à la place de $i$ (pour ne pas confondre avec l'intensité) : $Z_R = R$, $Z_L = jL\omega$, $Z_C = \dfrac{1}{jC\omega}$.
+        """)
+        with st.expander("🧭 Méthode : écrire un quotient sous forme algébrique"):
+            st.markdown(r"""
+1. Repère le dénominateur, par exemple $1 + 2i$.
+2. Multiplie **en haut et en bas** par son conjugué $1 - 2i$.
+3. En bas, tu obtiens un réel : $a^2 + b^2$.
+4. Développe le haut, remplace $i^2$ par $-1$, regroupe.
+5. Sépare partie réelle et partie imaginaire.
+
+*À toi :* essaie avec $\dfrac{4 - i}{1 + 2i}$. Tu dois trouver une partie réelle égale à $\tfrac{2}{5}$.
+            """)
+        with st.expander("🧭 Méthode : trouver module et argument"):
+            st.markdown(r"""
+1. Calcule le module $\lvert z\rvert = \sqrt{a^2 + b^2}$.
+2. Calcule $\cos\theta = a / \lvert z\rvert$ et $\sin\theta = b / \lvert z\rvert$.
+3. Cherche sur le cercle trigonométrique l'angle qui a **ce cosinus et ce sinus** (les deux, pour ne pas se tromper de signe).
+
+*À toi :* $z = \sqrt 3 - i$. Tu dois trouver un module de 2.
+            """)
+
+    with tabs[1]:
+        st.markdown(r"""
+**À quoi ça sert ?** Ranger des nombres en tableau pour traiter plusieurs équations d'un coup (systèmes, transformations, graphes de réseau).
+
+| Notion | Règle |
+| :--- | :--- |
+| Taille | lignes × colonnes |
+| Somme | terme à terme, mêmes tailles obligatoires |
+| Produit $A \times B$ | possible si **colonnes de A = lignes de B** ; résultat : lignes de A × colonnes de B |
+| Calcul d'un terme | ligne de A × colonne de B, puis on additionne |
+| Attention | en général $A \times B \neq B \times A$ |
+| Identité $I$ | des 1 sur la diagonale ; $A \times I = A$ |
+| Déterminant 2×2 | $\det\begin{pmatrix} a & b \\ c & d\end{pmatrix} = ad - bc$ |
+| Inverse 2×2 | si $\det \neq 0$ : $A^{-1} = \dfrac{1}{ad - bc}\begin{pmatrix} d & -b \\ -c & a\end{pmatrix}$ |
+| Système $AX = B$ | $X = A^{-1}B$ |
+        """)
+        with st.expander("🧭 Méthode : résoudre un système avec une matrice"):
+            st.markdown(r"""
+1. Écris le système sous la forme $AX = B$ (A = les coefficients, X = les inconnues, B = les seconds membres).
+2. Calcule $\det(A)$. S'il vaut 0, la méthode ne s'applique pas.
+3. Calcule $A^{-1}$ (formule ci-dessus ou calculatrice).
+4. Calcule $X = A^{-1}B$ : **$A^{-1}$ à gauche**, l'ordre compte.
+5. Vérifie en remplaçant dans une des équations de départ.
+            """)
+
+    with tabs[2]:
+        st.markdown(r"""
+**À quoi ça sert ?** La dérivée donne la **pente** de la courbe : elle dit si une grandeur monte ou descend, et à quelle vitesse.
+
+| Fonction | Dérivée | | Fonction | Dérivée |
+| :--- | :--- | --- | :--- | :--- |
+| constante $k$ | $0$ | | $e^x$ | $e^x$ |
+| $x$ | $1$ | | $e^{u}$ | $u'e^{u}$ |
+| $x^n$ | $n x^{n-1}$ | | $\ln x$ | $\dfrac1x$ |
+| $\dfrac1x$ | $-\dfrac{1}{x^2}$ | | $\ln u$ | $\dfrac{u'}{u}$ |
+| $\sqrt x$ | $\dfrac{1}{2\sqrt x}$ | | $\sin x$ | $\cos x$ |
+| $u + v$ | $u' + v'$ | | $\cos x$ | $-\sin x$ |
+| $uv$ | $u'v + uv'$ | | $\sin(\omega t + \varphi)$ | $\omega\cos(\omega t + \varphi)$ |
+| $\dfrac uv$ | $\dfrac{u'v - uv'}{v^2}$ | | $\cos(\omega t + \varphi)$ | $-\omega\sin(\omega t + \varphi)$ |
+
+Tangente au point d'abscisse $a$ : $y = f'(a)(x - a) + f(a)$.
+        """)
+        with st.expander("🧭 Méthode : étudier les variations d'une fonction"):
+            st.markdown(r"""
+1. Calcule $f'(x)$.
+2. Cherche où $f'(x) = 0$.
+3. Fais le tableau de signes de $f'(x)$.
+4. $f' > 0$ : $f$ monte. $f' < 0$ : $f$ descend.
+5. Là où $f'$ change de signe, il y a un maximum ou un minimum : calcule sa valeur.
+            """)
+
+    with tabs[3]:
+        st.markdown(r"""
+**À quoi ça sert ?** L'intégrale calcule une **aire sous la courbe**. En élec : valeur moyenne d'une tension, énergie consommée.
+
+| Fonction | Une primitive |
+| :--- | :--- |
+| $k$ | $kx$ |
+| $x^n$ ($n \neq -1$) | $\dfrac{x^{n+1}}{n+1}$ |
+| $\dfrac1x$ | $\ln x$ |
+| $e^{ax}$ | $\dfrac{1}{a}e^{ax}$ |
+| $\cos(\omega t)$ | $\dfrac{1}{\omega}\sin(\omega t)$ |
+| $\sin(\omega t)$ | $-\dfrac{1}{\omega}\cos(\omega t)$ |
+
+$$\int_a^b f(x)\,dx = F(b) - F(a) \qquad\qquad \text{valeur moyenne} = \frac{1}{b-a}\int_a^b f(x)\,dx$$
+        """)
+        with st.expander("🧭 Méthode : calculer une intégrale"):
+            st.markdown(r"""
+1. Trouve une primitive $F$ de $f$ (tableau ci-dessus).
+2. Vérifie en dérivant $F$ : tu dois retomber sur $f$.
+3. Calcule $F(b)$, puis $F(a)$.
+4. Fais $F(b) - F(a)$, **dans cet ordre**.
+
+*À toi :* $\int_0^1 x\,dx$. Tu dois trouver $\tfrac12$ (c'est l'aire d'un triangle).
+            """)
+
+    with tabs[4]:
+        st.markdown(r"""
+**À quoi ça sert ?** Fiabilité d'un composant, taux d'erreur d'une transmission, contrôle qualité.
+
+| Notion | Formule | En mots simples |
+| :--- | :--- | :--- |
+| Contraire | $P(\bar A) = 1 - P(A)$ | « A n'arrive pas » |
+| Union | $P(A \cup B) = P(A) + P(B) - P(A \cap B)$ | A ou B |
+| Conditionnelle | $P_A(B) = \dfrac{P(A \cap B)}{P(A)}$ | B sachant que A est réalisé |
+| Indépendance | $P(A \cap B) = P(A)\,P(B)$ | L'un n'influence pas l'autre |
+| Loi binomiale $\mathcal B(n ; p)$ | $P(X = k) = \binom nk p^k (1-p)^{n-k}$ | $n$ essais identiques et indépendants, on compte les succès |
+| | $E(X) = np$, $\sigma = \sqrt{np(1-p)}$ | moyenne et dispersion |
+| Loi normale $\mathcal N(\mu ; \sigma)$ | 68 % dans $[\mu \pm \sigma]$, 95 % dans $[\mu \pm 2\sigma]$, 99,7 % dans $[\mu \pm 3\sigma]$ | La courbe en cloche |
+| Loi exponentielle (paramètre $\lambda$) | $P(X \le t) = 1 - e^{-\lambda t}$, $E(X) = \dfrac1\lambda$ | Durée de vie sans usure ; $1/\lambda$ = MTBF |
+        """)
+        with st.expander("🧭 Méthode : reconnaître et utiliser une loi binomiale"):
+            st.markdown(r"""
+1. Vérifie les 3 conditions et **écris-les** : même épreuve répétée $n$ fois, 2 issues (succès / échec), répétitions indépendantes.
+2. Donne les paramètres : $n$ = nombre de répétitions, $p$ = probabilité du succès.
+3. Traduis la question : « exactement 3 » → $P(X = 3)$ ; « au plus 3 » → $P(X \le 3)$ ; « au moins 3 » → $1 - P(X \le 2)$.
+4. Calculatrice : fonction binomiale (Fdp pour $=$, FRép pour $\le$).
+            """)
+        with st.expander("🧭 Méthode : arbre de probabilités"):
+            st.markdown(r"""
+1. Premier niveau : les cas de départ, avec leurs probabilités (leur somme vaut 1).
+2. Deuxième niveau : les probabilités **conditionnelles**.
+3. Un chemin = on **multiplie** le long des branches.
+4. Plusieurs chemins mènent au même événement = on **additionne** (probabilités totales).
+            """)
+
+    with tabs[5]:
+        st.markdown(r"""
+**À quoi ça sert ?** Résumer une série de mesures et prévoir une tendance.
+
+| Indicateur | Ce qu'il dit |
+| :--- | :--- |
+| Moyenne $\bar x$ | La valeur « d'équilibre » : somme des valeurs / effectif |
+| Médiane | La valeur du milieu de la série rangée ; peu sensible aux valeurs extrêmes |
+| Quartiles $Q_1$, $Q_3$ | 25 % et 75 % des valeurs sont en dessous |
+| Variance $V$ | Moyenne des carrés des écarts à la moyenne |
+| Écart type $\sigma = \sqrt V$ | La dispersion : petit = valeurs regroupées |
+
+**Deux variables.** Droite de régression de $y$ en $x$ : $y = ax + b$ avec $a = \dfrac{\mathrm{cov}(x,y)}{V(x)}$. Elle passe par le point moyen $G(\bar x ; \bar y)$.
+Coefficient de corrélation $r$ : proche de $1$ ou $-1$, l'ajustement par une droite est pertinent ; proche de $0$, il ne l'est pas.
+        """)
+        with st.expander("🧭 Méthode : faire une prévision avec la droite de régression"):
+            st.markdown(r"""
+1. Entre les deux listes dans la calculatrice (menu statistiques à deux variables).
+2. Relève $a$, $b$ et $r$.
+3. Dis si l'ajustement est pertinent en regardant $r$.
+4. Écris l'équation $y = ax + b$ avec les valeurs arrondies comme demandé.
+5. Pour prévoir : remplace $x$ par la valeur donnée. Pour retrouver $x$ : résous l'équation.
+            """)
+
+    with tabs[6]:
+        st.markdown(r"""
+**À quoi ça sert ?** Tous les signaux sinusoïdaux : $u(t) = U_{max}\sin(\omega t + \varphi)$.
+
+| Angle | $0$ | $\pi/6$ | $\pi/4$ | $\pi/3$ | $\pi/2$ | $\pi$ |
+| :--- | :-: | :-: | :-: | :-: | :-: | :-: |
+| $\cos$ | $1$ | $\frac{\sqrt3}{2}$ | $\frac{\sqrt2}{2}$ | $\frac12$ | $0$ | $-1$ |
+| $\sin$ | $0$ | $\frac12$ | $\frac{\sqrt2}{2}$ | $\frac{\sqrt3}{2}$ | $1$ | $0$ |
+
+- $\cos^2 x + \sin^2 x = 1$ · $\cos(-x) = \cos x$ (paire) · $\sin(-x) = -\sin x$ (impaire)
+- Pulsation : $\omega = 2\pi f = \dfrac{2\pi}{T}$ · Période : $T = \dfrac1f$
+- Valeur efficace d'un sinus : $U_{eff} = \dfrac{U_{max}}{\sqrt2}$
+- Conversion : $180° = \pi$ rad
+        """)
+        with st.expander("🧭 Méthode : lire un signal $u(t) = 5\\sin(100\\pi t)$"):
+            st.markdown(r"""
+1. Le nombre devant le sinus est l'**amplitude**.
+2. Le nombre devant $t$ est la **pulsation** $\omega$.
+3. Fréquence : $f = \omega / (2\pi)$. Période : $T = 1/f$.
+4. Ce qui est ajouté à $\omega t$ est la **phase à l'origine** $\varphi$ (ici, 0).
+
+*À toi :* trouve $f$ et $T$ pour ce signal. Indice : tu dois reconnaître la fréquence du secteur.
+            """)
+
+    with tabs[7]:
+        st.markdown(r"""
+**À quoi ça sert ?** Décrire une grandeur qui évolue : charge d'un condensateur, refroidissement, courant dans une bobine.
+
+| Équation | Solutions |
+| :--- | :--- |
+| $y' = ay$ | $y(x) = Ce^{ax}$ |
+| $y' = ay + b$ | $y(x) = Ce^{ax} - \dfrac ba$ |
+| Circuit RC : $RC\,u' + u = E$ | $u(t) = E\left(1 - e^{-t/\tau}\right)$ avec $\tau = RC$ (charge depuis 0) |
+
+La constante $C$ se trouve avec la **condition initiale** (valeur à $t = 0$).
+        """)
+        with st.expander("🧭 Méthode : résoudre $y' + 2y = 6$ avec $y(0) = 1$"):
+            st.markdown(r"""
+1. Mets sous la forme $y' = ay + b$ : repère $a$ et $b$ (attention aux signes en changeant de côté).
+2. Écris la solution générale $y = Ce^{ax} - \dfrac ba$.
+3. Utilise $y(0) = 1$ : remplace $x$ par 0 ($e^0 = 1$) et trouve $C$.
+4. Vérifie : la valeur limite quand $x \to +\infty$ doit être $-b/a$.
+
+*À toi.* Tu dois trouver une limite égale à 3.
+            """)
+
+    with tabs[8]:
+        st.markdown(r"""
+| | Arithmétique | Géométrique |
+| :--- | :--- | :--- |
+| On passe au terme suivant en… | **ajoutant** $r$ | **multipliant** par $q$ |
+| Terme général | $u_n = u_0 + nr$ | $u_n = u_0 \times q^n$ |
+| Depuis $u_p$ | $u_n = u_p + (n-p)r$ | $u_n = u_p \times q^{n-p}$ |
+| Somme | $N \times \dfrac{\text{premier} + \text{dernier}}{2}$ | $\text{premier} \times \dfrac{1 - q^N}{1 - q}$ |
+| Limite | $\pm\infty$ si $r \neq 0$ | $0$ si $-1 < q < 1$ ; $+\infty$ si $q > 1$ et $u_0 > 0$ |
+
+$N$ = nombre de termes. De $u_0$ à $u_n$ il y a $n + 1$ termes.
+
+**Pourcentages :** augmenter de $t\,\%$ = multiplier par $1 + \dfrac{t}{100}$ ; baisser de $t\,\%$ = multiplier par $1 - \dfrac{t}{100}$.
+        """)
+        with st.expander("🧭 Méthode : prouver qu'une suite est arithmétique ou géométrique"):
+            st.markdown(r"""
+- **Arithmétique :** calcule $u_{n+1} - u_n$. Si le résultat est un nombre fixe (sans $n$), c'est la raison $r$.
+- **Géométrique :** calcule $\dfrac{u_{n+1}}{u_n}$. Si le résultat est un nombre fixe, c'est la raison $q$.
+- Calculer seulement les 3 premiers termes ne prouve rien : il faut le faire avec $n$.
+            """)
+
+    with tabs[9]:
+        st.markdown(r"""
+| Exponentielle | Logarithme népérien |
+| :--- | :--- |
+| $e^0 = 1$, $e^1 = e \approx 2{,}718$ | $\ln 1 = 0$, $\ln e = 1$ |
+| $e^{a+b} = e^a e^b$ | $\ln(ab) = \ln a + \ln b$ |
+| $e^{a-b} = \dfrac{e^a}{e^b}$ | $\ln\dfrac ab = \ln a - \ln b$ |
+| $(e^a)^n = e^{na}$ | $\ln(a^n) = n\ln a$ |
+| $e^x > 0$ toujours | défini seulement pour $x > 0$ |
+| $e^x = k \iff x = \ln k$ | $\ln x = k \iff x = e^k$ |
+
+**Décibels** (logarithme décimal $\log$) :
+
+- Puissances : $G_{dB} = 10\log\dfrac{P_s}{P_e}$ · Tensions : $G_{dB} = 20\log\dfrac{V_s}{V_e}$
+- Repères : ×2 en puissance = +3 dB · ×10 en puissance = +10 dB · ×10 en tension = +20 dB
+- Fréquence de coupure : là où le gain a baissé de 3 dB
+- Les gains en dB de plusieurs étages **s'additionnent**
+        """)
+        with st.expander("🧭 Méthode : résoudre une équation avec une exponentielle"):
+            st.markdown(r"""
+1. Isole l'exponentielle d'un côté : $e^{\dots} = \text{nombre}$.
+2. Vérifie que le nombre est positif (sinon, pas de solution).
+3. Applique $\ln$ des deux côtés.
+4. Résous l'équation qui reste.
+
+*Exemple type :* au bout de combien de temps un condensateur est-il chargé à 90 % ? Tu pars de $1 - e^{-t/\tau} = 0{,}9$.
+            """)
+    st.markdown("---")
+    st.info("Pour t'entraîner sur ces chapitres : **Grand Quiz** → domaine *Mathématiques* → choisis le chapitre.")
+
+
 HUBS_CONFIG = {
     "🏠 Mon Tableau de Bord & Profil": [
-        ("Vue d'Ensemble & Métriques", "🏠 Accueil & Dashboard"),
+        ("Vue d'Ensemble & Séance du jour", "🏠 Accueil & Dashboard"),
         ("Remédiation & Lacunes Ciblées", "🎯 Remédiation & Lacunes Ciblées (BTS Blanc)"),
         ("Planning BTS Blanc (6 Semaines)", "🗓️ Planning Révisions BTS Blanc (9-11 Déc)"),
         ("Suivi & Analyse des Scores", "📈 Analyse des Scores"),
@@ -1718,16 +4036,32 @@ HUBS_CONFIG = {
         ("Vidéothèque Recommandée", "📹 Vidéos de Cours"),
         ("Répertoire des Liens & Ressources", "🌐 Répertoire des Liens")
     ],
+    "🚀 Révision intelligente": [
+        ("🧠 Révision du jour (flashcards espacées)", "🧠 Révision du jour"),
+        ("📕 Carnet d'erreurs", "📕 Carnet d'erreurs"),
+        ("⏱️ Examen blanc chronométré (note sur 20)", "⏱️ Examen blanc chronométré"),
+        (f"📝 Grand Quiz ({len(QUESTION_POOL)} questions)", "📝 Grand Quiz d'Examen"),
+        (f"🇬🇧 Vocabulaire anglais BTS ({VOCAB_TOTAL} mots)", "🇬🇧 Vocabulaire anglais BTS"),
+        ("🧩 Décoder les énoncés (consignes en mots simples)", "🧩 Décoder les énoncés")
+    ],
     "📖 Grand Référentiel Rangé par Matière": [
         ("📶 Réseaux & Télécoms (OSI, IP, VLAN, Routage)", "📶 Réseaux & Télécoms"),
         ("🛡️ Master Cybersécurité (EBIOS, PKI, pfSense, VPN)", "🛡️ TP Cybersécurité, Gouvernance & pfSense"),
         ("🔒 Cybersécurité Fondamentale (OWASP & Cryptographie)", "🔒 Cybersécurité & Gouvernance"),
+        ("🛡️ Guides de Durcissement ANSSI (Hardening)", "🛡️ Guides de Durcissement (Hardening) ANSSI"),
         ("💻 Programmation & Dev (C++, Python, Algorithmique)", "💻 Programmation C++ & Python"),
         ("🖥️ Administration Système (Linux Debian & Active Directory)", "🖥️ Système Linux & Windows Server"),
         ("🔌 Électronique, Signaux & Bus (CAN, Modbus, I2C)", "🔌 Électronique & Bus Industriels"),
-        ("📐 Mathématiques Appliquées (Suites, Exp/Ln, Décibels)", "📐 Mathématiques Appliquées"),
-        ("🇬🇧 Anglais Technique & Datasheets Composants", "🇬🇧 Anglais Technique & Datasheets"),
+        ("📄 Fiches Savoir N°1 à 12 & Fiches Montage", "📄 Fiches Savoir & Fiches Montage"),
+        ("📄 Datasheets & Fiches Techniques (Composants)", "📄 Datasheets & Fiches Techniques (Composants)"),
+        ("📐 Maths : formulaire complet & méthodes guidées", "📐 Maths : formulaire complet"),
+        ("📊 Maths : Suites (cours, simulateur, exercices)", "📊 Mathématiques : Suites Arithmétiques & Géométriques"),
+        ("📈 Maths : Fonctions, Exp & Ln (cours, traceur, exercices)", "📈 Mathématiques : Fonctions, Exponentielle & Logarithme"),
+        ("📐 Maths : Résumé Suites & Décibels", "📐 Mathématiques Appliquées"),
+        ("🇬🇧 Anglais : Grammaire, Textes & Oral", "🇬🇧 Vocabulaire & Anglais Technique BTS"),
+        ("🇬🇧 Anglais Technique & Datasheets", "🇬🇧 Anglais Technique & Datasheets"),
         ("📖 Culture Générale & Expression (CGE 2025/2026)", "📖 Culture Générale & Expression (CGE)"),
+        ("📚 Encyclopédie des Cours & Mini-Tests", "📚 Encyclopédie des Cours & TPs"),
         ("🛠️ Guide Pratique d'Atelier Épreuve E5", "🛠️ Fiches Réussite Épreuve E5 (TP & Pratique)")
     ],
     "🧪 Le Laboratoire Pratique & Expérimentations": [
@@ -1741,11 +4075,9 @@ HUBS_CONFIG = {
         ("Qualification Logicielle & Tests E6 (Pytest)", "🧪 Qualification & Tests E6"),
         ("Modèles de Livrables & Dossier PVL E6", "📁 Modèles de Livrables & PVL Épreuve E6")
     ],
-    "🎯 Entraînement, Flashcards & Examens": [
-        ("🎯 Compétences, Réussites & Export IA", "🎯 Bilan Compétences & Diagnostic IA"),
-        ("105 Flashcards Actives Interactives", "🗂️ Flashcards Actives"),
+    "🎯 Flashcards, Annales & Programme": [
+        ("105 Flashcards (parcours libre)", "🗂️ Flashcards Actives"),
         ("Annales Officielles BTS (2024 à 2026)", "🎯 Annales BTS (2024 & 2025)"),
-        ("Grand Quiz d'Examen (70 Questions)", "📝 Grand Quiz d'Examen"),
         ("Programme Semaine par Semaine (BTS Blanc)", "🗓️ Révision Semaine par Semaine (BTS Blanc)"),
         ("Hub de Révision Totale (131 Sources)", "🎯 Révision Totale BTS Blanc (9-11 Déc)")
     ]
@@ -1795,11 +4127,15 @@ with st.sidebar:
                     st.session_state.current_user = nom_in.strip()
                     st.session_state.user_role = role_in
                     db = load_users()
-                    if nom_in not in db:
-                        db[nom_in] = {'role': role_in, 'progress': st.session_state.user_progress}
-                    else:
-                        st.session_state.user_progress = db[nom_in].get('progress', st.session_state.user_progress)
+                    _nm = nom_in.strip()
+                    db[_nm] = _repair_user_data(db.get(_nm), _nm, role_in)
+                    db[_nm]['role'] = role_in
+                    db[_nm]['last_login'] = datetime.now().strftime('%Y-%m-%d %H:%M')
+                    st.session_state.user_progress = db[_nm]
                     save_users(db)
+                    for _k in [k for k in st.session_state.keys() if str(k).startswith('v31_') and k != 'v31_seed']:
+                        del st.session_state[_k]
+                    st.session_state.pop('fc_mastered', None)
                     st.success(f"Bienvenue, {nom_in} ! Vos scores et accomplissements sont synchronisés.")
                     st.rerun()
         else:
@@ -1807,7 +4143,7 @@ with st.sidebar:
             st.download_button("Télécharger ma progression (JSON)", data=json.dumps(st.session_state.user_progress, indent=2), file_name=f"progression_ciel_{u_name}.json", mime="application/json")
     
     st.markdown("---")
-    hub_choisi = st.radio("🚀 ESPACE DE TRAVAIL (4 HUBS) :", list(HUBS_CONFIG.keys()), index=0)
+    hub_choisi = st.radio("🚀 ESPACE DE TRAVAIL :", list(HUBS_CONFIG.keys()), index=0)
     
     st.markdown("---")
     modules_du_hub = HUBS_CONFIG[hub_choisi]
@@ -1831,13 +4167,15 @@ if page == '🏠 Accueil & Dashboard':
     </div>
     """, unsafe_allow_html=True)
     
+    render_today_panel()
+
     col1, col2, col3, col4 = st.columns(4)
     with col1:
         st.markdown("<div class='stat-box'><div class='stat-number'>8</div><div class='stat-label'>Matières Structurées</div></div>", unsafe_allow_html=True)
     with col2:
-        st.markdown("<div class='stat-box'><div class='stat-number'>140+</div><div class='stat-label'>Questions de Cours & Quiz</div></div>", unsafe_allow_html=True)
+        st.markdown(f"<div class='stat-box'><div class='stat-number'>{len(QUESTION_POOL)}</div><div class='stat-label'>Questions de Cours & Quiz</div></div>", unsafe_allow_html=True)
     with col3:
-        st.markdown("<div class='stat-box'><div class='stat-number'>5</div><div class='stat-label'>Sandboxes Pratiques Réelles</div></div>", unsafe_allow_html=True)
+        st.markdown("<div class='stat-box'><div class='stat-number'>742</div><div class='stat-label'>Mots d'anglais à maîtriser</div></div>", unsafe_allow_html=True)
     with col4:
         st.markdown("<div class='stat-box'><div class='stat-number'>105</div><div class='stat-label'>Flashcards Actives 3D</div></div>", unsafe_allow_html=True)
     
@@ -3715,9 +6053,9 @@ elif page == '📚 Encyclopédie des Cours & TPs':
                 st.markdown(chap_contenu)
                 if chap_titre in MINI_QUIZ_COURS:
                     st.markdown('---')
-                    mq = MINI_QUIZ_COURS[chap_titre]
+                    mq = random.Random(f"{_session_seed()}{chap_titre}").choice(MINI_QUIZ_COURS[chap_titre])
                     st.markdown(f'**⚡ Mini-Test de Validation :** *{mq["q"]}*')
-                    choix_mq = st.radio('Votre réponse :', mq["options"], key=f'mq_{chap_titre}')
+                    choix_mq = st.radio('Votre réponse :', mq["options"], index=None, key=f'mq_{chap_titre}')
                     if st.button('Valider la réponse', key=f'btn_mq_{chap_titre}'):
                         if choix_mq == mq['rep']:
                             st.success(f'🎉 **Exact !** {mq["expl"]}')
@@ -4007,14 +6345,11 @@ elif page == '🎯 Annales BTS (2024 & 2025)':
 
 
 
-elif page == '🎯 Bilan Compétences & Diagnostic IA':
-    render_competencies_and_ai_diagnostic()
-
 elif page == '🗂️ Flashcards Actives':
     st.markdown("<div class='hero-title'>🗂️ Flashcards Actives & Auto-Évaluation</div>", unsafe_allow_html=True)
     st.markdown("<p style='color:#64748b;'>Stimulez votre mémoire active avec 105 cartes mémoire réflexes couvrant tout le programme du BTS CIEL (avec conseils prof, redirections de cours et vidéos YouTube)</p>", unsafe_allow_html=True)
     if 'fc_mastered' not in st.session_state:
-        st.session_state.fc_mastered = set()
+        st.session_state.fc_mastered = set(_ud_get().get('fc_mastered', []))
     yt_prefix = 'https://www.youtube.com/watch?v='
     col_f1, col_f2, col_f3 = st.columns([1.5, 1.5, 1])
     with col_f1:
@@ -4067,11 +6402,21 @@ elif page == '🗂️ Flashcards Actives':
         with bcol2:
             if st.button('✅ Maîtrisée', use_container_width=True):
                 st.session_state.fc_mastered.add(cur_fc['id'])
+                _d_fc = _ud_get()
+                _d_fc['fc_mastered'] = sorted(st.session_state.fc_mastered)
+                _d_fc['srs'][str(cur_fc['id'])] = [4, _iso(_today() + timedelta(days=LEITNER_JOURS[4]))]
+                _mark_day(_d_fc)
+                update_active_user_data(_d_fc)
                 st.success('Carte ajoutée aux acquis !')
                 st.rerun()
         with bcol3:
             if st.button('❌ À Revoir', use_container_width=True):
                 st.session_state.fc_mastered.discard(cur_fc['id'])
+                _d_fc = _ud_get()
+                _d_fc['fc_mastered'] = sorted(st.session_state.fc_mastered)
+                _d_fc['srs'][str(cur_fc['id'])] = [1, _iso(_today())]
+                _mark_day(_d_fc)
+                update_active_user_data(_d_fc)
                 st.warning('Carte conservée dans la liste de révision.')
                 st.rerun()
         with bcol4:
@@ -4122,99 +6467,7 @@ elif page == '💻 Sandboxes & Terminaux Pratiques':
 
 
 elif page == "📝 Grand Quiz d'Examen":
-    st.markdown("<div class='hero-title'>📝 Simulateur de Questionnaires Personnalisés & Marathons</div>", unsafe_allow_html=True)
-    st.markdown("<p style='color:#64748b;'>Configurez votre session de révision : du quiz standard de 10 questions au méga-marathon de 40 questions !</p>", unsafe_allow_html=True)
-    st.markdown("<div class='ciel-card'>", unsafe_allow_html=True)
-    col_cfg1, col_cfg2, col_cfg3 = st.columns([1.5, 1.5, 1])
-    with col_cfg1:
-        quiz_type = st.selectbox('Format du questionnaire :', ['Standard (10 questions)', 'Moyen (20 questions)', 'Marathon (30 questions)', 'Méga-Marathon (40 questions)', 'Intégral (Toutes les questions)'])
-    with col_cfg2:
-        selected_mod_filter = st.selectbox('Filtrer par domaine technique :', ['Tous les domaines', '📶 Réseaux & Télécoms', '🔒 Cybersécurité', '💻 Programmation / Dev', '🖥️ Administration Système', '🔌 Électronique & IoT', '📐 Modélisation UML & SysML'])
-    with col_cfg3:
-        st.markdown("<div style='padding-top:24px;'></div>", unsafe_allow_html=True)
-        if st.button('🚀 Générer le Questionnaire', use_container_width=True, type='primary') or 'active_quiz' not in st.session_state:
-            count_map = {'Standard (10 questions)': 10, 'Moyen (20 questions)': 20, 'Marathon (30 questions)': 30, 'Méga-Marathon (40 questions)': 40, 'Intégral (Toutes les questions)': len(GRAND_QUIZ_DATA)}
-            limit = count_map.get(quiz_type, 10)
-            pool = GRAND_QUIZ_DATA
-            if selected_mod_filter != 'Tous les domaines':
-                pool = [q for q in GRAND_QUIZ_DATA if q['mod'] == selected_mod_filter]
-            sample_size = min(limit, len(pool))
-            if sample_size > 0:
-                st.session_state.active_quiz = random.sample(pool, sample_size)
-            else:
-                st.session_state.active_quiz = []
-            st.session_state.quiz_answers = {}
-            st.session_state.quiz_submitted = False
-            st.rerun()
-    st.markdown('</div>', unsafe_allow_html=True)
-    if not st.session_state.get('active_quiz', []):
-        st.warning('Aucune question ne correspond à vos critères de filtrage. Veuillez sélectionner un autre domaine ou générer à nouveau.')
-    else:
-        active_q = st.session_state.active_quiz
-        st.info(f"📋 **Questionnaire actif** : {len(active_q)} questions générées (Domaine : *{selected_mod_filter}*). Répondez ci-dessous puis cliquez sur 'Soumettre mon questionnaire'.")
-        scores = {}
-        for idx, q_item in enumerate(active_q):
-            st.markdown(f'### Q{idx + 1} : {q_item["q"]}')
-            st.markdown(f'**Domaine :** `{q_item["mod"]}` | **Chapitre :** *{q_item["chap"]}*')
-            key_ans = f'active_q_ans_{idx}'
-            user_sel = st.radio('Sélectionnez votre réponse :', q_item['options'], key=key_ans, disabled=st.session_state.quiz_submitted)
-            scores[idx] = (user_sel, q_item['rep'], q_item['expl'], q_item['mod'], q_item['chap'])
-            st.markdown("<hr style='border: 1px dashed #e2e8f0; margin: 15px 0;'/>", unsafe_allow_html=True)
-        if not st.session_state.quiz_submitted:
-            if st.button('📥 Soumettre mon questionnaire', use_container_width=True, type='primary'):
-                st.session_state.quiz_submitted = True
-                st.rerun()
-        if st.session_state.quiz_submitted:
-            total_correct = 0
-            wrong_answers = []
-            details_stats = {'Réseaux': 0, 'Cybersécurité': 0, 'Prog': 0, 'SysAdmin': 0, 'Elec': 0, 'UML': 0}
-            for idx, (user_sel, rep, expl, m_ref, c_ref) in scores.items():
-                k_mod = 'Réseaux'
-                if 'Cyber' in m_ref:
-                    k_mod = 'Cybersécurité'
-                elif 'Prog' in m_ref:
-                    k_mod = 'Prog'
-                elif 'SysAdmin' in m_ref:
-                    k_mod = 'SysAdmin'
-                elif 'Élec' in m_ref:
-                    k_mod = 'Elec'
-                elif 'Modélisation' in m_ref:
-                    k_mod = 'UML'
-                if user_sel == rep:
-                    total_correct += 1
-                    details_stats[k_mod] += 1
-                else:
-                    wrong_answers.append({'num': idx + 1, 'mod': m_ref, 'chap': c_ref, 'user_sel': user_sel, 'rep': rep, 'expl': expl})
-            save_score(total_correct, len(active_q), details_stats)
-            st.markdown('## 📊 Votre Bilan du Questionnaire')
-            pct = total_correct / len(active_q)
-            st.progress(pct)
-            st.markdown(f"<div style='font-size: 1.5rem; font-weight: 700; color: #1e3a8a;'>Votre score final : {total_correct} / {len(active_q)} ({pct * 100:.1f}%)</div>", unsafe_allow_html=True)
-            if pct >= 0.8:
-                st.success("🏆 **Niveau d'Excellence atteint !** Vos connaissances techniques sont extrêmement solides. Prêt pour l'examen final !")
-            elif pct >= 0.5:
-                st.info('👍 **Bon niveau global !** La plupart des concepts sont acquis. Revoyez vos erreurs pour viser la perfection.')
-            else:
-                st.warning('⚠️ **Niveau fragile.** Prenez le temps de bien relire vos fiches de cours ci-dessous pour combler vos lacunes.')
-            if wrong_answers:
-                st.markdown('---')
-                st.markdown('### 🔄 Pont de Correction Automatique')
-                st.write('Le système a identifié des erreurs. Voici les explications et les fiches de cours correspondantes pour vous corriger :')
-                for w in wrong_answers:
-                    st.error(f'**Question {w["num"]} ({w["mod"]} - {w["chap"]})**')
-                    st.write(f'Votre choix : *{w["user_sel"]}* | Bonne réponse : **{w["rep"]}**')
-                    st.info(f"💡 *Explication de l'expert : {w['expl']}*")
-                    try:
-                        c_txt = COURS_BASE[w['mod']][w['chap']]
-                        with st.expander(f'📖 Relire la fiche de cours : {w["chap"]}', expanded=True):
-                            st.markdown(c_txt)
-                    except:
-                        pass
-            if st.button('🔄 Lancer un nouveau Questionnaire', use_container_width=True):
-                st.session_state.quiz_submitted = False
-                st.session_state.active_quiz = []
-                st.rerun()
-
+    render_page_grand_quiz()
 
 
 elif page == '📈 Analyse des Scores':
@@ -4272,10 +6525,11 @@ elif page == '📋 Planning de Projet E6 (Gantt)':
             plt.title('Planning de Gantt du Projet E6', fontsize=12, fontweight='bold', color='#1e3a8a')
             plt.grid(axis='x', linestyle='--', alpha=0.5)
             plt.tight_layout()
-            g_path = '/workspace/scratch/gantt_chart_v7.png'
-            plt.savefig(g_path, dpi=150)
+            import io as _io
+            _gantt_buf = _io.BytesIO()
+            plt.savefig(_gantt_buf, format='png', dpi=150)
             plt.close()
-            st.image(g_path)
+            st.image(_gantt_buf.getvalue())
 
 
 
@@ -5247,3 +7501,21 @@ int main() {
             else:
                 st.warning(f"⚠️ **Score : {score_rem} / 6.** Prenez le temps de revoir les fiches et visionnez les vidéos recommandées.")
 
+
+elif page == '🧠 Révision du jour':
+    render_page_revision_du_jour()
+
+elif page == "📕 Carnet d'erreurs":
+    render_page_carnet_erreurs()
+
+elif page == '⏱️ Examen blanc chronométré':
+    render_page_examen_blanc()
+
+elif page == '🇬🇧 Vocabulaire anglais BTS':
+    render_page_vocabulaire()
+
+elif page == '🧩 Décoder les énoncés':
+    render_page_decoder_enonces()
+
+elif page == '📐 Maths : formulaire complet':
+    render_page_formulaire_maths()
