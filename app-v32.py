@@ -6,291 +6,237 @@ import os
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 from datetime import datetime, timedelta
-st.set_page_config(page_title='BTS CIEL Pro Studio v31', page_icon='⚡', layout='wide', initial_sidebar_state='expanded')
+st.set_page_config(page_title='CIEL Studio', page_icon='🔴', layout='wide', initial_sidebar_state='expanded')
 import matplotlib
 matplotlib.use('Agg')
-st.markdown(r'''/* Modern Clean Tech CSS for BTS CIEL Studio Pro */
-<style>
-    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
-    
-    :root {
-        --bg-main: #050811;
-        --card-bg: rgba(13, 19, 36, 0.75);
-        --card-border: rgba(255, 255, 255, 0.08);
-        --card-border-hover: rgba(56, 189, 248, 0.4);
-        --accent-glow: radial-gradient(circle at 50% 0%, rgba(29, 78, 216, 0.25), transparent 70%);
-        --text-primary: #f8fafc;
-        --text-secondary: #94a3b8;
-        --text-muted: #64748b;
-        --brand-blue: #38bdf8;
-        --brand-orange: #fb923c;
-        --brand-emerald: #34d399;
-        --brand-purple: #c084fc;
-    }
-    
-    html, body, [class*="css"] {
-        font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif !important;
-        background-color: #050811 !important;
-        color: #f8fafc !important;
-    }
-    code, pre {
-        font-family: 'JetBrains Mono', monospace !important;
-    }
-    
-    /* Global scrollbar */
-    ::-webkit-scrollbar {
-        width: 8px;
-        height: 8px;
-    }
-    ::-webkit-scrollbar-track {
-        background: #050811;
-    }
-    ::-webkit-scrollbar-thumb {
-        background: #1e293b;
-        border-radius: 4px;
-    }
-    ::-webkit-scrollbar-thumb:hover {
-        background: #334155;
-    }
+# ══════════ DESIGN DU SITE : tout le style est ici ══════════
+st.markdown(r'''<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
-    /* Container constraints */
-    .block-container {
-        padding-top: 1.5rem !important;
-        padding-bottom: 3.5rem !important;
-        max-width: 1250px !important;
-    }
-    
-    /* Header hero with subtle noise & Monopo-like warm-cold gradient */
-    .hero-container {
-        position: relative;
-        overflow: hidden;
-        background: linear-gradient(135deg, #090e1d 0%, #0d1527 45%, #181d33 80%, #201724 100%) !important;
-        border: 1px solid rgba(255, 255, 255, 0.12) !important;
-        border-radius: 20px !important;
-        padding: 32px 36px !important;
-        margin-bottom: 24px !important;
-        box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
-    }
-    .hero-container::before {
-        content: "";
-        position: absolute;
-        top: -50%;
-        right: -10%;
-        width: 500px;
-        height: 350px;
-        background: radial-gradient(circle, rgba(251, 146, 60, 0.15) 0%, rgba(56, 189, 248, 0.12) 50%, transparent 80%);
-        filter: blur(50px);
-        pointer-events: none;
-    }
-    .hero-title {
-        font-size: 2.2rem !important;
-        font-weight: 800 !important;
-        letter-spacing: -0.03em !important;
-        background: linear-gradient(110deg, #ffffff 0%, #cbd5e1 50%, #93c5fd 100%) !important;
-        -webkit-background-clip: text !important;
-        -webkit-text-fill-color: transparent !important;
-        margin-bottom: 6px !important;
-    }
-    .hero-subtitle {
-        font-size: 1.05rem !important;
-        color: #94a3b8 !important;
-        font-weight: 400 !important;
-        line-height: 1.6 !important;
-        max-width: 850px !important;
-    }
-    
-    /* Badges */
-    .badge {
-        display: inline-flex !important;
-        align-items: center !important;
-        padding: 4px 12px !important;
-        border-radius: 9999px !important;
-        font-size: 0.75rem !important;
-        font-weight: 700 !important;
-        letter-spacing: 0.05em !important;
-        margin-right: 8px !important;
-        margin-top: 6px !important;
-        backdrop-filter: blur(8px);
-    }
-    .badge-blue { background: rgba(56, 189, 248, 0.12) !important; color: #38bdf8 !important; border: 1px solid rgba(56, 189, 248, 0.3) !important; }
-    .badge-emerald { background: rgba(52, 211, 153, 0.12) !important; color: #34d399 !important; border: 1px solid rgba(52, 211, 153, 0.3) !important; }
-    .badge-purple { background: rgba(192, 132, 252, 0.12) !important; color: #c084fc !important; border: 1px solid rgba(192, 132, 252, 0.3) !important; }
-    .badge-amber { background: rgba(251, 146, 60, 0.12) !important; color: #fb923c !important; border: 1px solid rgba(251, 146, 60, 0.3) !important; }
-    .badge-rose { background: rgba(244, 63, 94, 0.12) !important; color: #f43f5e !important; border: 1px solid rgba(244, 63, 94, 0.3) !important; }
-    
-    /* Cards - Premium Dark Glassmorphism */
-    .ciel-card {
-        background: rgba(13, 20, 38, 0.7) !important;
-        color: #f1f5f9 !important;
-        border: 1px solid rgba(255, 255, 255, 0.08) !important;
-        border-radius: 16px !important;
-        padding: 24px !important;
-        margin-bottom: 20px !important;
-        box-shadow: 0 8px 24px -6px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.06) !important;
-        backdrop-filter: blur(12px) !important;
-        transition: all 0.25s ease !important;
-    }
-    .ciel-card:hover {
-        border-color: rgba(56, 189, 248, 0.35) !important;
-        transform: translateY(-2px);
-        box-shadow: 0 12px 30px -8px rgba(56, 189, 248, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
-    }
-    .ciel-card h3 {
-        color: #f8fafc !important;
-        font-weight: 700 !important;
-        font-size: 1.25rem !important;
-        margin-bottom: 12px !important;
-    }
-    .ciel-card h4 {
-        color: #38bdf8 !important;
-        font-weight: 600 !important;
-        font-size: 1.05rem !important;
-        margin-bottom: 10px !important;
-    }
-    .ciel-card p, .ciel-card li, .ciel-card ul, .ciel-card span {
-        color: #cbd5e1 !important;
-        line-height: 1.7 !important;
-    }
-    
-    /* User Profile Card */
-    .user-profile-header {
-        background: linear-gradient(135deg, rgba(30, 41, 59, 0.8) 0%, rgba(15, 23, 42, 0.9) 100%) !important;
-        border: 1px solid rgba(255, 255, 255, 0.12) !important;
-        border-radius: 16px !important;
-        padding: 16px 20px !important;
-        margin-bottom: 20px !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: space-between !important;
-        box-shadow: 0 4px 16px rgba(0,0,0,0.3) !important;
-    }
-    
-    /* Interactive Terminal & Lab Simulator UI */
-    .terminal-header {
-        background: #090d16 !important;
-        color: #38bdf8 !important;
-        padding: 12px 18px !important;
-        border-top-left-radius: 14px !important;
-        border-top-right-radius: 14px !important;
-        font-family: 'JetBrains Mono', monospace !important;
-        font-size: 0.85rem !important;
-        font-weight: 600 !important;
-        display: flex !important;
-        align-items: center !important;
-        gap: 10px !important;
-        border: 1px solid rgba(255, 255, 255, 0.1) !important;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
-    }
-    .terminal-body {
-        background: #03060d !important;
-        color: #e2e8f0 !important;
-        padding: 20px !important;
-        border-bottom-left-radius: 14px !important;
-        border-bottom-right-radius: 14px !important;
-        font-family: 'JetBrains Mono', monospace !important;
-        border: 1px solid rgba(255, 255, 255, 0.1) !important;
-        border-top: none !important;
-        margin-bottom: 18px !important;
-        font-size: 0.9rem !important;
-        line-height: 1.65 !important;
-        box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.6) !important;
-    }
-    .terminal-dot {
-        width: 10px !important;
-        height: 10px !important;
-        border-radius: 50% !important;
-        display: inline-block !important;
-    }
-    .dot-red { background: #ef4444 !important; box-shadow: 0 0 8px rgba(239, 68, 68, 0.6); }
-    .dot-yellow { background: #f59e0b !important; box-shadow: 0 0 8px rgba(245, 158, 11, 0.6); }
-    .dot-green { background: #10b981 !important; box-shadow: 0 0 8px rgba(16, 185, 129, 0.6); }
-    
-    /* Stats & Metric Tiles */
-    .stat-box {
-        background: rgba(15, 23, 42, 0.7) !important;
-        border: 1px solid rgba(255, 255, 255, 0.08) !important;
-        border-radius: 14px !important;
-        padding: 20px 16px !important;
-        text-align: center !important;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.2) !important;
-    }
-    .stat-number {
-        font-size: 2rem !important;
-        font-weight: 800 !important;
-        background: linear-gradient(135deg, #38bdf8 0%, #818cf8 100%) !important;
-        -webkit-background-clip: text !important;
-        -webkit-text-fill-color: transparent !important;
-    }
-    .stat-label {
-        font-size: 0.85rem !important;
-        color: #94a3b8 !important;
-        font-weight: 600 !important;
-        margin-top: 4px !important;
-    }
-    
-    /* Flashcard UI */
-    .flashcard-box-modern {
-        background: linear-gradient(145deg, #0d1527 0%, #111b33 100%) !important;
-        border: 1px solid rgba(56, 189, 248, 0.25) !important;
-        border-radius: 20px !important;
-        padding: 36px 30px !important;
-        text-align: center !important;
-        min-height: 220px !important;
-        display: flex !important;
-        flex-direction: column !important;
-        justify-content: center !important;
-        align-items: center !important;
-        box-shadow: 0 16px 36px -10px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
-        margin: 18px 0 !important;
-        color: #f8fafc !important;
-    }
-    .flashcard-q-text {
-        font-size: 1.3rem !important;
-        font-weight: 700 !important;
-        color: #ffffff !important;
-        line-height: 1.55 !important;
-    }
-    .flashcard-a-box {
-        background: rgba(6, 78, 59, 0.25) !important;
-        border: 1px solid rgba(52, 211, 153, 0.4) !important;
-        border-radius: 14px !important;
-        padding: 22px !important;
-        margin-top: 18px !important;
-        color: #d1fae5 !important;
-        font-size: 1.05rem !important;
-        text-align: left !important;
-        line-height: 1.7 !important;
-        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
-    }
-    .flashcard-a-box p, .flashcard-a-box span, .flashcard-a-box div, .flashcard-a-box b {
-        color: #d1fae5 !important;
-    }
-    
-    /* Streamlit tabs */
-    .stTabs [data-baseweb="tab-list"] {
-        gap: 8px !important;
-        background: rgba(15, 23, 42, 0.8) !important;
-        padding: 6px !important;
-        border-radius: 14px !important;
-        border: 1px solid rgba(255, 255, 255, 0.08) !important;
-        margin-bottom: 24px !important;
-    }
-    .stTabs [data-baseweb="tab"] {
-        border-radius: 10px !important;
-        padding: 10px 18px !important;
-        font-weight: 700 !important;
-        font-size: 0.95rem !important;
-        color: #94a3b8 !important;
-        border: none !important;
-        background: transparent !important;
-        transition: all 0.2s ease !important;
-    }
-    .stTabs [aria-selected="true"] {
-        background: #1e293b !important;
-        color: #38bdf8 !important;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
-        border: 1px solid rgba(56, 189, 248, 0.3) !important;
-    }
+/* ───────── Palette (change une couleur ici, elle change partout) ───────── */
+:root {
+    --bg: #000000;
+    --surface: #0b0b0d;
+    --surface-2: #131316;
+    --line: rgba(255, 255, 255, 0.08);
+    --line-strong: rgba(255, 255, 255, 0.16);
+    --text: #f5f5f7;
+    --muted: #8e8e96;
+    --faint: #5c5c63;
+    --red: #ff453a;
+    --blue: #3d6bff;
+    --yellow: #ffcc33;
+    --green: #30d158;
+    --grad: linear-gradient(90deg, #ff453a 0%, #3d6bff 100%);
+    --radius: 14px;
+}
+
+/* ───────── Base ───────── */
+html, body, .stApp, [class*="css"], .stMarkdown, p, li, label, input, textarea, button, select {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+}
+.stApp { background: var(--bg) !important; color: var(--text) !important; }
+code, pre, .terminal-body { font-family: 'JetBrains Mono', monospace !important; }
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: #222226; border-radius: 4px; }
+::selection { background: rgba(61, 107, 255, 0.35); }
+
+header[data-testid="stHeader"] { background: transparent !important; }
+[data-testid="stDecoration"] { display: none !important; }
+.block-container { padding-top: 2.6rem !important; padding-bottom: 4rem !important; max-width: 1180px !important; }
+
+h1, h2, h3, h4 { color: var(--text) !important; letter-spacing: -0.03em; font-weight: 800 !important; }
+h2 { font-size: 1.7rem !important; }
+h3 { font-size: 1.3rem !important; }
+p, li { color: #d4d4d8; line-height: 1.65; }
+a { color: var(--blue) !important; text-decoration: none !important; }
+a:hover { text-decoration: underline !important; }
+hr { border-color: var(--line) !important; margin: 1.6rem 0 !important; }
+strong, b { color: var(--text); }
+
+/* ───────── Barre latérale ───────── */
+[data-testid="stSidebar"] { background: #050506 !important; border-right: 1px solid var(--line) !important; }
+[data-testid="stSidebar"] .block-container, [data-testid="stSidebarContent"] { padding-top: 1.2rem !important; }
+[data-testid="stSidebar"] hr { margin: 0.9rem 0 !important; }
+
+.nav-brand { display: flex; align-items: center; gap: 10px; margin: 0 0 18px 2px; }
+.nav-brand .dot { width: 22px; height: 22px; border-radius: 50%; background: var(--red);
+    display: flex; align-items: center; justify-content: center; color: #fff; font-size: 0.68rem; font-weight: 900; }
+.nav-brand .name { font-weight: 800; font-size: 1rem; letter-spacing: -0.02em; color: var(--text); }
+.nav-brand .ver { margin-left: auto; font-size: 0.7rem; color: var(--faint); font-weight: 600; }
+
+.nav-user { border: 1px solid var(--line); border-radius: var(--radius); padding: 12px 14px; margin-bottom: 14px; background: var(--surface); }
+.nav-user .who { font-weight: 700; color: var(--text); font-size: 0.95rem; }
+.nav-user .meta { color: var(--muted); font-size: 0.78rem; margin-top: 2px; }
+.nav-user .xp { display: flex; justify-content: space-between; align-items: baseline; margin-top: 10px; }
+.nav-user .xp b { color: var(--text); font-size: 1.05rem; }
+.nav-user .xp span { color: var(--muted); font-size: 0.75rem; }
+.nav-user .bar { height: 3px; background: var(--surface-2); border-radius: 3px; margin-top: 8px; overflow: hidden; }
+.nav-user .bar i { display: block; height: 100%; background: var(--grad); }
+
+.nav-section { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em;
+    color: var(--faint); margin: 16px 0 4px 4px; }
+
+/* Les liens du menu : des boutons sans cadre */
+[data-testid="stSidebar"] .stButton { margin-bottom: -10px; }
+[data-testid="stSidebar"] .stButton > button {
+    width: 100%; justify-content: flex-start !important; text-align: left !important;
+    background: transparent !important; border: none !important; box-shadow: none !important;
+    color: var(--muted) !important; font-weight: 500 !important; font-size: 0.9rem !important;
+    padding: 6px 10px 6px 14px !important; min-height: 34px !important; border-radius: 8px !important;
+    position: relative; transition: color .15s, background .15s;
+}
+[data-testid="stSidebar"] .stButton > button p { text-align: left !important; font-size: 0.9rem !important; }
+[data-testid="stSidebar"] .stButton > button:hover { color: var(--text) !important; background: var(--surface-2) !important; }
+[data-testid="stSidebar"] .stButton > button[kind="primary"],
+[data-testid="stSidebar"] [data-testid="stBaseButton-primary"] {
+    color: var(--text) !important; background: var(--surface-2) !important; font-weight: 700 !important;
+}
+[data-testid="stSidebar"] .stButton > button[kind="primary"]::before,
+[data-testid="stSidebar"] [data-testid="stBaseButton-primary"]::before {
+    content: ""; position: absolute; left: 0; top: 9px; bottom: 9px; width: 3px; border-radius: 3px; background: var(--red);
+}
+[data-testid="stSidebar"] [data-testid="stExpander"] details { border: none !important; background: transparent !important; }
+[data-testid="stSidebar"] [data-testid="stExpander"] summary { padding: 6px 4px !important; }
+[data-testid="stSidebar"] [data-testid="stExpander"] summary p { font-size: 0.68rem !important; font-weight: 700 !important;
+    text-transform: uppercase; letter-spacing: 0.12em; color: var(--faint) !important; }
+[data-testid="stSidebar"] [data-testid="stExpander"] summary:hover p { color: var(--text) !important; }
+
+/* Fil d'Ariane en haut de chaque page */
+.crumb { font-size: 0.78rem; color: var(--faint); margin-bottom: 6px; letter-spacing: 0.01em; }
+.crumb b { color: var(--muted); font-weight: 600; }
+
+/* ───────── Accueil ───────── */
+.home-hero { text-align: center; padding: 40px 10px 34px 10px; position: relative; }
+.home-hero .pill { display: inline-block; font-size: 0.75rem; font-weight: 600; color: var(--muted);
+    border: 1px solid var(--line-strong); border-radius: 999px; padding: 5px 12px; margin-bottom: 22px; }
+.home-hero h1 { font-size: clamp(2.6rem, 6vw, 4.6rem) !important; font-weight: 900 !important; letter-spacing: -0.055em !important;
+    line-height: 1.02 !important; margin: 0 !important; padding: 0 !important; }
+.home-hero h1 .tag { display: inline-block; vertical-align: top; font-size: 0.8rem; font-weight: 800; letter-spacing: 0;
+    background: var(--yellow); color: #000; border-radius: 6px; padding: 2px 7px; margin: 0.9rem 0 0 4px; transform: rotate(-4deg); }
+.home-hero .sub { color: var(--muted); font-size: clamp(1rem, 2vw, 1.3rem); font-weight: 500; margin-top: 16px; line-height: 1.45; }
+.home-hero .glow { position: absolute; left: 50%; top: 55%; width: 520px; height: 220px; transform: translate(-50%, -50%);
+    background: radial-gradient(closest-side, rgba(255,69,58,0.18), rgba(61,107,255,0.14), transparent); filter: blur(30px); z-index: -1; }
+
+.kpis { display: grid; grid-template-columns: repeat(5, 1fr); gap: 1px; background: var(--line);
+    border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; margin: 6px 0 28px 0; }
+.kpi { background: var(--surface); padding: 18px 16px; }
+.kpi .v { font-size: 1.7rem; font-weight: 800; letter-spacing: -0.04em; color: var(--text); }
+.kpi .l { font-size: 0.78rem; color: var(--muted); margin-top: 2px; }
+.kpi.hot .v { color: var(--red); }
+
+.sec-title { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.14em; color: var(--faint); margin: 30px 0 12px 2px; }
+
+.action { border: 1px solid var(--line); background: var(--surface); border-radius: var(--radius); padding: 18px 18px 6px 18px; min-height: 128px;
+    transition: border-color .2s; }
+.action:hover { border-color: var(--line-strong); }
+.action .k { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; }
+.action .t { font-size: 1.15rem; font-weight: 800; letter-spacing: -0.02em; color: var(--text); margin-top: 6px; }
+.action .d { font-size: 0.86rem; color: var(--muted); margin-top: 4px; line-height: 1.45; }
+
+.mastery-row { display: grid; grid-template-columns: 210px 1fr 48px; align-items: center; gap: 14px; padding: 9px 0; border-bottom: 1px solid var(--line); }
+.mastery-row .n { font-size: 0.9rem; color: #d4d4d8; }
+.mastery-row .b { height: 6px; background: var(--surface-2); border-radius: 6px; overflow: hidden; }
+.mastery-row .b i { display: block; height: 100%; background: var(--grad); border-radius: 6px; }
+.mastery-row .p { text-align: right; font-size: 0.85rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+/* ───────── Éléments des pages existantes ───────── */
+.hero-container { background: transparent !important; border: none !important; border-bottom: 1px solid var(--line) !important;
+    border-radius: 0 !important; padding: 8px 0 22px 0 !important; margin-bottom: 22px !important; box-shadow: none !important; }
+.hero-container::before { display: none !important; }
+.hero-title { font-size: clamp(1.8rem, 3.6vw, 2.6rem) !important; font-weight: 900 !important; letter-spacing: -0.045em !important;
+    color: var(--text) !important; line-height: 1.08 !important; margin: 0 0 8px 0 !important; }
+.hero-subtitle { color: var(--muted) !important; font-size: 1.02rem !important; }
+.hero-title + p, div:has(> .hero-title) + div p { color: var(--muted) !important; }
+
+.badge { display: inline-block; font-size: 0.72rem; font-weight: 600; border-radius: 999px; padding: 3px 10px; margin: 2px 4px 2px 0;
+    background: transparent !important; border: 1px solid var(--line-strong) !important; color: var(--muted) !important; }
+
+.ciel-card, .card-header, .user-profile-header, .flashcard-box-modern {
+    background: var(--surface) !important; border: 1px solid var(--line) !important; border-radius: var(--radius) !important;
+    padding: 20px 22px !important; margin-bottom: 16px !important; box-shadow: none !important; backdrop-filter: none !important;
+}
+.ciel-card:hover { border-color: var(--line-strong) !important; transform: none !important; }
+.ciel-card h3, .ciel-card h4, .card-header h3 { color: var(--text) !important; margin-top: 0 !important; }
+.ciel-card p, .ciel-card li, .ciel-card span, .ciel-card td { color: #c7c7cc !important; }
+.ciel-card b, .ciel-card strong { color: var(--text) !important; }
+
+.stat-box { background: var(--surface) !important; border: 1px solid var(--line) !important; border-radius: var(--radius) !important;
+    padding: 18px 16px !important; text-align: left !important; box-shadow: none !important; }
+.stat-number { font-size: 1.8rem !important; font-weight: 800 !important; letter-spacing: -0.04em; color: var(--text) !important;
+    background: none !important; -webkit-text-fill-color: var(--text) !important; }
+.stat-label { font-size: 0.78rem !important; color: var(--muted) !important; text-transform: none !important; letter-spacing: 0 !important; font-weight: 500 !important; }
+
+.terminal-header { background: var(--surface-2) !important; border: 1px solid var(--line) !important; border-bottom: none !important;
+    border-radius: 10px 10px 0 0 !important; padding: 9px 14px !important; }
+.terminal-body { background: #050506 !important; border: 1px solid var(--line) !important; border-radius: 0 0 10px 10px !important; color: #d4d4d8 !important; }
+.dot-red { background: var(--red) !important; box-shadow: none !important; }
+.dot-yellow { background: var(--yellow) !important; box-shadow: none !important; }
+.dot-green { background: var(--green) !important; box-shadow: none !important; }
+.flashcard-q-text { color: var(--text) !important; }
+.flashcard-a-box { background: var(--surface-2) !important; border: 1px solid var(--line) !important; border-radius: 10px !important; }
+.flashcard-a-box p, .flashcard-a-box span, .flashcard-a-box div, .flashcard-a-box b { color: #d4d4d8 !important; }
+
+/* ───────── Composants Streamlit ───────── */
+.stTabs [data-baseweb="tab-list"] { gap: 22px; border-bottom: 1px solid var(--line); background: transparent !important; padding: 0 !important; }
+.stTabs [data-baseweb="tab"] { background: transparent !important; border: none !important; padding: 10px 0 !important; height: auto !important;
+    color: var(--muted) !important; font-weight: 600 !important; }
+.stTabs [data-baseweb="tab"] p { font-size: 0.92rem !important; }
+.stTabs [aria-selected="true"] { color: var(--text) !important; background: transparent !important; }
+.stTabs [data-baseweb="tab-highlight"] { background: var(--red) !important; height: 2px !important; }
+.stTabs [data-baseweb="tab-border"] { display: none; }
+
+.main .stButton > button, [data-testid="stMain"] .stButton > button, .stFormSubmitButton > button, .stDownloadButton > button, .stLinkButton > a {
+    border-radius: 999px !important; font-weight: 600 !important; border: 1px solid var(--line-strong) !important;
+    background: transparent !important; color: var(--text) !important; box-shadow: none !important; transition: all .15s;
+}
+.main .stButton > button:hover, [data-testid="stMain"] .stButton > button:hover, .stFormSubmitButton > button:hover, .stDownloadButton > button:hover, .stLinkButton > a:hover {
+    border-color: var(--text) !important; background: var(--surface-2) !important;
+}
+[data-testid="stMain"] .stButton > button[kind="primary"], .stFormSubmitButton > button[kind="primary"], .stLinkButton > a[kind="primary"],
+[data-testid="stMain"] [data-testid="stBaseButton-primary"], [data-testid="stBaseButton-primaryFormSubmit"] {
+    background: var(--text) !important; color: #000 !important; border-color: var(--text) !important;
+}
+[data-testid="stMain"] .stButton > button[kind="primary"] p, .stFormSubmitButton > button[kind="primary"] p,
+[data-testid="stBaseButton-primary"] p, [data-testid="stBaseButton-primaryFormSubmit"] p { color: #000 !important; }
+[data-testid="stMain"] .stButton > button[kind="primary"]:hover, [data-testid="stBaseButton-primaryFormSubmit"]:hover { background: #d4d4d8 !important; }
+
+[data-testid="stExpander"] details { background: var(--surface) !important; border: 1px solid var(--line) !important; border-radius: 12px !important; }
+[data-testid="stExpander"] summary:hover { color: var(--text) !important; }
+
+.stTextInput input, .stTextArea textarea, .stNumberInput input, [data-baseweb="select"] > div, .stDateInput input {
+    background: var(--surface) !important; border-color: var(--line-strong) !important; border-radius: 10px !important; color: var(--text) !important;
+}
+[data-baseweb="popover"] ul, [data-baseweb="menu"] { background: var(--surface-2) !important; }
+
+[data-testid="stAlert"] { border-radius: 12px !important; border: 1px solid var(--line) !important; }
+[data-testid="stAlert"] > div { background: transparent !important; }
+[data-testid="stAlertContentSuccess"], [data-testid="stAlertContentError"], [data-testid="stAlertContentInfo"], [data-testid="stAlertContentWarning"] { color: #e4e4e7 !important; }
+div[data-testid="stAlert"]:has([data-testid="stAlertContentSuccess"]) { background: rgba(48, 209, 88, 0.07) !important; border-left: 3px solid var(--green) !important; }
+div[data-testid="stAlert"]:has([data-testid="stAlertContentError"]) { background: rgba(255, 69, 58, 0.07) !important; border-left: 3px solid var(--red) !important; }
+div[data-testid="stAlert"]:has([data-testid="stAlertContentInfo"]) { background: rgba(61, 107, 255, 0.07) !important; border-left: 3px solid var(--blue) !important; }
+div[data-testid="stAlert"]:has([data-testid="stAlertContentWarning"]) { background: rgba(255, 204, 51, 0.06) !important; border-left: 3px solid var(--yellow) !important; }
+
+[data-testid="stMetric"] { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; }
+[data-testid="stMetricLabel"] p { color: var(--muted) !important; font-size: 0.8rem !important; }
+[data-testid="stMetricValue"] { font-weight: 800 !important; letter-spacing: -0.03em; }
+
+.stProgress > div > div > div > div, [data-testid="stProgress"] div[role="progressbar"] > div > div { background: var(--grad) !important; }
+[data-testid="stDataFrame"], [data-testid="stTable"] { border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+[data-testid="stForm"] { border: 1px solid var(--line) !important; border-radius: var(--radius) !important; background: var(--surface) !important; padding: 22px !important; }
+.stCodeBlock, pre { border-radius: 10px !important; border: 1px solid var(--line) !important; background: #08080a !important; }
+[data-testid="stCaptionContainer"], .stCaption { color: var(--faint) !important; }
+
+/* ───────── Téléphone ───────── */
+@media (max-width: 760px) {
+    .block-container { padding-left: 1rem !important; padding-right: 1rem !important; padding-top: 3.2rem !important; }
+    .kpis { grid-template-columns: repeat(2, 1fr); }
+    .kpi:last-child { grid-column: span 2; }
+    .home-hero { padding: 18px 0 22px 0; }
+    .mastery-row { grid-template-columns: 1fr 70px 40px; }
+    .stTabs [data-baseweb="tab-list"] { gap: 14px; overflow-x: auto; }
+}
 </style>
 ''', unsafe_allow_html=True)
 COURS_BASE = {'📶 Réseaux & Télécoms': {'1. Modèle OSI vs TCP/IP & Encapsulation': "### 🌐 Architecture des Protocoles en Réseau\nLe **modèle OSI (Open Systems Interconnection)** découpe la communication en 7 couches standardisées :\n* **7. Application (PDU: Donnée)** : Protocoles applicatifs de haut niveau (HTTP, HTTPS, DNS, DHCP, SSH, MQTT, SNMP, SMTP).\n* **6. Présentation** : Formatage des données, chiffrement (TLS/SSL) et compression (ASCII, UTF-8, JPEG).\n* **5. Session** : Gestion et synchronisation des sessions d'échanges (NetBIOS, RPC, Sockets).\n* **4. Transport (PDU: Segment / Datagramme)** : Communication de bout en bout et contrôle de flux. **TCP** (orienté connexion, fiable avec accusé de réception ACK et fenêtre glissante) vs **UDP** (sans connexion, rapide, sans garantie d'arrivée, idéal streaming/VoIP/DNS).\n* **3. Réseau (PDU: Paquet)** : Routage logique et adressage mondial (IPv4, IPv6, ICMP, IPsec, protocoles OSPF/BGP). Equipement : **Routeur**.\n* **2. Liaison de données (PDU: Trame)** : Adressage physique (adresses MAC 48 bits), détection d'erreurs (FCS/CRC32), protocoles Ethernet (802.3), Wi-Fi (802.11). Equipement : **Commutateur (Switch)**.\n* **1. Physique (PDU: Bit)** : Transmission des signaux électriques, optiques ou électromagnétiques (RJ45, fibre optique, radio).\n\n**Modèle TCP/IP (4 couches)** : Application, Transport, Internet, Accès Réseau.", '2. Adressage IPv4, IPv6 & Calcul de Sous-Réseaux (VLSM)': "### 🧮 Méthodologie du Calcul de Masque & Subnetting\nUne adresse **IPv4** fait 32 bits (4 octets). Elle est scindée en **Partie Réseau (NetID)** et **Partie Hôte (HostID)** via le masque de sous-réseau.\n\n#### Règles Fondamentales :\n* **Nombre total d'adresses dans un bloc** = $2^{(32 - \\text{CIDR})}$\n* **Nombre d'adresses d'hôtes utilisables** = $2^{(32 - \\text{CIDR})} - 2$ (on soustrait l'adresse Réseau où tous les bits d'hôte sont à 0, et l'adresse de Broadcast où tous les bits d'hôte sont à 1).\n* **Calcul d'adresse Réseau** = Opération logique `ET (AND)` bit-à-bit entre l'IP et le Masque.\n* **Calcul du Broadcast** = Adresse Réseau + $(2^{(32 - \\text{CIDR})} - 1)$.\n\n#### Table Rapide des Masques Fréquents :\n* `/24` $\\rightarrow$ `255.255.255.0` (256 adresses, 254 hôtes)\n* `/25` $\\rightarrow$ `255.255.255.128` (128 adresses, 126 hôtes)\n* `/26` $\\rightarrow$ `255.255.255.192` (64 adresses, 62 hôtes)\n* `/27` $\\rightarrow$ `255.255.255.224` (32 adresses, 30 hôtes)\n* `/28` $\\rightarrow$ `255.255.255.240` (16 adresses, 14 hôtes)\n* `/29` $\\rightarrow$ `255.255.255.248` (8 adresses, 6 hôtes)\n* `/30` $\\rightarrow$ `255.255.255.252` (4 adresses, 2 hôtes - Liens point-à-point)\n\n#### Notions IPv6 (128 bits) :\n* Notation en 8 groupes de 4 caractères hexadécimaux séparés par des `:`.\n* Règle de compression : omission des zéros en tête (`0db8` $\\rightarrow$ `db8`) et remplacement d'une suite continue de groupes de zéros par `::` (une seule fois par adresse).", '3. VLANs, Trunking IEEE 802.1Q & Routage Inter-VLAN': "### 🔀 Segmentation & Routage Virtuel\nUn **VLAN (Virtual LAN)** isole logiquement les domaines de diffusion au sein d'un même commutateur physique.\n\n#### Modes de Ports Switch :\n* **Port Access** : Appartient à un seul VLAN. Les trames y circulent détaguées (standard Ethernet 802.3).\n* **Port Trunk** : Fait transiter plusieurs VLANs simultanément entre switchs ou vers un routeur. Utilise la norme **IEEE 802.1Q** qui insère un tag de **4 octets** dans l'en-tête Ethernet (incluant le VID sur 12 bits, soit 4096 VLANs possibles).\n\n#### Routage Inter-VLAN (Router-on-a-Stick) :\nSur le routeur, une seule interface physique (ex: `g0/0/0`) est découpée en sous-interfaces logiques (`g0/0/0.10`, `g0/0/0.20`) avec la commande `encapsulation dot1Q <ID>`.", "4. Services d'Infrastructure : DHCP, DNS, NAT/PAT": "### ⚙️ Services Réseaux Indispensables\n* **DHCP (Dynamic Host Configuration Protocol)** : Attribution dynamique de configuration IP. Processus **DORA** :\n  1. `Discover` (Client $\\rightarrow$ 255.255.255.255 en UDP 67/68)\n  2. `Offer` (Serveur $\\rightarrow$ Client)\n  3. `Request` (Client $\\rightarrow$ Serveur)\n  4. `Acknowledge` (Serveur valide le bail IP)\n* **DNS (Domain Name System)** : Résolution de noms d'hôtes. Types d'enregistrements : `A` (IPv4), `AAAA` (IPv6), `CNAME` (Alias), `MX` (Serveur mail), `PTR` (Résolution inverse).\n* **NAT / PAT (Port Address Translation)** : Translation d'adresses privées (RFC 1918) vers une adresse publique unique en multiplexant les numéros de ports source TCP/UDP.", '5. Protocoles Industriels & Bus de terrain (Modbus, Profibus)': "### 🏭 Protocoles Industriels & Bus de terrain (Modbus, Profibus)\nDans l'option A du BTS CIEL, l'étude des réseaux industriels est incontournable. Le protocole **Modbus RTU** (communiquant généralement sur une liaison physique **RS-485**) est un modèle de communication de type maître-esclave.\n\n#### Caractéristiques de Modbus RTU :\n* **Format des trames** : Composé de l'Adresse de l'esclave (1 octet), du Code Fonction (1 octet), des Données (variable) et du contrôle d'erreur CRC-16 (2 octets).\n* **Fonctions de lecture/écriture de registres de base** :\n  * `01` : Read Coils (Sorties binaires)\n  * `02` : Read Discrete Inputs (Entrées binaires)\n  * `03` : Read Holding Registers (Sorties analogiques en lecture/écriture, de taille 16 bits par registre)\n  * `04` : Read Input Registers (Entrées analogiques en lecture seule)\n  * `05` : Write Single Coil (Écriture d'une seule sortie binaire)\n  * `06` : Write Single Register (Écriture d'un seul registre analogique 16 bits)", '6. Transmission optique (Fibres optiques Monomodes & Multimodes)': "### ⚡ Transmission optique (Fibres optiques Monomodes & Multimodes)\nLa fibre optique utilise le principe de réflexion totale interne pour propager des impulsions lumineuses.\n\n#### Fibre Monomode (Single-mode) :\n* **Structure** : Cœur extrêmement étroit (environ 9 micromètres), gaine de 125 micromètres.\n* **Propagation** : Un seul chemin rectiligne de la lumière (un seul mode).\n* **Source** : Diode Laser de forte puissance.\n* **Performance** : Absence quasi-totale de dispersion modale, portée kilométrique très longue distance, idéale pour les réseaux d'interconnexion WAN.\n\n#### Fibre Multimode (Multi-mode) :\n* **Structure** : Cœur plus large (50 ou 62,5 micromètres).\n* **Propagation** : Plusieurs modes de propagation par rebonds (dispersion modale importante provoquant un étalement des impulsions dans le temps).\n* **Source** : LED ou VCSEL.\n* **Performance** : Portée réduite (courte distance comme les LANs d'entreprises ou Data Centers)."}, '🔒 Cybersécurité': {'1. Cryptographie : Symétrique, Asymétrique & Hachage': "### 🛡️ Les Fondements Cryptographiques\nLa sécurité repose sur la triade **CIA** (Confidentialité, Intégrité, Disponibilité) + Authenticité et Non-répudiation.\n\n* **Chiffrement Symétrique** : Même clé secrète pour chiffrer et déchiffrer. Rapide, adapté aux flux volumineux. Standard : **AES-128 / AES-256** (modes CBC, GCM avec authentification intégrée).\n* **Chiffrement Asymétrique** : Paire de clés mathématiquement liées (Clé Publique distribuable, Clé Privée secrète). Algorithmes : **RSA (2048/4096 bits)**, **ECC (Courbes Elliptiques)**. Utilisé pour l'échange de clés de session et les signatures numériques.\n* **Fonctions de Hachage** : Condensat à sens unique de taille fixe. Vérifie l'intégrité stricte. Algorithmes : **SHA-256**, **SHA-3** (MD5 et SHA-1 sont aujourd'hui vulnérables aux collisions).\n* **Certificats X.509 & PKI** : Une Autorité de Certification (CA) signe la clé publique d'un serveur pour attester de son identité.", '2. Top 10 OWASP & Sécurité Applicative': '### 🚨 Vulnérabilités Web et Remédiations\n* **Injections SQL** : L\'attaquant injecte du code SQL non filtré pour manipuler la BDD.\n  * *Exemple vulnérable* : `query = "SELECT * FROM users WHERE user=\'" + input + "\'"`\n  * *Remédiation absolue* : Utiliser exclusivement des **requêtes préparées (paramétrées)** via PDO en PHP ou `cursor.execute("SELECT * FROM users WHERE user=%s", (input,))` en Python.\n* **Cross-Site Scripting (XSS)** : Injection de scripts JavaScript malveillants exécutés par les navigateurs clients.\n  * *Remédiation* : Échappement des caractères HTML (`htmlspecialchars()`), CSP (Content Security Policy).\n* **CSRF (Cross-Site Request Forgery)** : Forcer un utilisateur authentifié à exécuter des actions non désirées. *Remédiation* : Jetons (tokens) anti-CSRF aléatoires et synchronisés.', '3. Pare-feux, VPN & Sécurisation Système': "### 🧱 Défense Périmétrique et Durcissement\n* **Pare-feu Stateful** : Analyse l'état des connexions (table d'états TCP). Sous Linux : `iptables` / `nftables` ou `ufw`.\n* **VPN (Virtual Private Network)** :\n  * **IPsec** : Opère en couche 3. Protocoles `AH` (Intégrité/Authentification) et `ESP` (Chiffrement + Intégrité). Modes : Transport (hôte à hôte) ou Tunnel (site à site).\n  * **OpenVPN / WireGuard** : VPN applicatif et niveau kernel moderne utilisant TLS/chiffrement moderne.\n* **Port Security Cisco** : Limite le nombre d'adresses MAC autorisées par port de switch pour contrer le MAC Flooding (`switchport port-security maximum 1`, `switchport port-security violation shutdown`).", '4. Protocoles Sécurisés (VPN, SSHv2, HTTPS, MQTTS)': "### 🛡️ Protocoles Sécurisés : Chiffrement & Authentification\n* **VPN (Virtual Private Network)** : Crée un tunnel sécurisé à travers un réseau non sécurisé (Internet).\n  * **IPsec** : Opère en couche 3 (Réseau) pour chiffrer l'intégralité du trafic IP d'un site à un autre (VPN Site-à-Site).\n  * **OpenVPN / WireGuard** : Utilise le protocole SSL/TLS ou des mécanismes cryptographiques modernes (Noise protocol) de couche Transport pour les connexions clients d'accès à distance.\n* **HTTPS** : Sécurisation du protocole HTTP par l'utilisation d'une couche TLS. Lors du **TLS Handshake** (poignée de main TLS), le client et le serveur s'accordent sur les algorithmes (Cipher Suite), s'authentifient via des certificats X.509 et génèrent une clé symétrique de session temporaire.\n* **MQTTS** : Variante sécurisée de MQTT qui utilise TLS (Port par défaut 8883) pour chiffrer les flux d'objets connectés et authentifier les clients de manière robuste."}, '💻 Programmation / Dev': {'1. Langage C++ : Mémoire, Pointeurs & POO': "### ⚡ Maîtrise Bas Niveau & Orientée Objet en C++\nLe C++ est au cœur du BTS CIEL pour la programmation système et microcontrôleurs embarqués.\n\n#### Gestion de la Mémoire :\n* **Pile (Stack)** : Gestion automatique, rapide, portée limitée au bloc `{}`.\n* **Tas (Heap)** : Allocation manuelle dynamique avec `new` / `new[]`. Doit obligatoirement être libérée avec `delete` / `delete[]` pour éviter les **fuites de mémoire (Memory Leaks)**.\n* **Pointeurs & Références** :\n  * `int x = 42; int* p = &x;` $\\rightarrow$ `p` contient l'adresse, `*p` accède à la valeur.\n  * `void modifier(int& ref)` $\\rightarrow$ passage par référence (sans copie mémoire).\n\n#### Programmation Orientée Objet (POO) :\n* **Encapsulation** : Données membres `private` accessibles via `getters`/`setters` `public`.\n* **Héritage** : `class CapteurTemperature : public Capteur`.\n* **Polymorphisme & Classes Abstraites** : Méthode déclarée `virtual void mesurer() = 0;` (méthode virtuelle pure). La classe devient abstraite et impose l'implémentation dans les classes dérivées.", '2. Python Réseau, Systèmes & Sockets': "### 🐍 Automatisation & Sockets Réseau en Python\nPython est l'outil privilégié pour les scripts de passerelle, de traitement de données IoT et d'administration système.\n\n#### Client TCP Sockets :\n```python\nimport socket\nwith socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:\n    s.connect(('192.168.1.50', 8080))\n    s.sendall(b'GET_TELEMETRY\\n')\n    data = s.recv(1024)\n    print('Reçu:', data.decode('utf-8'))\n```\n\n#### Manipulation de données JSON :\n```python\nimport json\npayload = {'capteur_id': 'TEMP_01', 'valeur': 23.4, 'unite': 'C'}\njson_str = json.dumps(payload)\n```", '3. Structures de données avancées & Unions en Langage C': "### 🏗️ Structures de données avancées & Unions en Langage C\n* **Structures (`struct`)** : Regroupement de plusieurs variables de types différents. En mémoire, chaque variable possède sa propre adresse, et la taille globale est au minimum égale à la somme des membres, plus d'éventuels octets de bourrage (padding) insérés par le compilateur pour l'alignement mémoire.\n* **Unions (`union`)** : Regroupement de membres de types différents partageant la **même zone mémoire**. À tout moment, un seul membre peut être stocké dans l'union. L'occupation mémoire totale d'une union est égale à la taille de son membre le plus volumineux.\n* **Exemple d'union** :\n  ```cpp\n  union Paquet {\n      char brut[4];\n      float valeur; // Partage le même espace de 4 octets\n  };\n  ```"}, '🖥️ Administration Système': {'1. Droits Linux & Commandes Système': '### 🐧 Administration GNU/Linux\n* **Droits Octaux (`chmod`)** :\n  * `r` (Lecture) = 4, `w` (Écriture) = 2, `x` (Exécution) = 1.\n  * `chmod 750 script.sh` : Propriétaire = `rwx` (7), Groupe = `r-x` (5), Autres = `---` (0).\n* **Droits Spéciaux** : SUID (`4000`), SGID (`2000`), Sticky Bit (`1000` ex: `/tmp`).\n* **Services Systemd** : `systemctl start|stop|restart|status|enable service_name`.\n* **Supervision des logs** : `journalctl -u service_name -f` ou `tail -f /var/log/syslog`.', '2. Active Directory, Domaines & GPO': "### 🏢 Gestion de Parc sous Windows Server\n* **Active Directory Domain Services (AD DS)** : Annuaire d'objets (Utilisateurs, Groupes, Ordinateurs).\n* **Unités d'Organisation (OU)** : Conteneurs logiques pour organiser le domaine.\n* **GPO (Group Policy Object)** : Politiques de configuration et de durcissement centralisées.\n* **Ordre d'application des GPO (LSDOU)** : **L**ocal $\\rightarrow$ **S**ite $\\rightarrow$ **D**omaine $\\rightarrow$ **O**U (la dernière stratégie appliquée prévaut sauf configuration 'Enforced').", '3. Virtualisation & Environnements Serveurs (Debian, VMware)': "### 🖥️ Virtualisation & Environnements Serveurs (Debian, VMware)\nLa virtualisation permet de faire fonctionner plusieurs machines virtuelles (VM) sur un unique serveur physique (Hyperviseur).\n\n#### Hyperviseurs de Type 1 (Bare Metal) :\n* Opèrent directement sur le matériel physique du serveur, sans système d'exploitation hôte préalable.\n* Offrent des performances optimales et une isolation stricte des ressources.\n* Exemples : **VMware ESXi**, Microsoft Hyper-V Server, Proxmox VE (KVM).\n\n#### Hyperviseurs de Type 2 (Hosted) :\n* S'exécutent comme des applications au-dessus d'un système d'exploitation hôte existant (Windows, Linux, macOS).\n* Exemples : **VMware Workstation**, Oracle VM VirtualBox.\n\n#### Serveur Linux Debian :\n* Système d'exploitation stable par excellence pour héberger des serveurs d'infrastructure (DNS Bind9, DHCP isc-dhcp-server, Apache, etc.)."}, '🔌 Électronique & IoT': {'1. Échantillonnage, CAN/CNA & Théorème de Shannon': "### 📡 Numérisation & Traitement du Signal\n* **Théorème de Nyquist-Shannon** : La fréquence d'échantillonnage $Fe$ doit respecter $Fe \\ge 2 \\times F_{max}$ pour éviter tout **repliement de spectre (Aliasing)**. On place un filtre passe-bas anti-repliement avant le CAN.\n* **Convertisseur Analogique-Numérique (CAN / ADC)** :\n  * Résolution : $n$ bits $\\rightarrow 2^n$ niveaux de quantification (de $0$ à $2^n - 1$).\n  * **Quantum ($q$)** : Plus petite variation de tension détectable :\n    $$q = \\frac{V_{ref}}{2^n - 1} \\approx \\frac{V_{ref}}{2^n}$$\n  * **Valeur numérique entière ($N$)** pour une tension d'entrée $V_e$ :\n    $$N = \\text{arrondi}\\left(\\frac{V_e}{q}\\right) = \\text{arrondi}\\left(\\frac{V_e \\times (2^n - 1)}{V_{ref}}\\right)$$r", '2. Bus Série Matériels : I2C, SPI, UART & CAN Bus': "### 🔌 Liaisons de Données Embarquées\n* **I2C** : 2 lignes bidirectionnelles (`SDA` Données, `SCL` Horloge). Maître-Esclave, adresses matérielles 7 bits sur bus avec résistances de Pull-up.\n* **SPI** : 4 lignes full-duplex rapide (`MOSI`, `MISO`, `SCLK`, `SS/CS`). Sélection d'esclave active à l'état bas.\n* **UART** : Liaison asynchrone point-à-point (2 fils `Tx`, `Rx`). Nécessite le même débit en bauds (ex: 115200 bauds, 8N1).\n* **Bus CAN** : Bus différentiel robuste (`CAN_H`, `CAN_L`), résistant aux parasites industriels et automobiles. Résistances de terminaison de 120 $\\Omega$ à chaque extrémité.", '3. Protocoles Connectés : MQTT & LoRaWAN': "### ☁️ Protocoles IoT & Télémesure\n* **MQTT (Message Queuing Telemetry Transport)** : Architecture Publish/Subscribe autour d'un courtier (**Broker**). Messages légers publiés sur des thèmes (**Topics** ex: `site/batA/temp`). Niveaux de QoS :\n  * `QoS 0` : Délivré au plus une fois (sans confirmation).\n  * `QoS 1` : Délivré au moins une fois (avec accusé PUBACK).\n  * `QoS 2` : Délivré exactement une fois (four-way handshake).\n* **LoRaWAN** : Réseau LPWAN longue portée (plusieurs kilomètres) à très faible consommation d'énergie sur fréquences sans licence (868 MHz en Europe).", "4. Lois Fondamentales d'Électricité & Composants Passifs": "### 🔌 Lois Fondamentales d'Électricité & Composants Passifs\n* **Loi d'Ohm** : $U = R \\times I$ (la tension en Volts est égale à la résistance en Ohms multipliée par l'intensité en Ampères).\n* **Loi de Joule (Puissance)** : $P = U \\times I = R \\times I^2 = \\frac{U^2}{R}$ (la puissance dissipée par effet Joule est exprimée en Watts).\n* **Lois de Kirchhoff** :\n  * **Loi des Nœuds** : La somme des intensités des courants entrant dans un nœud est égale à la somme des intensités sortant du même nœud.\n  * **Loi des Mailles** : La somme algébrique des tensions le long d'une maille fermée est nulle.\n* **Condensateur** : Stocke des charges électriques.\n  * **Relation Charge-Tension** : $Q = C \\times U$ (la charge en Coulombs est proportionnelle à la capacité en Farads).\n  * **Énergie emmagasinée** : $E_c = \\frac{1}{2} C \\times U^2$ (l'énergie stockée s'exprime en Joules)."}, '📐 Modélisation UML & SysML': {'1. Diagrammes UML Essentiels (Classes, Séquence, Use Case)': "### 📐 Ingénierie Logicielle UML\n* **Diagramme de Classes** : Modèle statique. Multiplicités (`1`, `0..1`, `1..*`, `*`).\n  * **Agrégation (Losange blanc $\\diamond$)** : Relation 'fait partie de' faible. L'élément peut exister sans le conteneur.\n  * **Composition (Losange noir $\\blacklozenge$)** : Relation d'appartenance forte. La destruction du conteneur détruit ses composants.\n  * **Généralisation/Héritage (Flèche à triangle vide $\\rightarrow$)** : Spécialisation de classe.\n* **Diagramme de Séquence** : Chronologie des échanges d'objets au cours du temps. Flèche pleine pour appel synchrone, flèche ouverte pour asynchrone, pointillé pour retour.", '2. Diagrammes SysML (BDD, IBD, Exigences)': "### 🏗️ Modélisation Système SysML\n* **BDD (Block Definition Diagram)** : Découpage structurel global du système en blocs matériels et logiciels.\n* **IBD (Internal Block Diagram)** : Vue interne des flux de données (`flow ports`), d'énergie et de signaux circulant entre les ports des sous-blocs.\n* **Diagramme d'Exigences (Requirement Diagram)** : Définition des critères du cahier des charges avec stéréotypes `<<deriveReqt>>`, `<<satisfy>>` (par un bloc) et `<<verify>>` (par un cas de test)."}}
@@ -743,7 +689,7 @@ def render_page_analyse_scores():
                     <div class='ciel-card' style='border: 1px solid rgba(255, 255, 255, 0.08) !important; background: rgba(15, 23, 42, 0.4); text-align: center; padding: 20px 14px; opacity: 0.6;'>
                         <div style='font-size: 2.5rem; margin-bottom: 6px; filter: grayscale(100%);'>{b['icon']}</div>
                         <h4 style='color: #94a3b8; margin: 0;'>{b['nom']}</h4>
-                        <p style='font-size: 0.85rem; color: #64748b; margin: 6px 0;'>{b['desc']}</p>
+                        <p style='font-size: 0.85rem; color: #8e8e96; margin: 6px 0;'>{b['desc']}</p>
                         <span class='badge' style='background: rgba(100, 116, 139, 0.2); color: #94a3b8; border: 1px solid #475569;'>🔒 Verrouillé</span>
                     </div>
                     """, unsafe_allow_html=True)
@@ -2582,7 +2528,7 @@ import hashlib as _hashlib
 import unicodedata as _ud
 from datetime import date as _date
 
-APP_VERSION = 'v31'
+APP_VERSION = 'v32'
 DATE_BTS_BLANC_DEFAUT = '2026-12-09'
 LEITNER_JOURS = {1: 1, 2: 2, 3: 4, 4: 8, 5: 16}   # boîte -> nombre de jours avant de revoir
 NOUVELLES_CARTES_PAR_JOUR = 15
@@ -4026,98 +3972,272 @@ $N$ = nombre de termes. De $u_0$ à $u_n$ il y a $n + 1$ termes.
     st.info("Pour t'entraîner sur ces chapitres : **Grand Quiz** → domaine *Mathématiques* → choisis le chapitre.")
 
 
-HUBS_CONFIG = {
-    "🏠 Mon Tableau de Bord & Profil": [
-        ("Vue d'Ensemble & Séance du jour", "🏠 Accueil & Dashboard"),
-        ("Remédiation & Lacunes Ciblées", "🎯 Remédiation & Lacunes Ciblées (BTS Blanc)"),
-        ("Planning BTS Blanc (6 Semaines)", "🗓️ Planning Révisions BTS Blanc (9-11 Déc)"),
-        ("Suivi & Analyse des Scores", "📈 Analyse des Scores"),
-        ("Gestion de Projet E6 (Gantt)", "📋 Planning de Projet E6 (Gantt)"),
-        ("Vidéothèque Recommandée", "📹 Vidéos de Cours"),
-        ("Répertoire des Liens & Ressources", "🌐 Répertoire des Liens")
-    ],
-    "🚀 Révision intelligente": [
-        ("🧠 Révision du jour (flashcards espacées)", "🧠 Révision du jour"),
-        ("📕 Carnet d'erreurs", "📕 Carnet d'erreurs"),
-        ("⏱️ Examen blanc chronométré (note sur 20)", "⏱️ Examen blanc chronométré"),
-        (f"📝 Grand Quiz ({len(QUESTION_POOL)} questions)", "📝 Grand Quiz d'Examen"),
-        (f"🇬🇧 Vocabulaire anglais BTS ({VOCAB_TOTAL} mots)", "🇬🇧 Vocabulaire anglais BTS"),
-        ("🧩 Décoder les énoncés (consignes en mots simples)", "🧩 Décoder les énoncés")
-    ],
-    "📖 Grand Référentiel Rangé par Matière": [
-        ("📶 Réseaux & Télécoms (OSI, IP, VLAN, Routage)", "📶 Réseaux & Télécoms"),
-        ("🛡️ Master Cybersécurité (EBIOS, PKI, pfSense, VPN)", "🛡️ TP Cybersécurité, Gouvernance & pfSense"),
-        ("🔒 Cybersécurité Fondamentale (OWASP & Cryptographie)", "🔒 Cybersécurité & Gouvernance"),
-        ("🛡️ Guides de Durcissement ANSSI (Hardening)", "🛡️ Guides de Durcissement (Hardening) ANSSI"),
-        ("💻 Programmation & Dev (C++, Python, Algorithmique)", "💻 Programmation C++ & Python"),
-        ("🖥️ Administration Système (Linux Debian & Active Directory)", "🖥️ Système Linux & Windows Server"),
-        ("🔌 Électronique, Signaux & Bus (CAN, Modbus, I2C)", "🔌 Électronique & Bus Industriels"),
-        ("📄 Fiches Savoir N°1 à 12 & Fiches Montage", "📄 Fiches Savoir & Fiches Montage"),
-        ("📄 Datasheets & Fiches Techniques (Composants)", "📄 Datasheets & Fiches Techniques (Composants)"),
-        ("📐 Maths : formulaire complet & méthodes guidées", "📐 Maths : formulaire complet"),
-        ("📊 Maths : Suites (cours, simulateur, exercices)", "📊 Mathématiques : Suites Arithmétiques & Géométriques"),
-        ("📈 Maths : Fonctions, Exp & Ln (cours, traceur, exercices)", "📈 Mathématiques : Fonctions, Exponentielle & Logarithme"),
-        ("📐 Maths : Résumé Suites & Décibels", "📐 Mathématiques Appliquées"),
-        ("🇬🇧 Anglais : Grammaire, Textes & Oral", "🇬🇧 Vocabulaire & Anglais Technique BTS"),
-        ("🇬🇧 Anglais Technique & Datasheets", "🇬🇧 Anglais Technique & Datasheets"),
-        ("📖 Culture Générale & Expression (CGE 2025/2026)", "📖 Culture Générale & Expression (CGE)"),
-        ("📚 Encyclopédie des Cours & Mini-Tests", "📚 Encyclopédie des Cours & TPs"),
-        ("🛠️ Guide Pratique d'Atelier Épreuve E5", "🛠️ Fiches Réussite Épreuve E5 (TP & Pratique)")
-    ],
-    "🧪 Le Laboratoire Pratique & Expérimentations": [
-        ("Centre de Commandes & Sandboxes Interactives", "💻 Sandboxes & Terminaux Pratiques"),
-        ("Lab Décodeur Wireshark (Hex)", "🔍 Lab Décodeur Wireshark"),
-        ("Captures de Trames PCAP Commentées", "🔍 Captures de Trames & Analyses Wireshark PCAP"),
-        ("Calculateur de Subnetting VLSM & CAN", "🧮 Laboratoire de Calculs (Subnetting & Élec)"),
-        ("Lab Oscilloscope & Mesures Physiques", "📺 Lab Oscilloscope & Mesures Physiques"),
-        ("Lab Kirchhoff, Ohm & Circuits Élec", "⚡ Lab Kirchhoff, Ohm & Circuits"),
-        ("Laboratoire Modélisation SysML & UML", "📐 Laboratoire UML & SysML"),
-        ("Qualification Logicielle & Tests E6 (Pytest)", "🧪 Qualification & Tests E6"),
-        ("Modèles de Livrables & Dossier PVL E6", "📁 Modèles de Livrables & PVL Épreuve E6")
-    ],
-    "🎯 Flashcards, Annales & Programme": [
-        ("105 Flashcards (parcours libre)", "🗂️ Flashcards Actives"),
-        ("Annales Officielles BTS (2024 à 2026)", "🎯 Annales BTS (2024 & 2025)"),
-        ("Programme Semaine par Semaine (BTS Blanc)", "🗓️ Révision Semaine par Semaine (BTS Blanc)"),
-        ("Hub de Révision Totale (131 Sources)", "🎯 Révision Totale BTS Blanc (9-11 Déc)")
-    ]
-}
-# Sidebar Modern Header & Switcher
-with st.sidebar:
-    init_user_session()
-    
-    # Modern Monopo User Profile Header
+
+# ══════════════════════════════════════════════════════════════════════════════
+# V32 — NAVIGATION
+# Chaque page a : un identifiant court (utilisé dans l'adresse ?p=...), un nom
+# affiché dans le menu, et la clé interne utilisée par les blocs `elif page == ...`.
+# ══════════════════════════════════════════════════════════════════════════════
+NAV = [
+    ("Accueil", [
+        ("accueil", "Accueil", "🏠 Accueil & Dashboard"),
+    ]),
+    ("Réviser", [
+        ("seance", "Séance du jour", "🧠 Révision du jour"),
+        ("erreurs", "Carnet d'erreurs", "📕 Carnet d'erreurs"),
+        ("examen", "Examen blanc chronométré", "⏱️ Examen blanc chronométré"),
+        ("quiz", "Grand quiz", "📝 Grand Quiz d'Examen"),
+        ("vocabulaire", "Vocabulaire anglais", "🇬🇧 Vocabulaire anglais BTS"),
+        ("flashcards", "Flashcards (parcours libre)", "🗂️ Flashcards Actives"),
+        ("enonces", "Comprendre les énoncés", "🧩 Décoder les énoncés"),
+    ]),
+    ("Cours — Informatique", [
+        ("reseaux", "Réseaux & télécoms", "📶 Réseaux & Télécoms"),
+        ("cyber", "Cybersécurité : EBIOS, PKI, pfSense, VPN", "🛡️ TP Cybersécurité, Gouvernance & pfSense"),
+        ("crypto", "Cybersécurité : OWASP & cryptographie", "🔒 Cybersécurité & Gouvernance"),
+        ("anssi", "Durcissement ANSSI", "🛡️ Guides de Durcissement (Hardening) ANSSI"),
+        ("prog", "Programmation C++ & Python", "💻 Programmation C++ & Python"),
+        ("systeme", "Linux & Windows Server", "🖥️ Système Linux & Windows Server"),
+        ("encyclo", "Encyclopédie des cours", "📚 Encyclopédie des Cours & TPs"),
+    ]),
+    ("Cours — Électronique", [
+        ("elec", "Électronique & bus", "🔌 Électronique & Bus Industriels"),
+        ("fiches", "Fiches savoir N°1 à 12", "📄 Fiches Savoir & Fiches Montage"),
+        ("datasheets", "Datasheets composants", "📄 Datasheets & Fiches Techniques (Composants)"),
+    ]),
+    ("Maths", [
+        ("formulaire", "Formulaire complet", "📐 Maths : formulaire complet"),
+        ("suites", "Suites", "📊 Mathématiques : Suites Arithmétiques & Géométriques"),
+        ("fonctions", "Fonctions, exp & ln", "📈 Mathématiques : Fonctions, Exponentielle & Logarithme"),
+        ("maths-resume", "Résumé suites & décibels", "📐 Mathématiques Appliquées"),
+    ]),
+    ("Anglais & culture générale", [
+        ("anglais", "Grammaire, textes & oral", "🇬🇧 Vocabulaire & Anglais Technique BTS"),
+        ("anglais-tech", "Anglais technique", "🇬🇧 Anglais Technique & Datasheets"),
+        ("cge", "Culture générale (CGE)", "📖 Culture Générale & Expression (CGE)"),
+    ]),
+    ("Labo pratique", [
+        ("sandbox", "Terminaux (Cisco, Linux, AD…)", "💻 Sandboxes & Terminaux Pratiques"),
+        ("wireshark", "Décodeur Wireshark", "🔍 Lab Décodeur Wireshark"),
+        ("pcap", "Captures de trames commentées", "🔍 Captures de Trames & Analyses Wireshark PCAP"),
+        ("calculs", "Subnetting & calculs", "🧮 Laboratoire de Calculs (Subnetting & Élec)"),
+        ("oscillo", "Oscilloscope", "📺 Lab Oscilloscope & Mesures Physiques"),
+        ("kirchhoff", "Kirchhoff & loi d'Ohm", "⚡ Lab Kirchhoff, Ohm & Circuits"),
+        ("uml", "UML & SysML", "📐 Laboratoire UML & SysML"),
+    ]),
+    ("Épreuves E4 · E5 · E6", [
+        ("annales", "Annales 2024 à 2026", "🎯 Annales BTS (2024 & 2025)"),
+        ("e5", "Réussir l'E5 (pratique)", "🛠️ Fiches Réussite Épreuve E5 (TP & Pratique)"),
+        ("tests-e6", "E6 : qualification & tests", "🧪 Qualification & Tests E6"),
+        ("livrables-e6", "E6 : livrables & PVL", "📁 Modèles de Livrables & PVL Épreuve E6"),
+        ("gantt", "E6 : planning Gantt", "📋 Planning de Projet E6 (Gantt)"),
+    ]),
+    ("Planning BTS blanc", [
+        ("planning", "Planning des révisions", "🗓️ Planning Révisions BTS Blanc (9-11 Déc)"),
+        ("semaines", "Programme semaine par semaine", "🗓️ Révision Semaine par Semaine (BTS Blanc)"),
+        ("revision-totale", "Révision totale", "🎯 Révision Totale BTS Blanc (9-11 Déc)"),
+        ("remediation", "Remédiation ciblée", "🎯 Remédiation & Lacunes Ciblées (BTS Blanc)"),
+    ]),
+    ("Suivi & ressources", [
+        ("scores", "Mes scores & mon compte", "📈 Analyse des Scores"),
+        ("videos", "Vidéos de cours", "📹 Vidéos de Cours"),
+        ("liens", "Liens utiles", "🌐 Répertoire des Liens"),
+    ]),
+]
+NAV_ITEMS = {slug: (section, label, key) for section, items in NAV for slug, label, key in items}
+NAV_OPEN = ("Accueil", "Réviser")      # sections toujours dépliées dans le menu
+
+# Compatibilité : certaines anciennes fonctions lisent encore HUBS_CONFIG
+HUBS_CONFIG = {section: [(label, key) for _s, label, key in items] for section, items in NAV}
+
+
+def nav_go(slug):
+    """Change de page (appelée par les boutons du menu et des raccourcis)."""
+    if slug not in NAV_ITEMS:
+        return
+    st.session_state.nav_slug = slug
+    try:
+        st.query_params['p'] = slug
+    except Exception:
+        pass
+
+
+def _nav_search_cb():
+    choix = st.session_state.get('nav_search')
+    if choix:
+        slug = next((s for s, (sec, lab, _k) in NAV_ITEMS.items() if f"{lab} · {sec}" == choix), None)
+        if slug:
+            nav_go(slug)
+    st.session_state.nav_search = None
+
+
+def nav_current():
+    if 'nav_slug' not in st.session_state:
+        slug = None
+        try:
+            slug = st.query_params.get('p')
+        except Exception:
+            pass
+        st.session_state.nav_slug = slug if slug in NAV_ITEMS else 'accueil'
+    if st.session_state.nav_slug not in NAV_ITEMS:
+        st.session_state.nav_slug = 'accueil'
+    return st.session_state.nav_slug
+
+
+def nav_button(slug, label=None, primary_if_active=True, key_prefix='nav'):
+    active = primary_if_active and (st.session_state.get('nav_slug') == slug)
+    st.button(label or NAV_ITEMS[slug][1], key=f"{key_prefix}_{slug}", type='primary' if active else 'secondary',
+              use_container_width=True, on_click=nav_go, args=(slug,))
+
+
+def _niveau_suivant(pts):
+    paliers = [(0, 100), (100, 250), (250, 400), (400, 600), (600, 1000)]
+    for lo, hi in paliers:
+        if pts < hi:
+            return lo, hi
+    return 600, max(pts, 1000)
+
+
+def render_sidebar_header():
+    up = st.session_state.user_progress
     u_name = st.session_state.current_user
-    u_pts = st.session_state.user_progress['points']
-    u_lvl = st.session_state.user_progress['level']
-    u_role = st.session_state.user_role
-    
+    pts = int(up.get('points', 0))
+    lo, hi = _niveau_suivant(pts)
+    pct = int(100 * (pts - lo) / max(1, hi - lo))
+    lvl = str(up.get('level', '')).rstrip(' 🎓🛡️⚡💻🚀')
     st.markdown(f"""
-    <div style='background: linear-gradient(135deg, rgba(29, 78, 216, 0.15) 0%, rgba(15, 23, 42, 0.8) 100%); border: 1px solid rgba(56, 189, 248, 0.25); border-radius: 16px; padding: 16px; margin-bottom: 16px;'>
-        <div style='display: flex; align-items: center; justify-content: space-between;'>
-            <div>
-                <span style='font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: #38bdf8; font-weight: 700;'>PROFIL ÉTUDIANT</span>
-                <h3 style='margin: 2px 0 0 0; font-size: 1.15rem; color: #ffffff; font-weight: 700;'>{u_name}</h3>
-                <span style='font-size: 0.8rem; color: #94a3b8;'>{u_role}</span>
-            </div>
-            <div style='background: rgba(56, 189, 248, 0.1); border-radius: 50%; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(56, 189, 248, 0.3); font-size: 1.3rem;'>
-                ⚡
-            </div>
-        </div>
-        <div style='margin-top: 12px; padding-top: 10px; border-top: 1px solid rgba(255, 255, 255, 0.08); display: flex; justify-content: space-between; align-items: center;'>
-            <div>
-                <span style='font-size: 0.72rem; color: #64748b; font-weight: 600;'>POINTS XP</span>
-                <div style='font-size: 1.1rem; font-weight: 800; color: #fb923c;'>{u_pts} pts</div>
-            </div>
-            <div style='text-align: right;'>
-                <span style='font-size: 0.72rem; color: #64748b; font-weight: 600;'>GRADE</span>
-                <div style='font-size: 0.85rem; font-weight: 700; color: #34d399;'>{u_lvl}</div>
-            </div>
-        </div>
+    <div class='nav-brand'><div class='dot'>C</div><div class='name'>CIEL Studio</div><div class='ver'>{APP_VERSION}</div></div>
+    <div class='nav-user'>
+        <div class='who'>{u_name}</div>
+        <div class='meta'>{lvl}</div>
+        <div class='xp'><b>{pts} XP</b><span>prochain niveau : {hi}</span></div>
+        <div class='bar'><i style='width:{pct}%'></i></div>
     </div>
     """, unsafe_allow_html=True)
-    
-    with st.expander("👤 Gérer mon Compte & Profil Cloud", expanded=False):
+    options = [f"{lab} · {sec}" for _s, (sec, lab, _k) in NAV_ITEMS.items()]
+    st.selectbox("Aller à", options, index=None, key='nav_search', placeholder="🔍  Chercher une page…",
+                 on_change=_nav_search_cb, label_visibility='collapsed')
+
+
+def render_sidebar_menu():
+    cur = st.session_state.nav_slug
+    cur_section = NAV_ITEMS[cur][0]
+    for section, items in NAV:
+        if section in NAV_OPEN:
+            if section != 'Accueil':
+                st.markdown(f"<div class='nav-section'>{section}</div>", unsafe_allow_html=True)
+            for slug, _lab, _k in items:
+                nav_button(slug)
+        else:
+            with st.expander(section, expanded=(section == cur_section)):
+                for slug, _lab, _k in items:
+                    nav_button(slug)
+
+
+def render_crumb(slug):
+    section, label, _k = NAV_ITEMS[slug]
+    if slug != 'accueil':
+        st.markdown(f"<div class='crumb'><b>{section}</b> &nbsp;/&nbsp; {label}</div>", unsafe_allow_html=True)
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# V32 — PAGE D'ACCUEIL
+# ══════════════════════════════════════════════════════════════════════════════
+def _action_card(slug, kicker, color, titre, desc, bouton):
+    st.markdown(f"""<div class='action'><div class='k' style='color:{color};'>{kicker}</div>
+        <div class='t'>{titre}</div><div class='d'>{desc}</div></div>""", unsafe_allow_html=True)
+    nav_button(slug, bouton, primary_if_active=False, key_prefix='home')
+
+
+def render_home():
+    d = _ud_get()
+    t = _iso(_today())
+    due, new, known = srs_counts(d)
+    a_faire = due + min(new, NOUVELLES_CARTES_PAR_JOUR)
+    voc_due = sum(1 for v in d['vocab'].values() if v[1] <= t)
+    voc_known = sum(1 for v in d['vocab'].values() if v[0] >= 4)
+    voc_new = min(NOUVEAUX_MOTS_PAR_JOUR, VOCAB_TOTAL - len(d['vocab']))
+    n_err = len(d['errors'])
+    try:
+        jours = (datetime.strptime(d['exam_date'], '%Y-%m-%d').date() - _today()).days
+    except Exception:
+        jours = None
+    j_txt = '—' if jours is None else (f"J-{jours}" if jours > 0 else ("Jour J" if jours == 0 else "Passé"))
+
+    nom = st.session_state.current_user
+    salut = "Salut." if nom == DEFAULT_USER else f"Salut, {nom.split()[0]}."
+    st.markdown(f"""
+    <div class='home-hero'>
+        <div class='glow'></div>
+        <div class='pill'>BTS CIEL · Option A · {APP_VERSION}</div>
+        <h1>{salut}<span class='tag'>{j_txt}</span></h1>
+        <div class='sub'>Révise ce qui compte, au bon moment.<br>Une séance de 30 minutes par jour suffit.</div>
+    </div>
+    <div class='kpis'>
+        <div class='kpi hot'><div class='v'>{j_txt}</div><div class='l'>BTS blanc le {datetime.strptime(d['exam_date'], '%Y-%m-%d').strftime('%d/%m') if jours is not None else '—'}</div></div>
+        <div class='kpi'><div class='v'>{a_faire}</div><div class='l'>Flashcards du jour</div></div>
+        <div class='kpi'><div class='v'>{n_err}</div><div class='l'>Erreurs à corriger</div></div>
+        <div class='kpi'><div class='v'>{voc_due + voc_new}</div><div class='l'>Mots d'anglais du jour</div></div>
+        <div class='kpi'><div class='v'>{serie_de_jours(d)}</div><div class='l'>Jours de suite</div></div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    st.markdown("<div class='sec-title'>Ta séance d'aujourd'hui · dans cet ordre</div>", unsafe_allow_html=True)
+    c1, c2, c3 = st.columns(3)
+    with c1:
+        _action_card('seance', 'Étape 1 · 10 min', '#ff453a', 'Séance du jour',
+                     f"{a_faire} flashcards à revoir. Celles que tu sais reviennent plus tard, les autres tout de suite.", 'Commencer →')
+    with c2:
+        _action_card('erreurs', 'Étape 2 · 10 min', '#3d6bff', "Carnet d'erreurs",
+                     (f"{n_err} question(s) ratée(s) à refaire. Réussie 2 fois de suite = elle sort du carnet." if n_err else
+                      "Vide pour l'instant. Fais un quiz : tes erreurs viendront s'y ranger."), 'Ouvrir →')
+    with c3:
+        _action_card('vocabulaire', 'Étape 3 · 10 min', '#ffcc33', 'Vocabulaire anglais',
+                     f"{voc_known} / {VOCAB_TOTAL} mots acquis. Liste, cartes, QCM ou mot à écrire.", 'Réviser →')
+
+    st.markdown("<div class='sec-title'>Pour aller plus loin</div>", unsafe_allow_html=True)
+    c4, c5, c6 = st.columns(3)
+    with c4:
+        _action_card('examen', "Conditions d'examen", '#8e8e96', 'Examen blanc', "20, 40 ou 60 questions chronométrées. Note sur 20 et détail par matière.", "S'entraîner →")
+    with c5:
+        _action_card('quiz', 'Par matière', '#8e8e96', 'Grand quiz', f"{len(QUESTION_POOL)} questions, filtrées par matière ou par chapitre.", 'Choisir →')
+    with c6:
+        _action_card('enonces', 'Méthode', '#8e8e96', 'Comprendre les énoncés', "Ce que veut dire « justifier », « en déduire », « relever »… en mots simples.", 'Lire →')
+
+    st.markdown("<div class='sec-title'>Ta maîtrise par matière</div>", unsafe_allow_html=True)
+    mastery = d.get('domain_mastery', {})
+    vues = d.get('qstats', {})
+    lignes = []
+    for mod, key in MOD_TO_MASTERY.items():
+        tot = vues.get(mod, [0, 0])[1]
+        val = mastery.get(key, 0) if tot >= 5 else None
+        larg = val if val is not None else 0
+        txt = f"{val} %" if val is not None else "—"
+        lignes.append(f"<div class='mastery-row'><div class='n'>{key}</div><div class='b'><i style='width:{larg}%'></i></div><div class='p'>{txt}</div></div>")
+    st.markdown("".join(lignes), unsafe_allow_html=True)
+    st.caption("Calculé sur tes vraies réponses aux quiz et examens blancs (à partir de 5 questions par matière). « — » = pas encore assez de réponses.")
+
+    with st.expander("Changer la date du BTS blanc ou de l'épreuve visée"):
+        try:
+            cur = datetime.strptime(d['exam_date'], '%Y-%m-%d').date()
+        except Exception:
+            cur = _today()
+        nd = st.date_input("Date visée :", value=cur, key='v32_exam_date')
+        if st.button("Enregistrer la date", key='v32_exam_date_btn'):
+            d['exam_date'] = _iso(nd)
+            update_active_user_data(d)
+            st.rerun()
+
+
+# Barre latérale : marque, profil, recherche, menu, compte
+init_user_session()
+_slug = nav_current()
+with st.sidebar:
+    u_name = st.session_state.current_user
+    render_sidebar_header()
+    render_sidebar_menu()
+    st.markdown("---")
+    with st.expander("Mon compte", expanded=False):
         c_mode = st.radio("Action :", ["Connexion / Création", "Exporter mes données (Cloud Sync)"], horizontal=True, key="user_act_radio")
         if "Connexion" in c_mode:
             nom_in = st.text_input("Nom d'utilisateur :", value="" if u_name == "Invité BTS CIEL" else u_name, key="input_username")
@@ -4142,109 +4262,17 @@ with st.sidebar:
             st.info("☁️ **Cloud Ready** : Vous pouvez exporter votre sauvegarde JSON pour la charger sur n'importe quel autre appareil ou la synchroniser.")
             st.download_button("Télécharger ma progression (JSON)", data=json.dumps(st.session_state.user_progress, indent=2), file_name=f"progression_ciel_{u_name}.json", mime="application/json")
     
-    st.markdown("---")
-    hub_choisi = st.radio("🚀 ESPACE DE TRAVAIL :", list(HUBS_CONFIG.keys()), index=0)
-    
-    st.markdown("---")
-    modules_du_hub = HUBS_CONFIG[hub_choisi]
-    labels_modules = [m[0] for m in modules_du_hub]
-    label_choisi = st.selectbox("📂 Module actif :", labels_modules, key=f"sel_mod_{hub_choisi}")
-    page = next((m[1] for m in modules_du_hub if m[0] == label_choisi), modules_du_hub[0][1])
-    st.caption(f"📍 Navigation : `{hub_choisi}` › **{label_choisi}**")
+
+page = NAV_ITEMS[_slug][2]
+render_crumb(_slug)
 
 
 if page == '🏠 Accueil & Dashboard':
-    st.markdown("""
-    <div class='hero-container'>
-        <div class='hero-title'>⚡ BTS CIEL - Studio d'Excellence Numérique</div>
-        <div class='hero-subtitle'>Plateforme d'élite pour la réussite des épreuves E4, E5 et E6 du BTS Cybersécurité, Informatique et réseaux, Électronique</div>
-        <div style='margin-top: 15px; display: flex; flex-wrap: wrap; gap: 6px;'>
-            <span class='badge badge-blue'>Option A : Informatique & Réseaux</span>
-            <span class='badge badge-emerald'>Option B : Électronique & Réseaux</span>
-            <span class='badge badge-purple'>UML & SysML Pro</span>
-            <span class='badge badge-amber'>Conforme Annales 2024-2026</span>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    render_today_panel()
-
-    col1, col2, col3, col4 = st.columns(4)
-    with col1:
-        st.markdown("<div class='stat-box'><div class='stat-number'>8</div><div class='stat-label'>Matières Structurées</div></div>", unsafe_allow_html=True)
-    with col2:
-        st.markdown(f"<div class='stat-box'><div class='stat-number'>{len(QUESTION_POOL)}</div><div class='stat-label'>Questions de Cours & Quiz</div></div>", unsafe_allow_html=True)
-    with col3:
-        st.markdown("<div class='stat-box'><div class='stat-number'>742</div><div class='stat-label'>Mots d'anglais à maîtriser</div></div>", unsafe_allow_html=True)
-    with col4:
-        st.markdown("<div class='stat-box'><div class='stat-number'>105</div><div class='stat-label'>Flashcards Actives 3D</div></div>", unsafe_allow_html=True)
-    
-    st.markdown('<br>', unsafe_allow_html=True)
-    
-    c1, c2 = st.columns([2, 1])
-    with c1:
-        st.markdown("""
-        <div class='ciel-card'>
-            <h3 style='color: #38bdf8; margin-top:0; font-size: 1.3rem;'>🎯 Méthode de Travail Optimale</h3>
-            <p style='color: #cbd5e1; font-size: 0.98rem; line-height: 1.6;'>Cette plateforme a été restructurée en <b>4 Hubs Thématiques</b> pour correspondre aux exigences strictes des jurys d'examen :</p>
-            <ul style='color: #cbd5e1; line-height: 1.8;'>
-                <li><b style='color: #ffffff;'>📖 Référentiel par Matière</b> : Cours rangés par discipline (Maths, Réseaux, Cyber, Dev C++, Linux AD, Élec, CGE, Anglais) avec <b>10 questions d'application directe</b> à chaque fin de chapitre.</li>
-                <li><b style='color: #ffffff;'>🧪 Laboratoire Pratique</b> : Entraînez-vous à saisir de véritables commandes sous Cisco IOS, Bash Debian, C++ Debugger, PowerShell Active Directory et bus IoT.</li>
-                <li><b style='color: #ffffff;'>🎯 Entraînement & Examens</b> : 105 Flashcards actives, Annales réelles 2024-2026 décortiquées et Grand Quiz de 70 questions.</li>
-            </ul>
-        </div>
-        """, unsafe_allow_html=True)
-    with c2:
-        st.markdown("""
-        <div class='ciel-card' style='border-left: 4px solid #34d399;'>
-            <h4 style='color: #34d399; margin-top:0; font-size: 1.15rem;'>📋 Épreuves Certifiantes :</h4>
-            <p style='color: #cbd5e1; margin-bottom: 12px;'><b style='color: #ffffff;'>• E4 : Étude & Conception (Coeff 4)</b><br>
-            <span style='color: #94a3b8; font-size: 0.88rem;'>6h d'épreuve : 4h30 Info/Réseaux (70 pts) + 1h30 Physique (30 pts)</span></p>
-            <p style='color: #cbd5e1; margin-bottom: 12px;'><b style='color: #ffffff;'>• E5 : Intervention & Maintenance (Coeff 3)</b><br>
-            <span style='color: #94a3b8; font-size: 0.88rem;'>Configurations réelles Cisco, Linux, pfSense, Wireshark</span></p>
-            <p style='color: #cbd5e1; margin-bottom: 0;'><b style='color: #ffffff;'>• E6 : Projet Professionnel (Coeff 7)</b><br>
-            <span style='color: #94a3b8; font-size: 0.88rem;'>Soutenance orale 1h, Cahier des charges, UML/SysML & PVL Pytest</span></p>
-        </div>
-        """, unsafe_allow_html=True)
-        
-    st.markdown("""
-    <div style='margin-top: 30px; margin-bottom: 20px;'>
-        <h3 style='color: #38bdf8; font-weight: 800; font-size: 1.4rem; margin-bottom: 6px;'>🗺️ Carte d'Accès Rapide aux 4 Hubs du Studio</h3>
-        <p style='color: #94a3b8; font-size: 0.95rem;'>Chaque espace est accessible via le menu latéral gauche :</p>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    col_h1, col_h2 = st.columns(2)
-    with col_h1:
-        st.markdown("""
-        <div class='ciel-card' style='border-top: 3px solid #38bdf8; min-height: 140px;'>
-            <h4 style='color: #38bdf8; margin-top: 0;'>🏠 1. Mon Tableau de Bord & Profil</h4>
-            <p style='color: #94a3b8; font-size: 0.9rem;'>Pilotez vos révisions personnalisées : métriques, plan de remédiation ciblée, planning 6 semaines et profil utilisateur avec gain d'XP.</p>
-        </div>
-        """, unsafe_allow_html=True)
-        st.markdown("""
-        <div class='ciel-card' style='border-top: 3px solid #34d399; min-height: 140px;'>
-            <h4 style='color: #34d399; margin-top: 0;'>🧪 2. Le Laboratoire Pratique</h4>
-            <p style='color: #94a3b8; font-size: 0.9rem;'>Manipulez des simulateurs avancés : 5 consoles réelles (Cisco, Linux, C++, AD, IoT), décodeur Wireshark, calculateurs VLSM et tests Pytest E6.</p>
-        </div>
-        """, unsafe_allow_html=True)
-    with col_h2:
-        st.markdown("""
-        <div class='ciel-card' style='border-top: 3px solid #818cf8; min-height: 140px;'>
-            <h4 style='color: #818cf8; margin-top: 0;'>📖 3. Référentiel Rangé par Matière</h4>
-            <p style='color: #94a3b8; font-size: 0.9rem;'>Tous vos cours structurés rigoureusement par discipline académique (Maths, Réseaux, Cyber, Dev C++, Linux AD, Élec, Anglais, CGE) avec 10 questions certifiantes par cours.</p>
-        </div>
-        """, unsafe_allow_html=True)
-        st.markdown("""
-        <div class='ciel-card' style='border-top: 3px solid #fb923c; min-height: 140px;'>
-            <h4 style='color: #fb923c; margin-top: 0;'>🎯 4. Entraînement & Examens</h4>
-            <p style='color: #94a3b8; font-size: 0.9rem;'>Entraînement réflexe : 105 flashcards interactives 3D, annales officielles 2024-2026 décortiquées et grand quiz de 70 questions avec correction active.</p>
-        </div>
-        """, unsafe_allow_html=True)
+    render_home()
 
 elif page == '📊 Mathématiques : Suites Arithmétiques & Géométriques':
     st.markdown("<div class='hero-title'>📊 Mathématiques Appliquées : Suites & Dérivées</div>", unsafe_allow_html=True)
-    st.markdown("<p style='color:#64748b;'>Cours complet, formules explicites, méthode de la dérivée, simulateurs interactifs et exercices de programmation Python</p>", unsafe_allow_html=True)
+    st.markdown("<p style='color:#8e8e96;'>Cours complet, formules explicites, méthode de la dérivée, simulateurs interactifs et exercices de programmation Python</p>", unsafe_allow_html=True)
     tab_m1, tab_m2, tab_m3, tab_m4 = st.tabs(['📖 Cours & Formules Clés', '🧮 Calculatrice & Simulateur de Suites', '🐍 Traduction Algorithmique Python', '✍️ Exercices Pratiques & Quiz'])
     with tab_m1:
         st.subheader('1. Synthèse Comparative : Arithmétique vs Géométrique')
@@ -4376,11 +4404,11 @@ elif page == '📊 Mathématiques : Suites Arithmétiques & Géométriques':
 
 elif page == '🛠️ Fiches Réussite Épreuve E5 (TP & Pratique)':
     st.markdown("<div class='hero-title'>🛠️ Fiches Réussite Épreuve E5 : TP & Pratiques de Terrain</div>", unsafe_allow_html=True)
-    st.markdown("<p style='color:#64748b;'>Guide complet, procédures pas-à-pas et fiches réflexes d'intervention pour réussir haut la main l'épreuve pratique E5 (Réseaux, SysAdmin, Cybersécurité & Électronique)</p>", unsafe_allow_html=True)
+    st.markdown("<p style='color:#8e8e96;'>Guide complet, procédures pas-à-pas et fiches réflexes d'intervention pour réussir haut la main l'épreuve pratique E5 (Réseaux, SysAdmin, Cybersécurité & Électronique)</p>", unsafe_allow_html=True)
     tab_e5_1, tab_e5_2, tab_e5_3, tab_e5_4, tab_e5_5, tab_e5_6, tab_e5_7, tab_e5_8 = st.tabs(['📶 E5-01 : Cisco IOS (Switch & Routeur)', '🖥️ E5-02 : Linux Debian & SysAdmin', '🏢 E5-03 : Active Directory, DNS, DHCP & GPO', '🛡️ E5-04 : Pare-Feu pfSense, DMZ & Flux', '🔍 E5-05 : Wireshark & Trames', '⚡ E5-06 : Électronique & Bus', '📋 E5-07 : Check-List Diagnostic E5', '✍️ Auto-Évaluation Pratique E5'])
     with tab_e5_1:
         st.subheader('📶 Fiche E5-01 : Commutateurs & Routeurs Cisco (Configuration & Dépannage)')
-        st.markdown("\n        <div class='ciel-card' style='border-left: 6px solid #2563eb !important;'>\n            <h4 style='color:#1d4ed8; margin-top:0;'>🎯 Objectifs de l'Épreuve E5 sur Cisco :</h4>\n            <p style='color:#334155; margin-bottom:0;'>Être capable d'initialiser, sécuriser, segmentez en VLANs (802.1Q), configurer le routage inter-VLAN et appliquer le Port Security sur les équipements Cisco de l'atelier.</p>\n        </div>\n        ", unsafe_allow_html=True)
+        st.markdown("\n        <div class='ciel-card' style='border-left: 6px solid #2563eb !important;'>\n            <h4 style='color:#1d4ed8; margin-top:0;'>🎯 Objectifs de l'Épreuve E5 sur Cisco :</h4>\n            <p style='color:#c7c7cc; margin-bottom:0;'>Être capable d'initialiser, sécuriser, segmentez en VLANs (802.1Q), configurer le routage inter-VLAN et appliquer le Port Security sur les équipements Cisco de l'atelier.</p>\n        </div>\n        ", unsafe_allow_html=True)
         with st.expander('1️⃣ Configuration Initiale & Sécurisation de Base (Switch/Routeur)', expanded=True):
             st.markdown("\n            ```cisco\n            enable\n            configure terminal\n            hostname SW-L2-CIEL\n            enable secret CiscoPass123!\n            \n            ! Sécurisation de l'accès Console\n            line console 0\n              password ConsolePass!\n              login\n              logging synchronous\n              exit\n              \n            ! Sécurisation des lignes VTY (SSH / Telnet)\n            line vty 0 15\n              password VtyPass!\n              login\n              transport input ssh\n              exit\n              \n            ! Chiffrement des mots de passe en clair dans le fichier de config\n            service password-encryption\n            \n            ! Bannière d'avertissement légal\n            banner motd # ACCES RESTREINT - BTS CIEL E5 - UTILISATEURS AUTORISES SEULEMENT #\n            ```\n            ")
         with st.expander("2️⃣ Configuration des VLANs & Assignation des Ports d'Accès", expanded=False):
@@ -4395,7 +4423,7 @@ elif page == '🛠️ Fiches Réussite Épreuve E5 (TP & Pratique)':
             st.markdown("\n            | Commande Cisco IOS | Objectif de Vérification E5 |\n            | :--- | :--- |\n            | `show vlan brief` | Vérifier que tous les VLANs existent et que les bons ports sont attribués. |\n            | `show interfaces trunk` | Vérifier que le lien Trunk est actif, en 802.1Q, et que les VLANs passent. |\n            | `show ip interface brief` | Vérifier l'état physique (`Status`) et logique (`Protocol`) des interfaces (`up/up`). |\n            | `show ip route` | Inspecter la table de routage IP du routeur ou switch L3. |\n            | `show port-security interface f0/5` | Vérifier si un port est bloqué suite à une violation d'adresse MAC (`err-disabled`). |\n            | `show running-config` | Consulter la configuration active en mémoire vive (RAM). |\n            ")
     with tab_e5_2:
         st.subheader('🖥️ Fiche E5-02 : Linux Debian Server & Administration Système')
-        st.markdown("\n        <div class='ciel-card' style='border-left: 6px solid #10b981 !important;'>\n            <h4 style='color:#065f46; margin-top:0;'>🎯 Objectifs de l'Épreuve E5 sur Linux :</h4>\n            <p style='color:#334155; margin-bottom:0;'>Savoir configurer le réseau fixe, gérer les utilisateurs/groupes, appliquer les permissions fines (`chmod`, SUID, SGID, Sticky, ACLs), éditer `sudoers`, écrire des scripts Bash et gérer les services systemd.</p>\n        </div>\n        ", unsafe_allow_html=True)
+        st.markdown("\n        <div class='ciel-card' style='border-left: 6px solid #10b981 !important;'>\n            <h4 style='color:#065f46; margin-top:0;'>🎯 Objectifs de l'Épreuve E5 sur Linux :</h4>\n            <p style='color:#c7c7cc; margin-bottom:0;'>Savoir configurer le réseau fixe, gérer les utilisateurs/groupes, appliquer les permissions fines (`chmod`, SUID, SGID, Sticky, ACLs), éditer `sudoers`, écrire des scripts Bash et gérer les services systemd.</p>\n        </div>\n        ", unsafe_allow_html=True)
         with st.expander('1️⃣ Configuration Réseau Fixe (`/etc/network/interfaces`)', expanded=True):
             st.markdown("\n            ```bash\n            # Éditer le fichier de configuration réseau\n            nano /etc/network/interfaces\n\n            # Configuration statique de l'interface eth0\n            auto eth0\n            iface eth0 inet static\n                address 192.168.1.100/24\n                gateway 192.168.1.254\n                dns-nameservers 192.168.1.200 8.8.8.8\n\n            # Appliquer les modifications\n            systemctl restart networking\n            # Ou avec la commande ip :\n            ip addr add 192.168.1.100/24 dev eth0\n            ip route add default via 192.168.1.254\n            ```\n            ")
         with st.expander('2️⃣ Gestion des Utilisateurs, Groupes & Privilèges Sudo', expanded=False):
@@ -4408,7 +4436,7 @@ elif page == '🛠️ Fiches Réussite Épreuve E5 (TP & Pratique)':
             st.markdown("\n            | Commande Linux | Rôle Diagnostic E5 |\n            | :--- | :--- |\n            | `ip a` / `ip route` | Vérifier les adresses IP configurées et la passerelle par défaut. |\n            | `ss -tulpn` / `netstat -an` | Lister tous les ports TCP/UDP en écoute et leurs PID. |\n            | `systemctl status <service>` | Inspecter l'état d'un service (active, dead, failed). |\n            | `journalctl -u <service> -n 30` | Consulter les 30 dernières lignes de journal systemd d'un service. |\n            | `tail -f /var/log/auth.log` | Suivre en temps réel les tentatives de connexion et d'authentification. |\n            | `df -h` / `free -m` | Vérifier l'occupation de l'espace disque et la mémoire RAM disponible. |\n            ")
     with tab_e5_3:
         st.subheader('🏢 Fiche E5-03 : Active Directory, DNS, DHCP & GPO (Windows Server)')
-        st.markdown("\n        <div class='ciel-card' style='border-left: 6px solid #8b5cf6 !important;'>\n            <h4 style='color:#6d28d9; margin-top:0;'>🎯 Objectifs de l'Épreuve E5 sur Active Directory :</h4>\n            <p style='color:#334155; margin-bottom:0;'>Maîtriser la gestion de domaine ADDS, la création d'OU, d'utilisateurs/groupes, le déploiement de GPO (LSDOU), et les services d'infrastructure DNS / DHCP.</p>\n        </div>\n        ", unsafe_allow_html=True)
+        st.markdown("\n        <div class='ciel-card' style='border-left: 6px solid #8b5cf6 !important;'>\n            <h4 style='color:#6d28d9; margin-top:0;'>🎯 Objectifs de l'Épreuve E5 sur Active Directory :</h4>\n            <p style='color:#c7c7cc; margin-bottom:0;'>Maîtriser la gestion de domaine ADDS, la création d'OU, d'utilisateurs/groupes, le déploiement de GPO (LSDOU), et les services d'infrastructure DNS / DHCP.</p>\n        </div>\n        ", unsafe_allow_html=True)
         with st.expander("1️⃣ Arborescence ADDS & Commandes PowerShell d'Administration", expanded=True):
             st.markdown('\n            ```powershell\n            # 1. Créer la structure d\'Unités d\'Organisation (OU)\n            New-ADOrganizationalUnit -Name "Direction" -Path "DC=ciel,DC=local"\n            New-ADOrganizationalUnit -Name "Ingénieurs" -Path "DC=ciel,DC=local"\n            New-ADOrganizationalUnit -Name "Techniciens" -Path "DC=ciel,DC=local"\n\n            # 2. Créer un utilisateur dans une OU\n            New-ADUser -Name "Alice Martin" `\n                       -GivenName "Alice" `\n                       -Surname "Martin" `\n                       -UserPrincipalName "amartin@ciel.local" `\n                       -SamAccountName "amartin" `\n                       -Path "OU=Ingénieurs,DC=ciel,DC=local" `\n                       -AccountPassword (Read-Host -AsSecureString "Password123!") `\n                       -Enabled $true `\n                       -ChangePasswordAtLogon $false\n\n            # 3. Créer un groupe de sécurité et ajouter le membre\n            New-ADGroup -Name "G_Ingenieurs" -GroupScope Global -GroupCategory Security `\n                        -Path "OU=Ingénieurs,DC=ciel,DC=local"\n            Add-ADGroupMember -Identity "G_Ingenieurs" -Members "amartin"\n            ```\n            ')
         with st.expander("2️⃣ Stratégies de Groupe (GPO) & Ordre d'Application LSDOU", expanded=False):
@@ -4421,18 +4449,18 @@ elif page == '🛠️ Fiches Réussite Épreuve E5 (TP & Pratique)':
             st.markdown("\n            | Commande PowerShell / CMD | Rôle Diagnostic E5 |\n            | :--- | :--- |\n            | `dcdiag` | Diagnostic complet de santé du Contrôleur de Domaine Active Directory. |\n            | `nslookup srv-web.ciel.local` | Tester la résolution de nom DNS directe et inverse. |\n            | `Test-NetConnection -ComputerName srv-ad -Port 389` | Tester l'ouverture du port LDAP (389) ou LDAPS (636). |\n            | `nltest /dsgetdc:ciel.local` | Vérifier quel contrôleur de domaine a authentifié la machine. |\n            | `ipconfig /all` & `ipconfig /flushdns` | Afficher la config IP et vider le cache DNS client. |\n            ")
     with tab_e5_4:
         st.subheader('🛡️ Fiche E5-04 : Pare-Feu pfSense, DMZ & Matrice des Flux')
-        st.markdown("\n        <div class='ciel-card' style='border-left: 6px solid #ef4444 !important;'>\n            <h4 style='color:#b91c1c; margin-top:0;'>🎯 Objectifs de l'Épreuve E5 sur pfSense :</h4>\n            <p style='color:#334155; margin-bottom:0;'>Configurer les zones WAN, LAN et DMZ, appliquer la règle d'isolation stricte DMZ $\\rightarrow$ LAN, mettre en place les règles de filtrage et le NAT/PAT Port Forwarding.</p>\n        </div>\n        ", unsafe_allow_html=True)
+        st.markdown("\n        <div class='ciel-card' style='border-left: 6px solid #ef4444 !important;'>\n            <h4 style='color:#b91c1c; margin-top:0;'>🎯 Objectifs de l'Épreuve E5 sur pfSense :</h4>\n            <p style='color:#c7c7cc; margin-bottom:0;'>Configurer les zones WAN, LAN et DMZ, appliquer la règle d'isolation stricte DMZ $\\rightarrow$ LAN, mettre en place les règles de filtrage et le NAT/PAT Port Forwarding.</p>\n        </div>\n        ", unsafe_allow_html=True)
         with st.expander('1️⃣ Architecture Réseau à 3 Interfaces & Adressage', expanded=True):
             st.markdown("\n            * **WAN (Wide Area Network)** : Interface d'accès externe (`10.0.0.2/24` ou IP Publique).\n            * **LAN (Local Area Network)** : Zone réseau interne sécurisée (`192.168.1.254/24`).\n            * **DMZ (Demilitarized Zone)** : Zone réseau isolée hébergeant les services ouverts à l'extérieur (`172.16.0.254/24`).\n            ")
         with st.expander("2️⃣ Règle d'Or d'Isolation de la DMZ (Inviolable)", expanded=False):
-            st.markdown("\n            <div class='ciel-card' style='background:#fef2f2 !important; border-left: 5px solid #dc2626 !important;'>\n                <b style='color:#991b1b;'>⚠️ Règle de Sécurité Numéro 1 en E5 :</b><br>\n                Une machine située en <b>DMZ ne doit JAMAIS pouvoir initier de connexion vers le réseau LAN interne</b>.<br>\n                Si le serveur Web DMZ est compromis par un pirate, celui-ci ne pourra pas attaquer les postes du réseau LAN.\n            </div>\n            ", unsafe_allow_html=True)
+            st.markdown("\n            <div class='ciel-card' style='background:rgba(255,69,58,0.06) !important; border-left: 5px solid #dc2626 !important;'>\n                <b style='color:#ff453a;'>⚠️ Règle de Sécurité Numéro 1 en E5 :</b><br>\n                Une machine située en <b>DMZ ne doit JAMAIS pouvoir initier de connexion vers le réseau LAN interne</b>.<br>\n                Si le serveur Web DMZ est compromis par un pirate, celui-ci ne pourra pas attaquer les postes du réseau LAN.\n            </div>\n            ", unsafe_allow_html=True)
         with st.expander('3️⃣ Matrice des Ports & Flux Réseaux de Référence (À Apprendre par Cœur)', expanded=False):
             st.markdown("\n            | Service | Protocole | Port | Sens Recommandé | Rôle & Explication |\n            | :--- | :--- | :--- | :--- | :--- |\n            | **DNS** | UDP / TCP | `53` | LAN -> DMZ / WAN | Résolution de noms de domaine. |\n            | **HTTP / HTTPS** | TCP | `80` / `443` | WAN -> DMZ (NAT) | Accès aux serveurs Web publics. |\n            | **SSH** | TCP | `22` | LAN -> DMZ | Administration à distance sécurisée. |\n            | **LDAP / LDAPS** | TCP | `389` / `636` | LAN -> DC | Annuaire d'entreprise ADDS. |\n            | **Kerberos AD** | TCP / UDP | `88` | LAN -> DC | Jetons d'authentification AD. |\n            | **SMB / CIFS** | TCP | `445` | LAN -> FileSRV | Partage de fichiers Windows. |\n            | **MQTTS** | TCP | `8883` | DMZ -> IoT Broker | Transport IoT chiffré TLS. |\n            ")
         with st.expander('4️⃣ Procédure de Configuration NAT / PAT (Port Forwarding pfSense)', expanded=False):
             st.markdown('\n            1. Aller dans **Firewall $\\rightarrow$ NAT $\\rightarrow$ Port Forward**.\n            2. Cliquer sur **Add (Top)** :\n               - **Interface** : `WAN`\n               - **Protocol** : `TCP`\n               - **Destination** : `WAN Address`\n               - **Destination Port Range** : `HTTP (80)`\n               - **Redirect Target IP** : `172.16.0.10` (IP du serveur Web DMZ)\n               - **Redirect Target Port** : `HTTP (80)`\n               - **Filter Rule Association** : `Pass` (Génère la règle de pare-feu automatiquement)\n            3. Cliquer sur **Save** puis **Apply Changes**.\n            ')
     with tab_e5_5:
         st.subheader('🔍 Fiche E5-05 : Wireshark & Diagnostics de Trames Réseaux')
-        st.markdown("\n        <div class='ciel-card' style='border-left: 6px solid #0284c7 !important;'>\n            <h4 style='color:#0369a1; margin-top:0;'>🎯 Objectifs de l'Épreuve E5 sur Wireshark :</h4>\n            <p style='color:#334155; margin-bottom:0;'>Capturer, filtrer et décoder des paquets réseaux pour identifier un dysfonctionnement, réconcilier une connexion TCP ou analyser un protocole applicatif.</p>\n        </div>\n        ", unsafe_allow_html=True)
+        st.markdown("\n        <div class='ciel-card' style='border-left: 6px solid #0284c7 !important;'>\n            <h4 style='color:#0369a1; margin-top:0;'>🎯 Objectifs de l'Épreuve E5 sur Wireshark :</h4>\n            <p style='color:#c7c7cc; margin-bottom:0;'>Capturer, filtrer et décoder des paquets réseaux pour identifier un dysfonctionnement, réconcilier une connexion TCP ou analyser un protocole applicatif.</p>\n        </div>\n        ", unsafe_allow_html=True)
         with st.expander("1️⃣ Filtres d'Affichage Wireshark Essentiels pour l'Examen", expanded=True):
             st.markdown('\n            | Filtre d\'Affichage Wireshark | Rôle Diagnostic E5 |\n            | :--- | :--- |\n            | `ip.addr == 192.168.1.50` | Filtrer tout le trafic concernant une adresse IP spécifique. |\n            | `tcp.port == 443` | Isoler le trafic Web sécurisé HTTPS. |\n            | `tcp.flags.syn == 1 and tcp.flags.ack == 0` | Identifier les demandes de connexion TCP (Handshake SYN). |\n            | `dns.qname contains "ciel"` | Filtrer les requêtes DNS portant sur le domaine d\'examen. |\n            | `dhcp.option.dhcp == 3` | Filtrer les paquets DHCP Request lors d\'un bail d\'adresse. |\n            | `arp.opcode == 2` | Filtrer les réponses ARP (Utile pour détecter un ARP Spoofing). |\n            | `http.request.method == "POST"` | Inspecter les envois de formulaires et identifiants en clair. |\n            ')
         with st.expander("2️⃣ Méthodologie d'Analyse d'une Séquence TCP 3-Way Handshake", expanded=False):
@@ -4441,7 +4469,7 @@ elif page == '🛠️ Fiches Réussite Épreuve E5 (TP & Pratique)':
             st.markdown("\n            * **Follow TCP Stream** : Clic droit sur un paquet TCP $\\rightarrow$ *Follow $\\rightarrow$ TCP Stream*. Permet de reconstituer l'intégralité du dialogue applicatif (HTTP, SMTP, FTP, Modbus) en texte clair.\n            * **Exportation d'Objets HTTP** : Menu *File $\\rightarrow$ Export Objects $\\rightarrow$ HTTP*. Permet d'extraire un fichier (image, PDF, binaire) téléchargé pendant la capture.\n            ")
     with tab_e5_6:
         st.subheader('⚡ Fiche E5-06 : Électronique, Oscilloscope & Bus Industriels')
-        st.markdown("\n        <div class='ciel-card' style='border-left: 6px solid #eab308 !important;'>\n            <h4 style='color:#a16207; margin-top:0;'>🎯 Objectifs de l'Épreuve E5 sur l'Atelier Électronique :</h4>\n            <p style='color:#334155; margin-bottom:0;'>Régler les calibres de l'oscilloscope, effectuer des mesures de tension/période/fréquence, calculer des quantums CAN, et contrôler le signal sur les bus I2C, SPI, CAN ou Modbus.</p>\n        </div>\n        ", unsafe_allow_html=True)
+        st.markdown("\n        <div class='ciel-card' style='border-left: 6px solid #eab308 !important;'>\n            <h4 style='color:#a16207; margin-top:0;'>🎯 Objectifs de l'Épreuve E5 sur l'Atelier Électronique :</h4>\n            <p style='color:#c7c7cc; margin-bottom:0;'>Régler les calibres de l'oscilloscope, effectuer des mesures de tension/période/fréquence, calculer des quantums CAN, et contrôler le signal sur les bus I2C, SPI, CAN ou Modbus.</p>\n        </div>\n        ", unsafe_allow_html=True)
         with st.expander("1️⃣ Mesures Physiques à l'Oscilloscope Numérique", expanded=True):
             st.markdown('\n            * **Tension Crête-à-Crête $V_{pp}$** : $V_{pp} = N_{\\text{div\\_vert}} \\times S_v$\n            * **Tension Maximale $V_{max}$** : $V_{max} = \\frac{V_{pp}}{2}$\n            * **Tension Efficace $V_{\\text{eff}}$** : $V_{\\text{eff}} = \\frac{V_{max}}{\\sqrt{2}} \\approx 0,707 \\times V_{max}$ (Signal sinusoïdal)\n            * **Période $T$** : $T = N_{\\text{div\\_horiz}} \\times S_h$\n            * **Fréquence $f$** : $f = \\frac{1}{T}$\n            * **Déphasage $\\Delta \\phi$** : $\\Delta \\phi = 360^\\circ \\times \\frac{\\Delta t}{T}$\n            ')
         with st.expander('2️⃣ Convertisseurs CAN / CNA (ADC / DAC)', expanded=False):
@@ -4450,7 +4478,7 @@ elif page == '🛠️ Fiches Réussite Épreuve E5 (TP & Pratique)':
             st.markdown('\n            | Bus de Terrain | Lignes Physiques | Type de Signal | Spécificités & Points de Contrôle E5 |\n            | :--- | :--- | :--- | :--- |\n            | **I2C** | 2 fils (`SDA`, `SCL`) | Synchrone | Résistances de tirage Pull-Up ($4,7\\text{ k}\\Omega$). Adressage 7 bits. |\n            | **SPI** | 4 fils (`MOSI`, `MISO`, `SCLK`, `CS`) | Synchrone Full-Duplex | Liaison maître-esclave très rapide (plusieurs MHz). |\n            | **Bus CAN** | 2 fils (`CAN_H`, `CAN_L`) | Différentiel | Résistances de terminaison de $120\\ \\Omega$. Bit dominant 0 / récessif 1. |\n            | **Modbus RTU** | 2 fils (`A`, `B` / RS-485) | Différentiel Asynchrone | Code Fonction `03` (Read Holding Registers), contrôle CRC-16. |\n            ')
     with tab_e5_7:
         st.subheader("📋 Fiche E5-07 : Check-List Diagnostic & Grille d'Intervention E5")
-        st.markdown("\n        <div class='ciel-card' style='border-top: 5px solid #2563eb !important;'>\n            <h4 style='color:#1d4ed8; margin-top:0;'>🧭 Guide Méthodologique de Résolution de Panne en 5 Étapes :</h4>\n            <p style='color:#334155;'>Suivez rigoureusement ce protocole lors de vos évaluations pratiques E5 pour ne négliger aucun point du barème :</p>\n            \n            ```\n            [Étape 1 : Vérification Couche 1 Physique]\n              └── Câble RJ45 / Fibre correctement encliqueté ? Voyants Link/Act allumés ? Équipement alimenté ?\n            \n            [Étape 2 : Vérification Couche 2 Liaison]\n              └── Adresse MAC détectée ? Port du switch dans le bon VLAN ? (`show vlan brief` / `ip link`)\n            \n            [Étape 3 : Vérification Couche 3 Réseau]\n              └── IP, Masque et Passerelle configurés ? PING passerelle OK ? PING DNS OK ? (`ping 192.168.1.254`)\n            \n            [Étape 4 : Vérification Couche 4/7 Transport & Application]\n              └── Port ouvert sur la cible ? Service démarré ? (`ss -tulpn` / `nc -zvw3 IP PORT` / `curl -Iv`)\n            \n            [Étape 5 : Documentation & Compte-Rendu d'Intervention]\n              └── Rédiger la fiche de synthèse d'examen avec les symptômes, la cause racine et la solution appliquée.\n            ```\n        </div>\n        ", unsafe_allow_html=True)
+        st.markdown("\n        <div class='ciel-card' style='border-top: 5px solid #2563eb !important;'>\n            <h4 style='color:#1d4ed8; margin-top:0;'>🧭 Guide Méthodologique de Résolution de Panne en 5 Étapes :</h4>\n            <p style='color:#c7c7cc;'>Suivez rigoureusement ce protocole lors de vos évaluations pratiques E5 pour ne négliger aucun point du barème :</p>\n            \n            ```\n            [Étape 1 : Vérification Couche 1 Physique]\n              └── Câble RJ45 / Fibre correctement encliqueté ? Voyants Link/Act allumés ? Équipement alimenté ?\n            \n            [Étape 2 : Vérification Couche 2 Liaison]\n              └── Adresse MAC détectée ? Port du switch dans le bon VLAN ? (`show vlan brief` / `ip link`)\n            \n            [Étape 3 : Vérification Couche 3 Réseau]\n              └── IP, Masque et Passerelle configurés ? PING passerelle OK ? PING DNS OK ? (`ping 192.168.1.254`)\n            \n            [Étape 4 : Vérification Couche 4/7 Transport & Application]\n              └── Port ouvert sur la cible ? Service démarré ? (`ss -tulpn` / `nc -zvw3 IP PORT` / `curl -Iv`)\n            \n            [Étape 5 : Documentation & Compte-Rendu d'Intervention]\n              └── Rédiger la fiche de synthèse d'examen avec les symptômes, la cause racine et la solution appliquée.\n            ```\n        </div>\n        ", unsafe_allow_html=True)
     with tab_e5_8:
         st.subheader('✍️ Auto-Évaluation Pratique E5 (QCM de Validation)')
         st.markdown("Testez vos réflexes d'intervention pratique avant de passer devant les examinateurs :")
@@ -4471,7 +4499,7 @@ elif page == '🛠️ Fiches Réussite Épreuve E5 (TP & Pratique)':
 
 elif page == '📄 Fiches Savoir & Fiches Montage':
     st.markdown("<div class='hero-title'>📄 Recueil Officiel des Fiches Savoir & Fiches Montage</div>", unsafe_allow_html=True)
-    st.markdown("<p style='color:#64748b;'>Guide complet, exhaustif et verbatim de toutes les Fiches Savoir (N°1 à N°12), Fiche Physique et Fiches Montage (N°1 & N°2) du BTS CIEL (Option A)</p>", unsafe_allow_html=True)
+    st.markdown("<p style='color:#8e8e96;'>Guide complet, exhaustif et verbatim de toutes les Fiches Savoir (N°1 à N°12), Fiche Physique et Fiches Montage (N°1 & N°2) du BTS CIEL (Option A)</p>", unsafe_allow_html=True)
     tab_fs1, tab_fs2, tab_fs3, tab_fs4, tab_fs5 = st.tabs(['⚡ Fiches Savoir Électronique (1 à 4 & Physique)', '💻 Fiches Savoir Informatique (5 à 8)', '📶 Fiches Savoir Réseaux & Com (9 à 12)', '🛠️ Fiches Montage (N°1 & N°2)', '✍️ Auto-Évaluation Fiches Savoir'])
     with tab_fs1:
         st.subheader('⚡ Fiches Savoir : Électronique, Puissance & Signaux')
@@ -4970,7 +4998,7 @@ elif page == '🛡️ TP Cybersécurité, Gouvernance & pfSense':
 
 elif page == '📖 Culture Générale & Expression (CGE)':
     st.markdown("<div class='hero-title'>📖 Culture Générale & Expression (Épreuve E1)</div>", unsafe_allow_html=True)
-    st.markdown("<p style='color:#64748b;'>Préparation méthodologique de l'épreuve écrite E1 (Coefficient 2, 3h), thèmes officiels 2025/2026/2027 et entraînements</p>", unsafe_allow_html=True)
+    st.markdown("<p style='color:#8e8e96;'>Préparation méthodologique de l'épreuve écrite E1 (Coefficient 2, 3h), thèmes officiels 2025/2026/2027 et entraînements</p>", unsafe_allow_html=True)
 
     tab_cge1, tab_cge2, tab_cge3, tab_cge4 = st.tabs([
         "🎯 Réforme & Méthodologie E1",
@@ -4984,7 +5012,7 @@ elif page == '📖 Culture Générale & Expression (CGE)':
         st.markdown("""
 <div class='ciel-card' style='border-left: 6px solid #2563eb !important;'>
     <h4 style='color: #1d4ed8; margin-top: 0;'>📋 Cadre Réglementaire de l'Épreuve Écrite E1</h4>
-    <ul style='color: #1e293b; line-height: 1.8;'>
+    <ul style='color: #e4e4e7; line-height: 1.8;'>
         <li><b>Coefficient officiel</b> : <b>2</b> (Épreuve écrite nationale de <b>3 heures</b>, réformée depuis l'arrêté de juillet 2023).</li>
         <li><b>Notation globale</b> : Notée sur <b>20 points</b>, scindée en deux parties équilibrées (10 pts + 10 pts).</li>
         <li><b>Changement majeur de la réforme</b> : Fin de la synthèse de documents académique stricte et de l'écriture personnelle isolée ! L'épreuve privilégie désormais la confrontation d'idées, la finesse d'analyse et l'argumentation critique.</li>
@@ -5028,9 +5056,9 @@ elif page == '📖 Culture Générale & Expression (CGE)':
     with tab_cge2:
         st.subheader("2. Thème de 2e Année (Session 2026) : « Les animaux et nous : imaginer, connaître, comprendre l'animal »")
         st.markdown("""
-<div class='ciel-card' style='border-left: 6px solid #10b981 !important; background: #f0fdf4;'>
+<div class='ciel-card' style='border-left: 6px solid #10b981 !important; background: rgba(48,209,88,0.06);'>
     <h4 style='color: #065f46; margin-top: 0;'>📖 Problématique Officielle du Bulletin Officiel (BO n°17)</h4>
-    <p style='color: #166534;'>L'homme n'a cessé de rêver les animaux comme autant de miroirs, d'emblèmes voire de repoussoirs de lui-même. Objets de fascination, de délectation ou d'effroi, les animaux suscitent une multiplicité de représentations artistiques et philosophiques. Ce thème invite à interroger la frontière poreuse entre l'humain et l'animal, la hiérarchie des espèces et les responsabilités éthiques contemporaines.</p>
+    <p style='color: #30d158;'>L'homme n'a cessé de rêver les animaux comme autant de miroirs, d'emblèmes voire de repoussoirs de lui-même. Objets de fascination, de délectation ou d'effroi, les animaux suscitent une multiplicité de représentations artistiques et philosophiques. Ce thème invite à interroger la frontière poreuse entre l'humain et l'animal, la hiérarchie des espèces et les responsabilités éthiques contemporaines.</p>
 </div>
         """, unsafe_allow_html=True)
 
@@ -5070,7 +5098,7 @@ elif page == '📖 Culture Générale & Expression (CGE)':
         st.subheader("3. Thème Précédent (Session 2025) : « À table ! : formes et enjeux du repas »")
         st.markdown("""
 <div class='ciel-card' style='border-left: 6px solid #f59e0b !important;'>
-    <h4 style='color: #b45309; margin-top: 0;'>🍽️ Enjeux Sociologiques, Anthropologiques & Écologiques du Repas</h4>
+    <h4 style='color: #ffcc33; margin-top: 0;'>🍽️ Enjeux Sociologiques, Anthropologiques & Écologiques du Repas</h4>
     <p>Le repas n'est pas un simple besoin biologique de nutrition : c'est un <b>fait social total</b>, un rituel de commensalité, d'intégration sociale et un miroir des inégalités.</p>
     <ul>
         <li><b>Commensalité & Liens sociaux</b> : Partager le pain (*cum panis* = compagnon). Le banquet platonicien, les repas de famille, la fête villageoise.</li>
@@ -5692,8 +5720,8 @@ L'atténuation en espace libre calculée pour la distance de liaison est $A_{\te
 
 elif page == '🎯 Révision Totale BTS Blanc (9-11 Déc)':
     st.markdown("<div class='hero-title'>🎯 Hub de Révision Totale - BTS Blanc (9, 10 & 11 Décembre)</div>", unsafe_allow_html=True)
-    st.markdown("<p style='color:#64748b;'>Centrale de préparation intensive regroupant l'intégralité des cours, TP, annales et fiches de synthèse du notebook</p>", unsafe_allow_html=True)
-    st.markdown("\n    <div class='ciel-card' style='border-left: 6px solid #f59e0b !important; background: #fffbeb;'>\n        <h3 style='color: #b45309; margin-top: 0;'>🚨 Objectif Échéance : Examens du 9, 10 et 11 Décembre 2026</h3>\n        <p style='color: #78350f;'>Ce hub rassemble <b>l'ensemble des 61 sources et TPs</b> déposés dans votre notebook pour une révision transversale sans aucune impasse.</p>\n    </div>", unsafe_allow_html=True)
+    st.markdown("<p style='color:#8e8e96;'>Centrale de préparation intensive regroupant l'intégralité des cours, TP, annales et fiches de synthèse du notebook</p>", unsafe_allow_html=True)
+    st.markdown("\n    <div class='ciel-card' style='border-left: 6px solid #f59e0b !important; background: rgba(255,204,51,0.05);'>\n        <h3 style='color: #ffcc33; margin-top: 0;'>🚨 Objectif Échéance : Examens du 9, 10 et 11 Décembre 2026</h3>\n        <p style='color: #ffcc33;'>Ce hub rassemble <b>l'ensemble des 61 sources et TPs</b> déposés dans votre notebook pour une révision transversale sans aucune impasse.</p>\n    </div>", unsafe_allow_html=True)
     tab_tot1, tab_tot2, tab_tot3 = st.tabs(['📚 Synthèse Exhaustive des 6 Piliers', '🛠️ Récapitulatif des TP de Réseau & SysAdmin', "📝 Générateur d'Examen Blanc Multi-Matières"])
     with tab_tot1:
         st.subheader('Synthèse Globale du Programme Officiel')
@@ -5740,7 +5768,7 @@ elif page == '🎯 Révision Totale BTS Blanc (9-11 Déc)':
 
 elif page == '📈 Mathématiques : Fonctions, Exponentielle & Logarithme':
     st.markdown("<div class='hero-title'>📈 Mathématiques Appliquées : Fonctions de Référence, $e^x$ & $\\ln(x)$</div>", unsafe_allow_html=True)
-    st.markdown("<p style='color:#64748b;'>Cours magistral, propriétés algébriques, dérivation, calculs de décibels, charge $RC$ et simulateurs interactifs</p>", unsafe_allow_html=True)
+    st.markdown("<p style='color:#8e8e96;'>Cours magistral, propriétés algébriques, dérivation, calculs de décibels, charge $RC$ et simulateurs interactifs</p>", unsafe_allow_html=True)
     tab_exp1, tab_exp2, tab_exp3, tab_exp4 = st.tabs(['📖 Cours, Formules & Propriétés Clés', '🧮 Traceur Interactif & Simulateurs (RC, dB)', '🐍 Traduction Algorithmique & Python', '✍️ Exercices Pratiques & Mini-Quiz'])
     with tab_exp1:
         st.subheader('1. Tableau Synthétique des Fonctions de Référence')
@@ -5891,8 +5919,8 @@ elif page == '📈 Mathématiques : Fonctions, Exponentielle & Logarithme':
 
 elif page == '🗓️ Planning Révisions BTS Blanc (9-11 Déc)':
     st.markdown("<div class='hero-title'>🗓️ Planning de Révision Intensif - BTS Blanc (9, 10 & 11 Déc 2026)</div>", unsafe_allow_html=True)
-    st.markdown("<p style='color:#64748b;'>Programme d'entraînement structuré semaine par semaine pour réussir les épreuves écrites et pratiques</p>", unsafe_allow_html=True)
-    st.markdown("\n    <div class='ciel-card' style='border-left: 6px solid #f59e0b !important;'>\n        <h3 style='color: #92400e; margin-top:0;'>⚠️ Objectif Examen : Épreuves du 9, 10 et 11 Décembre 2026</h3>\n        <p>Il vous reste <b>6 semaines intensives</b> pour maîtriser la totalité du programme du BTS CIEL Option A. Suivez cette feuille de route hebdomadaire :</p>\n    </div>", unsafe_allow_html=True)
+    st.markdown("<p style='color:#8e8e96;'>Programme d'entraînement structuré semaine par semaine pour réussir les épreuves écrites et pratiques</p>", unsafe_allow_html=True)
+    st.markdown("\n    <div class='ciel-card' style='border-left: 6px solid #f59e0b !important;'>\n        <h3 style='color: #ffcc33; margin-top:0;'>⚠️ Objectif Examen : Épreuves du 9, 10 et 11 Décembre 2026</h3>\n        <p>Il vous reste <b>6 semaines intensives</b> pour maîtriser la totalité du programme du BTS CIEL Option A. Suivez cette feuille de route hebdomadaire :</p>\n    </div>", unsafe_allow_html=True)
     col_w1, col_w2 = st.columns(2)
     with col_w1:
         st.markdown("\n        <div class='ciel-card'>\n            <h4 style='color:#1d4ed8; margin-top:0;'>📅 Semaine 1 : Réseaux, Adressage & Commutation</h4>\n            <ul>\n                <li><b>Révisez</b> : Modèle OSI (7 couches), Adressage IPv4/IPv6, Masques VLSM.</li>\n                <li><b>Pratiquez</b> : Le <i>Générateur de Subnetting</i> et la configuration des VLANs 802.1Q dans la sandbox <i>Cisco IOS</i>.</li>\n                <li><b>Exercice clé</b> : Décodage de trames brutes dans le <i>Lab Wireshark</i>.</li>\n            </ul>\n        </div>\n        \n        <div class='ciel-card'>\n            <h4 style='color:#1d4ed8; margin-top:0;'>📅 Semaine 2 : Cybersécurité & Administration Système</h4>\n            <ul>\n                <li><b>Révisez</b> : Cryptographie (AES/RSA/SHA), Top 10 OWASP, Active Directory (OUs, GPO LSDOU) et droits Linux (chmod).</li>\n                <li><b>Pratiquez</b> : Configuration de règles UFW/IPtables et sécurisation de bases SQL via des requêtes préparées.</li>\n                <li><b>Exercice clé</b> : Sandbox <i>Linux Bash</i> (chmod octal) et analyse des tickets Kerberos.</li>\n            </ul>\n        </div>\n        \n        <div class='ciel-card'>\n            <h4 style='color:#1d4ed8; margin-top:0;'>📅 Semaine 3 : Développement C++ & Python Réseau</h4>\n            <ul>\n                <li><b>Révisez</b> : Gestion de la mémoire (Tas vs Pile), pointeurs `*`, références `&`, `new[]`/`delete[]`, POO (héritage, classes abstraites).</li>\n                <li><b>Pratiquez</b> : Debugger C++ (correction de fuites mémoire) et programmation de Sockets TCP/UDP Python.</li>\n                <li><b>Exercice clé</b> : Analyse des destructeurs virtuels et des conteneurs STL (`std::vector`).</li>\n            </ul>\n        </div>", unsafe_allow_html=True)
@@ -5903,7 +5931,7 @@ elif page == '🗓️ Planning Révisions BTS Blanc (9-11 Déc)':
 
 elif page == '⚡ Lab Kirchhoff, Ohm & Circuits':
     st.markdown("<div class='hero-title'>⚡ Lab Kirchhoff, Loi d'Ohm & Circuits Électriques</div>", unsafe_allow_html=True)
-    st.markdown("<p style='color:#64748b;'>Exercices interactifs d'entraînement sur les lois fondamentales de l'électricité en régime continu</p>", unsafe_allow_html=True)
+    st.markdown("<p style='color:#8e8e96;'>Exercices interactifs d'entraînement sur les lois fondamentales de l'électricité en régime continu</p>", unsafe_allow_html=True)
     tab_k1, tab_k2, tab_k3 = st.tabs(["📝 Exercice 1 : Loi d'Ohm & Puissance", '🔗 Exercice 2 : Loi des Mailles & Diviseur de Tension', '🔀 Exercice 3 : Loi des Nœuds & Parallélisme'])
     with tab_k1:
         st.subheader('Exercice 1 : Calcul de courant, tension et puissance')
@@ -5971,8 +5999,8 @@ elif page == '⚡ Lab Kirchhoff, Ohm & Circuits':
 
 elif page == '📺 Lab Oscilloscope & Mesures Physiques':
     st.markdown("<div class='hero-title'>📺 Lab Oscilloscope & Analyse d'Oscillogrammes</div>", unsafe_allow_html=True)
-    st.markdown("<p style='color:#64748b;'>Analyse graphique de signaux temporels et réglages de sensibilité verticale / horizontale</p>", unsafe_allow_html=True)
-    st.markdown("\n    <div class='ciel-card'>\n        <h3 style='color:#1e3a8a; margin-top:0;'>🔍 Oscillogramme à analyser (Signal Sinusoïdal)</h3>\n        <p>Réglages de l'oscilloscope :</p>\n        <ul>\n            <li><b>Sensibilité Verticale ($S_v$)</b> : <code>2,0 V/div</code></li>\n            <li><b>Base de temps Horizontal ($S_h$)</b> : <code>1,0 ms/div</code></li>\n        </ul>\n    </div>", unsafe_allow_html=True)
+    st.markdown("<p style='color:#8e8e96;'>Analyse graphique de signaux temporels et réglages de sensibilité verticale / horizontale</p>", unsafe_allow_html=True)
+    st.markdown("\n    <div class='ciel-card'>\n        <h3 style='color:#f5f5f7; margin-top:0;'>🔍 Oscillogramme à analyser (Signal Sinusoïdal)</h3>\n        <p>Réglages de l'oscilloscope :</p>\n        <ul>\n            <li><b>Sensibilité Verticale ($S_v$)</b> : <code>2,0 V/div</code></li>\n            <li><b>Base de temps Horizontal ($S_h$)</b> : <code>1,0 ms/div</code></li>\n        </ul>\n    </div>", unsafe_allow_html=True)
     import numpy as np
     import matplotlib.pyplot as plt
     fig_osc, ax_osc = plt.subplots(figsize=(9, 4.5))
@@ -6040,7 +6068,7 @@ elif page == '📺 Lab Oscilloscope & Mesures Physiques':
 
 elif page == '📚 Encyclopédie des Cours & TPs':
     st.markdown("<div class='hero-title'>📚 Encyclopédie des Cours & Mini-Tests</div>", unsafe_allow_html=True)
-    st.markdown("<p style='color:#64748b;'>Cours théoriques exhaustifs, formules d'ingénierie et mini-évaluations interactives</p>", unsafe_allow_html=True)
+    st.markdown("<p style='color:#8e8e96;'>Cours théoriques exhaustifs, formules d'ingénierie et mini-évaluations interactives</p>", unsafe_allow_html=True)
     col_sel1, col_sel2 = st.columns([1, 1])
     with col_sel1:
         domaine = st.selectbox("Sélectionnez le Domaine d'Ingénierie :", list(COURS_BASE.keys()))
@@ -6066,7 +6094,7 @@ elif page == '📚 Encyclopédie des Cours & TPs':
 
 elif page == '🧮 Laboratoire de Calculs (Subnetting & Élec)':
     st.markdown("<div class='hero-title'>🧮 Laboratoire de Calculs Dynamiques</div>", unsafe_allow_html=True)
-    st.markdown("<p style='color:#64748b;'>Générateur infini d'exercices de calculs pour l'épreuve écrite E4</p>", unsafe_allow_html=True)
+    st.markdown("<p style='color:#8e8e96;'>Générateur infini d'exercices de calculs pour l'épreuve écrite E4</p>", unsafe_allow_html=True)
     tab_calc1, tab_calc2 = st.tabs(['🌐 Calculs de Sous-Réseaux (Subnetting IPv4)', '⚡ Calculs Électronique & CAN (Quantum)'])
     with tab_calc1:
         st.subheader('Générateur Infini de Découpage IPv4')
@@ -6164,7 +6192,7 @@ elif page == '🧮 Laboratoire de Calculs (Subnetting & Élec)':
 
 elif page == '📐 Laboratoire UML & SysML':
     st.markdown("<div class='hero-title'>📐 Laboratoire Interactif UML & SysML</div>", unsafe_allow_html=True)
-    st.markdown("<p style='color:#64748b;'>Modélisation système d'ingénierie et cas pratiques d'examen</p>", unsafe_allow_html=True)
+    st.markdown("<p style='color:#8e8e96;'>Modélisation système d'ingénierie et cas pratiques d'examen</p>", unsafe_allow_html=True)
     tab_uml1, tab_uml2 = st.tabs(['🏗️ Modélisation SysML (BDD & IBD)', '📐 Modélisation UML (Classes & Séquence)'])
     with tab_uml1:
         st.subheader("Exemple Complet SysML : Station de Surveillance de la Qualité de l'Air")
@@ -6190,7 +6218,7 @@ elif page == '📐 Laboratoire UML & SysML':
 
 elif page == '🧪 Qualification & Tests E6':
     st.markdown("<div class='hero-title'>🧪 Qualification Logicielle & Tests E6</div>", unsafe_allow_html=True)
-    st.markdown("<p style='color:#64748b;'>Méthodologie du Plan de Validation Logicielle (PVL) et assertions de tests automatisés</p>", unsafe_allow_html=True)
+    st.markdown("<p style='color:#8e8e96;'>Méthodologie du Plan de Validation Logicielle (PVL) et assertions de tests automatisés</p>", unsafe_allow_html=True)
     st.write("\n    Dans l'épreuve **E6**, vous devez prouver la conformité de vos développements avec le cahier des charges initial au moyen d'un **Plan de Validation Logicielle (PVL)** rigoureux.")
     st.markdown("### 💻 Exemple de Script de Test d'Intégration Réseau & BDD (Python / PyTest) :")
     st.code('\nimport pytest\nimport json\n\ndef valider_payload_telemesure(payload_json_str):\n    try:\n        data = json.loads(payload_json_str)\n        if "device_id" not in data or "co2_ppm" not in data:\n            return False, "Champs obligatoires manquants"\n        if not (0 <= data["co2_ppm"] <= 5000):\n            return False, "Valeur CO2 hors plage valide [0-5000]"\n        return True, "Payload conforme"\n    except Exception as e:\n        return False, str(e)\n\n# --- CAS DE TEST D\'INTÉGRATION ---\ndef test_integration_payload_nominal():\n    payload_test = \'{"device_id": "STATION_AIR_01", "co2_ppm": 420.5, "temp": 21.4}\'\n    valide, msg = valider_payload_telemesure(payload_test)\n    assert valide is True\n    assert msg == "Payload conforme"\n\ndef test_integration_payload_anomalie():\n    payload_anormal = \'{"device_id": "STATION_AIR_01", "co2_ppm": 99999.0}\'\n    valide, msg = valider_payload_telemesure(payload_anormal)\n    assert valide is False\n    assert "hors plage" in msg', language='python')
@@ -6207,7 +6235,7 @@ elif page == '🧪 Qualification & Tests E6':
 
 elif page == '🎯 Annales BTS (2024 & 2025)':
     st.markdown("<div class='hero-title'>🎯 Banque Complète des Annales Officielles BTS CIEL (2024 - 2026)</div>", unsafe_allow_html=True)
-    st.markdown("<p style='color:#64748b;'>Étude approfondie des sujets réels E4 (Informatique & Physique), barèmes officiels et grilles d'évaluation</p>", unsafe_allow_html=True)
+    st.markdown("<p style='color:#8e8e96;'>Étude approfondie des sujets réels E4 (Informatique & Physique), barèmes officiels et grilles d'évaluation</p>", unsafe_allow_html=True)
 
     tab_an_sel = st.selectbox("Sélectionnez la Session d'Examen Officielle :", [
         "Session 2026 : CISS Cashless Online (Métropole & Nouvelle-Calédonie)",
@@ -6320,7 +6348,7 @@ elif page == '🎯 Annales BTS (2024 & 2025)':
 <div class='ciel-card'>
     <h4>Répartition Officielle des Points à l'Épreuve E4 (Coefficient 4, Durée 6h) :</h4>
     <table style='width: 100%; border-collapse: collapse;'>
-        <tr style='background: #f1f5f9; border-bottom: 2px solid #cbd5e1;'>
+        <tr style='background: #131316; border-bottom: 2px solid #cbd5e1;'>
             <th style='padding: 10px; text-align: left;'>Partie d'Épreuve</th>
             <th style='padding: 10px;'>Durée Recommandée</th>
             <th style='padding: 10px;'>Points Barème</th>
@@ -6347,7 +6375,7 @@ elif page == '🎯 Annales BTS (2024 & 2025)':
 
 elif page == '🗂️ Flashcards Actives':
     st.markdown("<div class='hero-title'>🗂️ Flashcards Actives & Auto-Évaluation</div>", unsafe_allow_html=True)
-    st.markdown("<p style='color:#64748b;'>Stimulez votre mémoire active avec 105 cartes mémoire réflexes couvrant tout le programme du BTS CIEL (avec conseils prof, redirections de cours et vidéos YouTube)</p>", unsafe_allow_html=True)
+    st.markdown("<p style='color:#8e8e96;'>Stimulez votre mémoire active avec 105 cartes mémoire réflexes couvrant tout le programme du BTS CIEL (avec conseils prof, redirections de cours et vidéos YouTube)</p>", unsafe_allow_html=True)
     if 'fc_mastered' not in st.session_state:
         st.session_state.fc_mastered = set(_ud_get().get('fc_mastered', []))
     yt_prefix = 'https://www.youtube.com/watch?v='
@@ -6381,7 +6409,7 @@ elif page == '🗂️ Flashcards Actives':
             st.success('✅ Carte enregistrée comme **Maîtrisée**')
         else:
             st.info("⏳ Carte en cours d'apprentissage")
-        st.markdown(f"\n        <div class='ciel-card' style='border-left: 6px solid #2563eb !important; background: #f8fafc;'>\n            <h3 style='color: #1e3a8a; margin-top: 0;'>❓ Question :</h3>\n            <p style='font-size: 1.15rem; font-weight: 600; color: #0f172a;'>{cur_fc['q']}</p>\n        </div>\n        ", unsafe_allow_html=True)
+        st.markdown(f"\n        <div class='ciel-card' style='border-left: 6px solid #2563eb !important; background: #0b0b0d;'>\n            <h3 style='color: #f5f5f7; margin-top: 0;'>❓ Question :</h3>\n            <p style='font-size: 1.15rem; font-weight: 600; color: #f5f5f7;'>{cur_fc['q']}</p>\n        </div>\n        ", unsafe_allow_html=True)
         user_fc_ans = st.text_area('✍️ Rédigez votre réponse réflexe avant de vérifier :', key=f'fc_txt_{cur_fc["id"]}')
         rev = st.checkbox('👁️ Afficher la Solution & Conseils Examen', key=f'rev_{cur_fc["id"]}')
         if rev:
@@ -6439,7 +6467,7 @@ elif page == '🗂️ Flashcards Actives':
 
 elif page == '🔍 Lab Décodeur Wireshark':
     st.markdown("<div class='hero-title'>🔍 Lab Décodeur Wireshark</div>", unsafe_allow_html=True)
-    st.markdown("<p style='color:#64748b;'>Apprenez à décoder les octets hexadécimaux bruts d'une capture réseau</p>", unsafe_allow_html=True)
+    st.markdown("<p style='color:#8e8e96;'>Apprenez à décoder les octets hexadécimaux bruts d'une capture réseau</p>", unsafe_allow_html=True)
     st.markdown("\n    <div class='terminal-header'>\n        <span class='terminal-dot dot-red'></span>\n        <span class='terminal-dot dot-yellow'></span>\n        <span class='terminal-dot dot-green'></span>\n        &nbsp; capture_reseau_brute_ipv4.hex (20 Octets En-tête IP)\n    </div>\n    <div class='terminal-body'>\n    Octet n° : 00 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18 19<br>\n    Données  : <b>45 00 00 3C 1C 2D 40 00 40 06 A8 B2 C0 A8 0A 05 C0 A8 0A 01</b>\n    </div>", unsafe_allow_html=True)
     st.markdown('### Décryptage des champs du paquet :')
     col_w1, col_w2 = st.columns(2)
@@ -6476,7 +6504,7 @@ elif page == '📈 Analyse des Scores':
 
 elif page == '📋 Planning de Projet E6 (Gantt)':
     st.markdown("<div class='hero-title'>📋 Planning de Projet E6 & Diagramme de Gantt</div>", unsafe_allow_html=True)
-    st.markdown("<p style='color:#64748b;'>Gérez vos jalons de projet et générez votre planning pour votre soutenance finale</p>", unsafe_allow_html=True)
+    st.markdown("<p style='color:#8e8e96;'>Gérez vos jalons de projet et générez votre planning pour votre soutenance finale</p>", unsafe_allow_html=True)
     PROJ_FILE = 'e6_tasks_v7.json'
     if os.path.exists(PROJ_FILE):
         try:
@@ -6535,7 +6563,7 @@ elif page == '📋 Planning de Projet E6 (Gantt)':
 
 elif page == '📄 Datasheets & Fiches Techniques (Composants)':
     st.markdown("<div class='hero-title'>📄 Datasheets & Fiches Techniques de Composants (en Anglais)</div>", unsafe_allow_html=True)
-    st.markdown("<p style='color:#64748b;'>Guide d'analyse et de décodage des fiches constructeurs pour l'épreuve écrite E4 et les travaux pratiques E5/E6</p>", unsafe_allow_html=True)
+    st.markdown("<p style='color:#8e8e96;'>Guide d'analyse et de décodage des fiches constructeurs pour l'épreuve écrite E4 et les travaux pratiques E5/E6</p>", unsafe_allow_html=True)
     tab_ds1, tab_ds2, tab_ds3, tab_ds4, tab_ds5 = st.tabs(['⚙️ Microcontrôleurs 8/32 bits', '🔌 Bus & Transceivers (MCP2515/MAX485)', '⚡ Drivers Moteurs & Puissance', '🌡️ Capteurs Industriels (4-20mA/MAX6675)', '✍️ Quiz Datasheets & Anglais Technique'])
     with tab_ds1:
         st.subheader('1. Microcontrôleurs 8 bits & 32 bits (ATmega328P, ESP32, STM32)')
@@ -6566,7 +6594,7 @@ elif page == '📄 Datasheets & Fiches Techniques (Composants)':
 
 elif page == '🔍 Captures de Trames & Analyses Wireshark PCAP':
     st.markdown("<div class='hero-title'>🔍 Captures de Trames & Analyses Wireshark PCAP Commentées</div>", unsafe_allow_html=True)
-    st.markdown("<p style='color:#64748b;'>Décryptage pas-à-pas de paquets réseaux réels, captures de trames industrielles et simulateur d'analyse d'examen</p>", unsafe_allow_html=True)
+    st.markdown("<p style='color:#8e8e96;'>Décryptage pas-à-pas de paquets réseaux réels, captures de trames industrielles et simulateur d'analyse d'examen</p>", unsafe_allow_html=True)
     tab_pc1, tab_pc2, tab_pc3, tab_pc4, tab_pc5 = st.tabs(['🌐 TCP/IP & Handshake 3-Way', '⚙️ Services Réseaux (DHCP & DNS)', '🏭 Bus Industriels (Modbus & CAN)', '🔒 Sessions TLS 1.3 & SSH', "✍️ Simulateur d'Analyse Hex"])
     with tab_pc1:
         st.subheader('1. Établissement de Connexion TCP (Handshake 3-Way) & Fermeture')
@@ -6594,7 +6622,7 @@ elif page == '🔍 Captures de Trames & Analyses Wireshark PCAP':
 
 elif page == '📁 Modèles de Livrables & PVL Épreuve E6':
     st.markdown("<div class='hero-title'>📁 Modèles de Livrables & PVL (Épreuve E6 - Projet de Fin d'Études)</div>", unsafe_allow_html=True)
-    st.markdown("<p style='color:#64748b;'>Gabarits officiels, cahier des charges AFNOR, matrice de traçabilité des exigences, et scripts de tests d'intégration Pytest</p>", unsafe_allow_html=True)
+    st.markdown("<p style='color:#8e8e96;'>Gabarits officiels, cahier des charges AFNOR, matrice de traçabilité des exigences, et scripts de tests d'intégration Pytest</p>", unsafe_allow_html=True)
     tab_e6_1, tab_e6_2, tab_e6_3, tab_e6_4, tab_e6_5 = st.tabs(['📋 Cahier des Charges AFNOR (CdCf)', '📐 Matrice de Traçabilité ReqIF', '🧪 Plan de Validation (PVL & Pytest)', '📜 Dossier de Recette (FAT/SAT)', '✍️ Auto-Évaluation Livrables E6'])
     with tab_e6_1:
         st.subheader('1. Structure Normée du Cahier des Charges Fonctionnel (CdCf - Norme NF X50-151)')
@@ -6621,7 +6649,7 @@ elif page == '📁 Modèles de Livrables & PVL Épreuve E6':
 
 elif page == '🛡️ Guides de Durcissement (Hardening) ANSSI':
     st.markdown("<div class='hero-title'>🛡️ Guides de Durcissement (Hardening) ANSSI & PSSI</div>", unsafe_allow_html=True)
-    st.markdown("<p style='color:#64748b;'>Règles de sécurité fondamentales publiées par l'ANSSI pour le durcissement de Linux Debian, Active Directory et des passerelles IoT</p>", unsafe_allow_html=True)
+    st.markdown("<p style='color:#8e8e96;'>Règles de sécurité fondamentales publiées par l'ANSSI pour le durcissement de Linux Debian, Active Directory et des passerelles IoT</p>", unsafe_allow_html=True)
     tab_an1, tab_an2, tab_an3, tab_an4, tab_an5 = st.tabs(['🖥️ Hardening Linux Debian', '🏢 Durcissement Active Directory (Tiering)', '📶 Sécurisation Wi-Fi & IoT', '📜 PSSI & Directives ANSSI', '✍️ Quiz Hardening & Sécurité'])
     with tab_an1:
         st.subheader('1. Recommandations de Durcissement Linux Debian (Guide ANSSI - Niveau Intermédiaire)')
@@ -6648,7 +6676,7 @@ elif page == '🛡️ Guides de Durcissement (Hardening) ANSSI':
 
 elif page == '🇬🇧 Vocabulaire & Anglais Technique BTS':
     st.markdown("<div class='hero-title'>🇬🇧 Vocabulaire & Anglais Technique BTS CIEL</div>", unsafe_allow_html=True)
-    st.markdown("<p style='color:#64748b;'>Module complet : Lexique bilingue, grammaire technique d'examen (passif, conditionnels, verbe BE), étude de cas d'incident critique et oraux</p>", unsafe_allow_html=True)
+    st.markdown("<p style='color:#8e8e96;'>Module complet : Lexique bilingue, grammaire technique d'examen (passif, conditionnels, verbe BE), étude de cas d'incident critique et oraux</p>", unsafe_allow_html=True)
 
     tab_en1, tab_en2, tab_en3, tab_en4, tab_en5 = st.tabs([
         "📖 Lexique Bilingue (100+ Mots)",
@@ -6739,8 +6767,8 @@ Dans les rapports d'incidents et manuels techniques, l'action importe plus que l
     with tab_en3:
         st.subheader("3. Project 3 : Critical IT Incident in a Company (Étude de Cas d'Examen)")
         st.markdown("""
-<div class='ciel-card' style='border-left: 6px solid #ef4444 !important; background: #fef2f2;'>
-    <h4 style='color: #991b1b; margin-top:0;'>🚨 Mission Statement (Oral Exam Scenario)</h4>
+<div class='ciel-card' style='border-left: 6px solid #ef4444 !important; background: rgba(255,69,58,0.06);'>
+    <h4 style='color: #ff453a; margin-top:0;'>🚨 Mission Statement (Oral Exam Scenario)</h4>
     <p>You are an IT technical team (BTS CIEL) called urgently by a medium-sized company (around 45 employees). A major IT incident is seriously disrupting the company's activity. Your mission is to analyse the situation, propose technical solutions, and communicate professionally with managers and employees.</p>
 </div>
         """, unsafe_allow_html=True)
@@ -6784,7 +6812,7 @@ Dans les rapports d'incidents et manuels techniques, l'action importe plus que l
 
 elif page == '📹 Vidéos de Cours':
     st.markdown("<div class='hero-title'>📹 Vidéothèque Pédagogique BTS CIEL</div>", unsafe_allow_html=True)
-    st.markdown("<p style='color:#64748b;'>Retrouvez l'intégralité des leçons vidéo classées par pôles d'ingénierie pour réviser visuellement vos cours et TPs</p>", unsafe_allow_html=True)
+    st.markdown("<p style='color:#8e8e96;'>Retrouvez l'intégralité des leçons vidéo classées par pôles d'ingénierie pour réviser visuellement vos cours et TPs</p>", unsafe_allow_html=True)
     yt_p = 'https://www.youtube.com/watch?v='
     VIDEOS_BY_DOMAIN = {'📶 Réseaux & Télécoms': [{'titre': 'Comprendre le Modèle OSI en 10 minutes', 'id': '33UJvS_z8R8', 'chap': 'Modèle OSI & TCP/IP'}, {'titre': 'Masterclass Subnetting VLSM IPv4', 'id': '42S-A-9PqM0', 'chap': 'Subnetting & Masques IP'}, {'titre': 'IPv6, SLAAC et NDP expliqués simplement', 'id': '72sn_0M4T4g', 'chap': 'IPv6 & Protocoles associées'}, {'titre': 'Comprendre et configurer un VLAN', 'id': '06Y6qYg9_C0', 'chap': 'Commutation & VLANs'}, {'titre': 'Tout savoir sur le Trunking IEEE 802.1Q', 'id': '0j3_T7sN8J4', 'chap': 'Trunking 802.1Q'}, {'titre': 'Configuration Router-on-a-Stick Cisco', 'id': 'LqT5y7aZJ4k', 'chap': 'Routage Inter-VLAN'}, {'titre': 'Spanning Tree Protocol (STP & RSTP 802.1w)', 'id': 'i8D4W6U4z_E', 'chap': 'Commutation Redondante'}, {'titre': 'Comprendre le routage dynamique OSPF', 'id': '3k1-zK7u1G0', 'chap': 'Routage OSPF'}, {'titre': "Maîtriser les filtres d'affichage Wireshark", 'id': 'TkCSr30UojM', 'chap': 'Analyse de trames Wireshark'}], '🔒 Cybersécurité & Gouvernance': [{'titre': "Méthode EBIOS RM de l'ANSSI en 5 Ateliers", 'id': 'J8n0j3x9K2A', 'chap': 'Gouvernance EBIOS RM'}, {'titre': "Réaliser une Analyse d'Impact RGPD (PIA / AIPD)", 'id': '5k9m2-8a9X0', 'chap': 'Conformité RGPD & PIA'}, {'titre': 'Chiffrement Symétrique vs Asymétrique & PKI', 'id': '0iY2m-J4z-0', 'chap': 'Cryptographie & PKI'}, {'titre': 'Architecture DMZ & Configuration Pare-Feu pfSense', 'id': 'L2k3j4X5m-0', 'chap': 'pfSense & Isolation DMZ'}, {'titre': 'Top 10 OWASP : Injections SQL & Requêtes Préparées', 'id': '0k3j4X5m-0', 'chap': 'Sécurité Web OWASP'}, {'titre': 'Tunnels VPN IPsec (L3) vs TLS OpenVPN (L4)', 'id': 'L2k3j4X5m-0', 'chap': 'Sécurisation VPN'}, {'titre': "Wi-Fi 802.1X & Serveur d'Authentification RADIUS", 'id': '8m9k3j4X5m0', 'chap': 'Sécurité Réseau 802.1X'}], '💻 Programmation C++, Python & Git': [{'titre': 'Débutez en C++ - Les bases du langage', 'id': '6m8gS-iXmXQ', 'chap': 'Langage C++'}, {'titre': 'Comprendre la mémoire C++ : Pile vs Tas, Pointeurs', 'id': 'S1yR7_7bWRE', 'chap': 'Gestion Mémoire C++'}, {'titre': 'La POO en C++ : Classes, Encapsulation & Héritage', 'id': '6m8gS-iXmXQ', 'chap': 'POO C++'}, {'titre': 'Multithreading en C++11 : std::thread & std::mutex', 'id': '5m9k3j4X5m0', 'chap': 'Concurrence C++'}, {'titre': 'Programmation Réseau Sockets TCP/UDP en Python', 'id': '6m9k3j4X5m0', 'chap': 'Sockets Python'}, {'titre': 'Tutoriel Git : add, commit, push & branches', 'id': '6m8gS-iXmXQ', 'chap': 'Versioning Git'}], '🖥️ Administration Système Linux & Active Directory': [{'titre': 'Linux Permissions octales chmod, SUID & ACLs', 'id': '2n3j4X5m-0', 'chap': 'Droits Linux POSIX'}, {'titre': 'Gestion des Services systemd & systemctl', 'id': '2n3j4X5m-0', 'chap': 'Systemd Linux'}, {'titre': 'Active Directory de A à Z - Tutoriel Complet', 'id': 'rQ_1n8Y0o-0', 'chap': 'Active Directory ADDS'}, {'titre': 'Gestion des Stratégies de Groupe (GPO LSDOU)', 'id': '8m9k3j4X5m0', 'chap': 'GPO Windows Server'}, {'titre': 'Authentification Kerberos & Rôles FSMO', 'id': '8m9k3j4X5m0', 'chap': 'Kerberos & FSMO'}, {'titre': 'Commandes PowerShell pour Active Directory & Réseau', 'id': '8m9k3j4X5m0', 'chap': 'PowerShell AD'}], '🔌 Électronique, Signaux & Bus Industriels': [{'titre': "Lois fondamentales d'Électricité : Ohm & Kirchhoff", 'id': '7m9k3j4X5m0', 'chap': 'Lois Fondamentales'}, {'titre': 'Le Pont en H BTS7960 & Commande de Moteur CC', 'id': '8m9k3j4X5m0', 'chap': 'Électronique de Puissance'}, {'titre': "La Modulation de Largeur d'Impulsion (PWM/MLI)", 'id': '4jS0qUfE_y4', 'chap': 'Signal PWM MLI'}, {'titre': 'La Boucle de Courant 4-20 mA Industrielle', 'id': '9m9k3j4X5m0', 'chap': 'Capteurs 4-20 mA'}, {'titre': 'Le Bus CAN Industriel & Automobile (ISO 11898)', 'id': '10m9k3j4X5m0', 'chap': 'Bus CAN Différentiel'}, {'titre': 'Le Protocole Modbus RTU sur RS-485', 'id': '11m9k3j4X5m0', 'chap': 'Modbus RTU RS-485'}], '📐 Mathématiques, SysML & Projet E6': [{'titre': 'Suites Arithmétiques & Géométriques (Formules & Sommes)', 'id': '12m9k3j4X5m0', 'chap': 'Suites Mathématiques'}, {'titre': 'Fonctions Exponentielle & Logarithme Népérien', 'id': '13m9k3j4X5m0', 'chap': 'Exp & Ln Math'}, {'titre': 'Diagrammes SysML : BDD, IBD & Requirement Diagram', 'id': '14m9k3j4X5m0', 'chap': 'Modélisation SysML'}, {'titre': 'Diagrammes UML : Classes, Séquence & États-Transitions', 'id': '15m9k3j4X5m0', 'chap': 'Modélisation UML'}, {'titre': 'Qualification E6 : Tests Automatisés avec Pytest', 'id': '16m9k3j4X5m0', 'chap': 'Pytest & PVL E6'}]}
     sel_domain = st.selectbox("📁 Choisissez un domaine d'ingénierie :", list(VIDEOS_BY_DOMAIN.keys()))
@@ -7020,7 +7048,7 @@ elif page == '🇬🇧 Anglais Technique & Datasheets':
 
 elif page == '🌐 Répertoire des Liens':
     st.markdown("<div class='hero-title'>🌐 Répertoire des Ressources Essentielles</div>", unsafe_allow_html=True)
-    st.markdown("<p style='color:#64748b;'>Les sites de référence incontournables pour réussir votre BTS CIEL</p>", unsafe_allow_html=True)
+    st.markdown("<p style='color:#8e8e96;'>Les sites de référence incontournables pour réussir votre BTS CIEL</p>", unsafe_allow_html=True)
     LIENS = {'Cours Magistraux & Fiches': [('Le site de Thierry Vaira', 'http://tvaira.free.fr/', 'La bible de référence du BTS informatique et réseaux.'), ('Cours BTS CIEL', 'https://coursbtsciel.fr/', 'Fiches synthétiques de cours et résumés.'), ('IT-Connect', 'https://www.it-connect.fr/', 'Tutoriels professionnels SysAdmin, Linux et Réseaux.')], 'MOOCs & Formations': [('Cisco Networking Academy', 'https://www.netacad.com/', 'Cours officiels de préparation aux certifications Cisco.'), ('OpenClassrooms - Réseaux TCP/IP', 'https://openclassrooms.com/fr/courses/857447-apprenez-le-fonctionnement-des-reseaux-tcp-ip', 'Fondations des réseaux.'), ('OpenClassrooms - Programmation C++', 'https://openclassrooms.com/fr/courses/1894236-programmez-avec-le-langage-c', 'Maîtrise de la POO en C++.')], 'Entraînement Pratique & Cyber': [('Root-Me', 'https://www.root-me.org/', "Plateforme d'entraînement au hacking éthique."), ('TryHackMe', 'https://tryhackme.com/', 'Salles guidées de cybersécurité.'), ('France-IOI', 'http://france-ioi.org/', 'Entraînement algorithmique.')]}
     for cat, items in LIENS.items():
         st.markdown(f'### 📂 {cat}')
@@ -7037,12 +7065,12 @@ elif page == '🌐 Répertoire des Liens':
 
 elif page == '🎯 Remédiation & Lacunes Ciblées (BTS Blanc)':
     st.markdown("<div class='hero-title'>🎯 Plan de Remédiation Ciblée & Consolidation des Lacunes</div>", unsafe_allow_html=True)
-    st.markdown("<p style='color:#64748b;'>Programme personnalisé de renforcement technique basé sur votre évaluation d'entrée pour le BTS Blanc</p>", unsafe_allow_html=True)
+    st.markdown("<p style='color:#8e8e96;'>Programme personnalisé de renforcement technique basé sur votre évaluation d'entrée pour le BTS Blanc</p>", unsafe_allow_html=True)
 
     st.markdown("""
-    <div class='ciel-card' style='border-left: 6px solid #ef4444 !important; background: #fef2f2;'>
-        <h3 style='color: #991b1b; margin-top: 0;'>📋 Bilan de Session d'Évaluation & Diagnostic Technique</h3>
-        <p style='color: #7f1d1d;'>Votre évaluation met en évidence un <b>socle solide déjà validé</b> sur plusieurs piliers fondamentaux, mais révèle <b>6 lacunes conceptuelles prioritaires</b> à verrouiller impérativement avant le BTS Blanc des 9-11 décembre.</p>
+    <div class='ciel-card' style='border-left: 6px solid #ef4444 !important; background: rgba(255,69,58,0.06);'>
+        <h3 style='color: #ff453a; margin-top: 0;'>📋 Bilan de Session d'Évaluation & Diagnostic Technique</h3>
+        <p style='color: #ff453a;'>Votre évaluation met en évidence un <b>socle solide déjà validé</b> sur plusieurs piliers fondamentaux, mais révèle <b>6 lacunes conceptuelles prioritaires</b> à verrouiller impérativement avant le BTS Blanc des 9-11 décembre.</p>
         <div style='display: flex; gap: 15px; flex-wrap: wrap; margin-top: 10px;'>
             <span class='badge badge-emerald'>✅ 5 Notions Clés Validées</span>
             <span class='badge badge-rose'>🚨 6 Lacunes Prioritaires à Consolider</span>
@@ -7071,7 +7099,7 @@ elif page == '🎯 Remédiation & Lacunes Ciblées (BTS Blanc)':
             st.markdown("""
             <div class='ciel-card' style='border-top: 4px solid #10b981 !important;'>
                 <h4 style='color: #065f46; margin-top: 0;'>✅ Concepts Validés (À réviser ponctuellement)</h4>
-                <ul style='color: #1e293b; line-height: 1.8;'>
+                <ul style='color: #e4e4e7; line-height: 1.8;'>
                     <li><b>🛡️ Permissions Linux (chmod)</b> : Calcul des masques octaux (750, 644, 755), symbolique (u/g/o/a) et commande <code>chmod</code> acquis.</li>
                     <li><b>🛡️ Identification des Attaques DDoS</b> : Compréhension du déni de service distribué, saturation volumétrique et détection.</li>
                     <li><b>🛡️ Filtrage Pare-Feu de Base</b> : Rôle de coupure réseau, distinction LAN/DMZ/WAN et politique d'interdiction par défaut.</li>
@@ -7087,8 +7115,8 @@ elif page == '🎯 Remédiation & Lacunes Ciblées (BTS Blanc)':
         with col_ko:
             st.markdown("""
             <div class='ciel-card' style='border-top: 4px solid #ef4444 !important;'>
-                <h4 style='color: #991b1b; margin-top: 0;'>🚨 Axes Prioritaires de Remédiation (Lacunes Ciblées)</h4>
-                <ul style='color: #1e293b; line-height: 1.8;'>
+                <h4 style='color: #ff453a; margin-top: 0;'>🚨 Axes Prioritaires de Remédiation (Lacunes Ciblées)</h4>
+                <ul style='color: #e4e4e7; line-height: 1.8;'>
                     <li><b>🔴 Rôle des Protocoles Couche 4 (TCP vs UDP)</b> : Confusion sur la connexion, les accusés ACK, le Three-Way Handshake et les en-têtes.</li>
                     <li><b>🔴 Fonctionnement & Utilité du DHCP</b> : Maîtrise incomplète de la séquence DORA, des baux, des options (003, 006, 015) et d'APIPA.</li>
                     <li><b>🔴 Mécanisme du NAT / PAT</b> : Distinction floue entre NAT Statique, Dynamique et surcharge de port (PAT / Overload).</li>
@@ -7096,7 +7124,7 @@ elif page == '🎯 Remédiation & Lacunes Ciblées (BTS Blanc)':
                     <li><b>🔴 Virtualisation (Hyperviseurs Type 1 vs Type 2)</b> : Confusion entre exécution Bare-Metal et hyperviseur hébergé sur un OS.</li>
                     <li><b>🔴 Encapsulation en POO (C++)</b> : Principe de masquage des données via <code>private</code>/<code>public</code> et rôle des accesseurs getters/setters.</li>
                 </ul>
-                <div style='background: #fef2f2; padding: 10px; border-radius: 8px; border: 1px solid #fecaca; margin-top: 10px;'>
+                <div style='background: rgba(255,69,58,0.06); padding: 10px; border-radius: 8px; border: 1px solid #fecaca; margin-top: 10px;'>
                     <span style='color: #b91c1c; font-weight: 600;'>🎯 Objectif Remédiation</span> : Révision active des 6 fiches ci-jointes + vidéos ciblées + validation sur le mini-quiz.
                 </div>
             </div>
