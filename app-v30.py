@@ -1427,7 +1427,8 @@ HUBS_CONFIG = {
     ],
     "📖 Grand Référentiel Rangé par Matière": [
         ("📶 Réseaux & Télécoms (OSI, IP, VLAN, Routage)", "📶 Réseaux & Télécoms"),
-        ("🔒 Cybersécurité & Hardening (ANSSI, EBIOS, Crypt)", "🔒 Cybersécurité & Gouvernance"),
+        ("🛡️ Master Cybersécurité (EBIOS, PKI, pfSense, VPN)", "🛡️ TP Cybersécurité, Gouvernance & pfSense"),
+        ("🔒 Cybersécurité Fondamentale (OWASP & Cryptographie)", "🔒 Cybersécurité & Gouvernance"),
         ("💻 Programmation & Dev (C++, Python, Algorithmique)", "💻 Programmation C++ & Python"),
         ("🖥️ Administration Système (Linux Debian & Active Directory)", "🖥️ Système Linux & Windows Server"),
         ("🔌 Électronique, Signaux & Bus (CAN, Modbus, I2C)", "🔌 Électronique & Bus Industriels"),
@@ -1899,70 +1900,440 @@ elif page == '📄 Fiches Savoir & Fiches Montage':
 
 
 elif page == '🛡️ TP Cybersécurité, Gouvernance & pfSense':
-    st.markdown("<div class='hero-title'>🛡️ TP Cybersécurité, Gouvernance & Infrastructure</div>", unsafe_allow_html=True)
-    st.markdown("<p style='color:#64748b;'>Cours magistral de A à Z, cas pratiques, commandes et quiz sur EBIOS RM, PIA/AIPD, PKI et pfSense/DMZ</p>", unsafe_allow_html=True)
-    tab_tp1, tab_tp2, tab_tp3, tab_tp4 = st.tabs(['📊 Atelier 1 : EBIOS RM (ANSSI)', '📜 Atelier 2 : PIA / AIPD (RGPD)', '🔑 Atelier 3 : PKI & Certificats X.509', '🧱 Atelier 4 : Matrice des Flux & pfSense'])
-    with tab_tp1:
-        st.subheader('1. Cours Magistral : Méthodologie EBIOS Risk Manager (ANSSI)')
-        st.markdown("\n        **EBIOS Risk Manager (EBIOS RM)** est la méthode officielle française d'appréciation et de traitement des risques numériques, publiée par l'**ANSSI** (Agence Nationale de la Sécurité des Systèmes d'Information). Elle est conforme à la norme **ISO/IEC 27005**.\n\n        Elle s'articule autour de **5 Ateliers progressifs** :")
-        st.markdown("\n        #### 🔹 Atelier 1 : Socle de sécurité & Périmètre métier\n        * **Périmètre de l'étude** : Définition des limites du système d'information analysé.\n        * **Valeurs Métiers (VM)** : Ce que l'organisation produit ou protège (ex: continuité de la production, confidentialité des brevets, crédibilité).\n        * **Biens Supports (BS)** : Les composants techniques qui hébergent les VM (serveurs, bases de données, automates STM32, liens réseau).\n        * **Besoins de Sécurité (DICP)** : Définition des niveaux d'exigence (de 0 à 4) sur la **D**isponibilité, l'**I**ntégrité, la **C**onfidentialité et la **P**reuve/Traçabilité.\n\n        #### 🔹 Atelier 2 : Sources de Risques (SR) & Visées Stratégiques (VS)\n        * **Sources de Risques (SR)** : Qui peut attaquer ? (Cybercriminels motivés par le gain, États/Espionnage, Concurrents, Vengeurs internes, Activistes).\n        * **Visées Stratégiques (VS)** : Quel est le but ultime de l'attaquant ? (Ex: Interrompre la chaîne de production, voler la base de données clients, extorquer une rançon via Rançongiciel).\n\n        #### 3. Atelier 3 : Scénarios Stratégiques & Écosystème\n        * **Analyse de l'écosystème** : Cartographie des parties prenantes (prestataires, sous-traitants, fournisseurs d'accès, maintenance distante).\n        * **Chemins d'attaque stratégiques** : Comment la SR va rebondir sur un prestataire moins sécurisé pour atteindre les valeurs métiers du système principal.\n\n        #### 4. Atelier 4 : Scénarios Opérationnels & Cyber Kill Chain\n        * Décomposition technique détaillée des modes opératoires (Kill Chain) :\n          1. *Reconnaissance* (Scans Nmap, OSINT).\n          2. *Armement & Livraison* (Hameçonnage/Phishing, pièce jointe malveillante).\n          3. *Exploitation & Installation* (Exploitation d'une vulnérabilité OWASP ou binaire).\n          4. *Command & Control (C2)* (Prise de contrôle distante).\n          5. *Actions sur objectifs* (Exfiltration de données, chiffrement des disques).\n\n        #### 5. Atelier 5 : Traitement du risque & PACS\n        * **Décision sur le risque** : Refuser, Réduire (imposer des mesures), Transférer (assurance) ou Conserver (accepter le risque résiduel).\n        * **Plan d'Amélioration de la Sécurité (PACS)** : Liste des mesures d'atténuation prioritaires (ex: MFA, chiffrement AES-256, isolation des réseaux par VLANs/pfSense).")
-        st.markdown('---')
-        st.subheader('💡 Cas Pratique BTS CIEL : Passerelle de Collecte IoT Industrielle')
-        st.info('\n        **Mise en situation** : Une PME industrielle installe des capteurs de température/pression STM32 sur ses cuves. Les données transitent en MQTT vers une passerelle Debian qui enregistre en BDD MySQL et transmet au Cloud.\n        * **Valeur Métier (VM)** : Intégrité des télémesures et continuité de régulation thermique.\n        * **Bien Support (BS)** : Serveur Debian, Broker MQTT, base MySQL.\n        * **Source de Risque (SR)** : Concurrent industriel ou cybercriminel.\n        * **Mesure PACS obligatoire** : Chiffrement TLS sur le Broker MQTT (MQTTS sur port 8883), authentification par certificat X.509 et isolation de la passerelle en DMZ sur pfSense.')
-        st.markdown('---')
-        st.subheader("✍️ Quiz d'Auto-Évaluation EBIOS RM")
-        q_eb1 = st.radio('Q1 : Dans la méthode EBIOS RM, à quel atelier identifie-t-on les Valeurs Métiers et les Biens Supports ?', ['Atelier 1', 'Atelier 2', 'Atelier 3', 'Atelier 5'], key='q_eb1_k')
-        if st.button('Valider Q1 EBIOS', key='btn_eb1'):
-            if q_eb1 == 'Atelier 1':
-                st.success("🎉 **Exact !** L'Atelier 1 définit le socle de sécurité, le périmètre, les Valeurs Métiers et les Biens Supports.")
-            else:
-                st.error("❌ **Incorrect.** L'Atelier 1 est consacré au cadre, aux Valeurs Métiers et au socle de sécurité.")
-    with tab_tp2:
-        st.subheader('2. Cours Magistral : PIA / AIPD (RGPD & CNIL)')
-        st.markdown("\n        L'**AIPD** (**Analyse d'Impact relative à la Protection des Données**), souvent appelée **PIA** (*Privacy Impact Assessment*), est une obligation légale imposée par l'article 35 du **RGPD** (Règlement Général sur la Protection des Données).\n\n        #### 🔹 Quand réaliser une AIPD / PIA ?\n        L'AIPD est **obligatoire** pour tout traitement susceptible de présenter un **risque élevé** pour les droits et libertés des personnes physiques. La CNIL définit **9 critères** :\n        1. Évaluation ou scoring (profilage).\n        2. Décision automatisée avec effet juridique.\n        3. Surveillance systématique (vidéoprotection, géolocalisation).\n        4. Collecte de données sensibles (biométrie, santé, opinions).\n        5. Données personnelles collectées à grande échelle.\n        6. Croisement ou combinaison de jeux de données.\n        7. Données concernant des personnes vulnérables (mineurs, salariés).\n        8. Utilisation d'une innovation technologique (IoT, IA).\n        9. Exclusion du bénéfice d'un droit ou d'un contrat.\n\n        📌 **Règle pratique** : Si un traitement remplit au moins **2 de ces 9 critères**, l'AIPD est légalement **OBLIGATOIRE**.")
-        st.markdown("\n        #### 🔹 Les 3 Volets de la Démarche AIPD :\n        1. **Description détaillée du traitement** : Finalités, nature des données collectées, durée de conservation, destinataires, cartographie des flux.\n        2. **Évaluation de la nécessité et de la proportionnalité** : Respect des droits des personnes (droit d'accès, de rectification, d'opposition, de suppression), durée de conservation justifiée.\n        3. **Appréciation des risques sur la vie privée** : Analyse des impacts potentiels en cas d'accès non autorisé (violation de confidentialité), de modification non désirée (violation d'intégrité) ou d'indisponibilité des données, et identification des mesures techniques (chiffrement, pseudonymisation) et organisationnelles.")
-        st.markdown('---')
-        st.subheader("💡 Cas Pratique BTS CIEL : Contrôle d'Accès Biométrique par Empreinte Raccordé à Active Directory")
-        st.warning("\n        **Analyse RGPD/PIA** :\n        * Critère 1 : Collecte de données biométriques (données sensibles).\n        * Critères 2 : Surveillance des salariés/vulnérables.\n        * **Verdict** : 2 critères remplis $\\rightarrow$ **AIPD OBLIGATOIRE avant tout déploiement**.\n        * **Mesures de conformité** : Stockage du gabarit biométrique sous forme de hachage irréversible chiffré AES-256 uniquement sur la carte à puce de l'agent (pas de BDD centrale si possible), journalisation des accès sécurisée.")
-        st.markdown('---')
-        st.subheader("✍️ Quiz d'Auto-Évaluation PIA / RGPD")
-        q_pia1 = st.radio("Q1 : Selon les recommandations de la CNIL, à partir de combien de critères remplis parmi les 9 l'AIPD devient-elle obligatoire ?", ['1 critère', '2 critères', '5 critères', 'Tous les critères'], key='q_pia1_k')
-        if st.button('Valider Q1 PIA', key='btn_pia1'):
-            if q_pia1 == '2 critères':
-                st.success("🎉 **Exact !** Au moins 2 critères sur 9 rendent l'AIPD légalement obligatoire.")
-            else:
-                st.error("❌ **Incorrect.** L'AIPD est obligatoire dès lors que 2 critères sur 9 sont satisfaits.")
-    with tab_tp3:
-        st.subheader('3. Cours Magistral : PKI (Infrastructure à Clés Publiques & Certificats X.509)')
-        st.markdown("\n        Une **PKI** (*Public Key Infrastructure*) ou **IGC** (*Infrastructure à Clés Publiques*) est l'ensemble des composants matériels, logiciels et humains permettant de délivrer, gérer, distribuer et révoquer des **certificats numériques X.509**.\n\n        #### 🔹 Composants de la Chaîne de Confiance :\n        1. **Autorité de Certification Racine (Root CA)** : Clé maîtresse de l'infrastructure. Elle est généralement maintenue **hors ligne (offline)** dans un coffre-fort pour éviter toute compromission.\n        2. **Autorité de Certification Intermédiaire (Intermediate CA)** : Signée par la Root CA, elle est en ligne et délivre les certificats opérationnels aux serveurs et utilisateurs.\n        3. **Autorité d'Enregistrement (RA)** : Vérifie l'identité du demandeur de certificat.\n        4. **Registre / Dépôt (Directory)** : Publie les certificats et la liste de révocation.")
-        st.markdown("\n        #### 🔹 Structure d'un Certificat Numérique X.509 v3 :\n        * **Subject** : Identité du titulaire (Nom, Organisation, Common Name CN=bts-ciel.local).\n        * **Issuer** : Nom de la CA ayant signé le certificat.\n        * **Validity** : Dates Not Before et Not After.\n        * **Public Key** : Clé publique du titulaire (RSA 2048/4096 bits ou ECC 256 bits).\n        * **Extensions (SAN - Subject Alternative Name)** : Adresses IP ou noms FQDN secondaires couverts par le certificat (ex: `DNS:www.bts-ciel.local`, `IP:192.168.10.1`).\n        * **Signature** : Condensat Haché (SHA-256) du certificat, chiffré avec la clé privée de la CA émettrice.\n\n        #### 🔹 Révocation de Certificats :\n        * **CRL (Certificate Revocation List)** : Fichier signé publié périodiquement par la CA contenant la liste des numéros de série révoqués.\n        * **OCSP (Online Certificate Status Protocol)** : Protocole réseau interactif (HTTP) permettant d'interroger la CA en temps réel pour connaître le statut d'un certificat sans télécharger toute la CRL.")
-        st.markdown('---')
-        st.subheader('💻 Commandes OpenSSL Indispensables (BTS CIEL)')
-        st.code('\n# 1. Générer une clé privée RSA de 2048 bits chiffrée\nopenssl genrsa -out cle_privee_serveur.key 2048\n\n# 2. Créer une Demande de Signature de Certificat (CSR)\nopenssl req -new -key cle_privee_serveur.key -out demande_serveur.csr -subj "/C=FR/ST=IDF/L=Paris/O=BTS_CIEL/CN=web.ciel.local"\n\n# 3. Signer le certificat avec sa propre CA auto-signée (Valable 365 jours)\nopenssl x509 -req -in demande_serveur.csr -signkey cle_privee_serveur.key -out certificat_serveur.crt -days 365\n\n# 4. Examiner le contenu détaillé d\'un certificat X.509\nopenssl x509 -in certificat_serveur.crt -text -noout\n\n# 5. Tester la poignée de main TLS avec un serveur web sécurisé\nopenssl s_client -connect web.ciel.local:443 -showcerts', language='bash')
-        st.markdown('---')
-        st.subheader("✍️ Quiz d'Auto-Évaluation PKI")
-        q_pki1 = st.radio("Q1 : Quel protocole interactif permet de vérifier le statut de révocation d'un certificat en temps réel ?", ['CRL', 'OCSP', 'LDAPS', 'DNSSEC'], key='q_pki1_k')
-        if st.button('Valider Q1 PKI', key='btn_pki1'):
-            if q_pki1 == 'OCSP':
-                st.success("🎉 **Exact !** OCSP (Online Certificate Status Protocol) permet d'interroger la CA directement sans télécharger de lourdes listes CRL.")
-            else:
-                st.error('❌ **Incorrect.** OCSP est le protocole de vérification en temps réel.')
-    with tab_tp4:
-        st.subheader('4. Cours Magistral : Matrice des Flux & Pare-feu pfSense (LAN / DMZ / WAN / Active Directory)')
-        st.markdown("\n        Le pare-feu **pfSense** (fondé sur FreeBSD et `pf`) est l'équipement de sécurité périmétrique clé étudié en TP de BTS CIEL. Il permet de segmenter le réseau en zones de confiance différentes.\n\n        #### 🔹 Architecture 3 Zones Standard (LAN, DMZ, WAN) :\n        * **WAN (Unstrusted / Internet)** : Zone publique non de confiance.\n        * **DMZ (Demilitarized Zone - Ex: 172.16.1.0/24)** : Zone isolée hébergeant les serveurs accessibles depuis le Web (Serveur Web, Reverse Proxy, Broker MQTT, Mail).\n        * **LAN (Trusted / Réseau Interne - Ex: 192.168.10.0/24)** : Zone haute sécurité hébergeant les postes de travail, le contrôleur de domaine Active Directory et la BDD principale.")
-        st.markdown("\n        #### 🔹 Règles d'Or de Sécurité & Matrice des Flux :\n        1. **Politique par défaut** : **Deny All** (Tout ce qui n'est pas explicitement autorisé est bloqué).\n        2. **Sens d'Initiation des Connexions** :\n           * LAN $\\rightarrow$ WAN : Autorisé (Nav Web, HTTP/HTTPS).\n           * LAN $\\rightarrow$ DMZ : Autorisé (Administration SSH/HTTPS).\n           * DMZ $\\rightarrow$ WAN : Autorisé de façon restreinte (Mises à jour `apt update`, DNS).\n           * **DMZ $\\rightarrow$ LAN : STRICTEMENT INTERDIT** (Si le serveur Web en DMZ est compromis, l'attaquant ne peut pas rebondir vers le LAN).\n           * **WAN $\\rightarrow$ LAN : STRICTEMENT INTERDIT**.\n           * WAN $\\rightarrow$ DMZ : Autorisé uniquement sur les ports publics via Redirection de Port (**Port Forwarding / NAT 1:1**).")
-        st.markdown('---')
-        st.subheader('📋 Matrice des Flux Réseau Détaillée (TP pfSense & Active Directory)')
-        st.markdown('\n        | N° | Zone Source | IP Source | Zone Dest. | IP Dest. | Port / Protocole | Action | Justification Métier |\n        | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |\n        | **1** | WAN | Any | DMZ | 172.16.1.10 | TCP 80, 443 | **PASS (NAT)** | Accès des usagers au serveur Web public |\n        | **2** | WAN | Any | DMZ | 172.16.1.20 | TCP 8883 (MQTTS) | **PASS (NAT)** | Télémesure IoT chiffrée |\n        | **3** | LAN | 192.168.10.0/24 | WAN | Any | TCP 80, 443 | **PASS** | Navigation Web des utilisateurs du LAN |\n        | **4** | LAN | 192.168.10.10 (Admin)| DMZ | 172.16.1.0/24 | TCP 22 (SSH), 443 | **PASS** | Administration distante des serveurs |\n        | **5** | DMZ | 172.16.1.0/24 | LAN | 192.168.10.2 (AD) | TCP/UDP 53 (DNS) | **PASS** | Résolution DNS pour les serveurs DMZ |\n        | **6** | DMZ | 172.16.1.0/24 | LAN | 192.168.10.2 (AD) | TCP/UDP 88 (Kerberos) | **PASS** | Authentification du domaine AD |\n        | **7** | DMZ | 172.16.1.0/24 | LAN | 192.168.10.0/24 | ANY | **BLOCK (LOG)** | Blocage strict DMZ vers LAN |\n        | **8** | WAN | Any | LAN | Any | ANY | **BLOCK** | Protections périmétrique totale du LAN |')
-        st.markdown('---')
-        st.subheader("✍️ Quiz d'Auto-Évaluation pfSense & Flux Network")
-        q_pf1 = st.radio("Q1 : Pourquoi est-il strictement interdit d'autoriser l'initiation de connexions directes de la DMZ vers le LAN ?", ['Pour économiser de la bande passante', "Parce que si le serveur en DMZ est piraté, l'attaquant ne doit pas pouvoir attaquer le réseau interne", 'Parce que pfSense ne sait pas traiter le trafic DMZ', "Pour éviter les conflits d'adresses IP"], key='q_pf1_k')
-        if st.button('Valider Q1 pfSense', key='btn_pf1'):
-            if 'piraté' in q_pf1:
-                st.success('🎉 **Exact !** La DMZ est une zone tampon. Si elle est compromise, le LAN reste isolé.')
-            else:
-                st.error("❌ **Incorrect.** L'isolation de la DMZ empêche le rebond d'un pirate vers le LAN.")
+    st.markdown("<div class='hero-title'>🛡️ Master Hub Cybersécurité Avancée & Gouvernance</div>", unsafe_allow_html=True)
+    st.markdown("<p style='color:#94a3b8;'>Plateforme de référence regroupant l'intégralité des 4 cours d'expertise : EBIOS RM & PIA CNIL, PKI & Certificats X.509, Matrice des Flux & Pare-feu pfSense, Chiffrage & VPN (IPsec / OpenVPN).</p>", unsafe_allow_html=True)
 
+    tab_c1, tab_c2, tab_c3, tab_c4, tab_c5, tab_c6, tab_c7 = st.tabs([
+        "📊 1. EBIOS RM & PIA (CNIL)",
+        "🔑 2. PKI, X.509 & Certificats",
+        "🧱 3. pfSense, DMZ & Matrice des Flux",
+        "🔒 4. Chiffrage & VPN (IPsec / OpenVPN)",
+        "🧪 5. Laboratoire & Simulateurs Pratiques",
+        "🗂️ 6. Flashcards Spécifiques (20 Cartes)",
+        "📝 7. Grand Examen Blanc Cyber (20 Q)"
+    ])
+
+    # =========================================================================
+    # TAB 1 : EBIOS RM & PIA
+    # =========================================================================
+    with tab_c1:
+        st.subheader("1. Analyse des Risques : Méthode EBIOS RM & PIA (RGPD / CNIL)")
+        st.markdown("""
+        <div class='ciel-card'>
+            <h4 style='color: #38bdf8; margin-top: 0;'>📌 Deux méthodes complémentaires de référence en France</h4>
+            <p>La sécurité informatique ne se limite pas à des outils techniques : elle repose sur une analyse formelle des menaces et de la conformité réglementaire :</p>
+            <ul>
+                <li><b>EBIOS RM (ANSSI)</b> : <i>Expression des Besoins et Identification des Objectifs de Sécurité - Risk Manager</i>. Protège les <b>actifs métiers et le système d'information de l'organisation</b> (conformité ISO/IEC 27005).</li>
+                <li><b>PIA / AIPD (CNIL)</b> : <i>Analyse d'Impact relative à la Protection des Données</i> (RGPD Art. 35). Protège <b>les droits et libertés des personnes physiques</b>. La CNIL recommande expressément de s'appuyer sur EBIOS RM pour l'étude des risques.</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
+
+        st.markdown("#### 🔹 Les 5 Ateliers Collaboratifs d'EBIOS Risk Manager (ANSSI)")
+        col_eb1, col_eb2 = st.columns(2)
+        with col_eb1:
+            st.markdown("""
+            **Atelier 1 : Cadrage et socle de sécurité**
+            * *Question clé* : **Qu'est-ce qui compte pour nous ?**
+            * **Valeurs Métiers (VM)** : Processus, informations stratégiques ou savoir-faire critiques (ex: continuité de télémétrie, secrets de fabrication, réputation).
+            * **Biens Supports (BS)** : Éléments matériels, logiciels ou organisationnels hébergeant les VM (serveur Debian, base de données PostgreSQL, automates STM32, administrateurs).
+            * **Événements Redoutés (ER)** : Atteintes aux critères **DICP** (*Disponibilité, Intégrité, Confidentialité, Preuve/Traçabilité*) sur une valeur métier (ex: perte d'intégrité de la télémétrie entraînant un diagnostic erroné).
+            * *Livrable* : **Fiche de cadrage** et tableau des événements redoutés avec échelle de gravité (de 1-Négligeable à 4-Critique).
+
+            **Atelier 2 : Sources de risque (SR)**
+            * *Question clé* : **Qui peut nous attaquer et pourquoi ?**
+            * Identification des **Sources de Risque (SR)** : Cybercriminels motivés par le gain financier, concurrents (espionnage), hacktivistes, collaborateurs malveillants ou négligents.
+            * Formulation des **Objectifs Visés (OV)** : Vol de données médicales, rançonnage par chiffrement (Ransomware), sabotage industriel.
+            * *Livrable* : **Cartographie des couples SR / OV priorisés**.
+            """)
+        with col_eb2:
+            st.markdown("""
+            **Atelier 3 : Scénarios stratégiques**
+            * *Question clé* : **Par quel chemin macroscopique la menace peut-elle frapper ?**
+            * Évaluation de l'**Écosystème** : Fournisseurs de maintenance, prestataires cloud, partenaires réseau.
+            * **Chemins d'attaque** : Attaque directe sur le périmètre ou attaque indirecte par rebond via un tiers de confiance moins protégé (attaque par chaîne logistique / *Supply Chain*).
+            * *Livrable* : **Matrice de risque stratégique (Gravité x Vraisemblance)**.
+
+            **Atelier 4 : Scénarios opérationnels**
+            * *Question clé* : **Concrètement, par quelles techniques l'attaquant progresse-t-il ?**
+            * Décomposition en chaînes d'attaque techniques étape par étape (modèle Cyber Kill Chain / MITRE ATT&CK) : Reconnaissance -> Intrusion initiale (Phishing) -> Élévation de privilèges -> Mouvement latéral -> Exfiltration ou sabotage.
+            * *Livrable* : **Chaîne d'attaque opérationnelle détaillée**.
+
+            **Atelier 5 : Traitement du risque**
+            * *Question clé* : **Que fait-on et à quel coût ?**
+            * 4 options : **Réduction/Atténuation** (mesures de sécurité), **Refus/Évitement** (supprimer l'activité), **Partage/Transfert** (assurance), **Maintien/Acceptation** (pour le risque résiduel).
+            * *Livrable* : **Plan de traitement du risque priorisé** et fiche d'acceptation du **risque résiduel**.
+            """)
+
+        st.markdown("---")
+        st.markdown("#### 🔹 L'AIPD / PIA (CNIL) : Protection des Données Personnelles")
+        st.markdown("""
+        * **Obligation Légale (RGPD Article 35)** : Obligatoire dès qu'un traitement présente un risque élevé pour les droits et libertés. La CNIL définit **9 critères de déclenchement** (ex: données sensibles/santé, surveillance systématique, profilage, personnes vulnérables, volume important). Si au moins **2 critères** sont réunis, le PIA est **juridiquement obligatoire**.
+        * **Différence Fondamentale** :
+          * **EBIOS RM** protège l'**organisation** contre les pertes financières, d'image ou juridiques.
+          * **Le PIA** protège l'**individu** (le citoyen, le patient, l'employé) contre la discrimination, le vol d'identité ou la violation de sa vie privée.
+        """)
+
+    # =========================================================================
+    # TAB 2 : PKI & CERTIFICATS X.509
+    # =========================================================================
+    with tab_c2:
+        st.subheader("2. Infrastructure à Clés Publiques (PKI) & Certificats X.509")
+        st.markdown("""
+        <div class='ciel-card'>
+            <h4 style='color: #38bdf8; margin-top: 0;'>🔑 Qu'est-ce qu'un Certificat Numérique X.509 ?</h4>
+            <p>Un certificat est un <b>fichier électronique standardisé</b> qui lie formellement une <b>identité</b> (Nom de domaine FQDN, serveur, personne, objet connecté) à une <b>clé publique</b>. Cette liaison n'a de valeur que parce qu'elle est <b>cryptographiquement signée par une Autorité de Certification (CA) de confiance</b>.</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+        col_pk1, col_pk2 = st.columns(2)
+        with col_pk1:
+            st.markdown("""
+            #### 🏛️ Architecture & Hiérarchie de Confiance
+            * **Autorité de Certification Racine (Root CA)** :
+              * Clé maîtresse de l'organisation. Son certificat est auto-signé.
+              * **Règle d'or de sécurité** : La CA Racine doit être **HORS LIGNE (Offline)** et physiquement sécurisée pour être protégée de toute intrusion réseau.
+            * **Autorité de Certification Subordonnée / Intermédiaire (Intermediate CA)** :
+              * Signée par la Root CA. Elle est en ligne (Online) et signe les certificats d'extrémité du quotidien (serveurs web, VPN, contrôleurs de domaine).
+              * Si l'intermédiaire est compromise, seule cette branche est révoquée, préservant la confiance globale.
+            * **Magasin de confiance (*Trust Store*)** : Liste des certificats racines pré-installés dans le système d'exploitation ou le navigateur.
+
+            #### 📄 Structure du Certificat X.509 v3
+            * **Common Name (CN)** : FQDN principal du serveur (ex: `glpi.labo.local`).
+            * **Subject Alternative Name (SAN)** : **Obligatoire aujourd'hui** ! Permet d'associer plusieurs noms alternatifs ou adresses IP (`DNS:srv-glpi`, `IP:192.168.90.10`). Un certificat sans SAN est rejeté par les navigateurs modernes.
+            * **Période de validité** : *Not Before* et *Not After* (durée maximale recommandée : 1 an / 398 jours pour le Web).
+            * **Signature de la CA** : Hash du certificat chiffré avec la clé privée de l'autorité.
+            """)
+        with col_pk2:
+            st.markdown("""
+            #### 🔄 Le Cycle de Vie Complet d'un Certificat (4 Étapes)
+            1. **Génération & Demande (CSR - Certificate Signing Request)** :
+               * Générée par la machine cliente (Debian, pfSense).
+               * Contient l'identité (CN, SAN) et la **clé publique**.
+               * ⚠️ **Règle absolue** : La **clé privée ne quitte JAMAIS la machine** qui l'a créée ! Elle n'apparaît jamais dans la CSR.
+            2. **Émission & Signature** : La CA valide l'identité et signe le certificat avec sa clé privée.
+            3. **Vérification de la Chaîne de Confiance (AIA)** :
+               * **AIA (*Authority Information Access*)** : Extension URL embarquée dans le certificat pointant vers le certificat public de la CA émettrice. Permet au client de télécharger le maillon manquant pour remonter la chaîne jusqu'à la racine.
+            4. **Révocation (CRL & OCSP)** :
+               * **CRL (*Certificate Revocation List*)** : Fichier contenant la liste noire des certificats invalidés avant échéance (vol de clé, départ d'employé).
+               * **CDP (*CRL Distribution Point*)** : URL HTTP embarquée dans le certificat où télécharger la CRL.
+               * **OCSP (*Online Certificate Status Protocol*)** : Protocole temps réel interrogeant le statut d'un certificat unique sans télécharger l'intégralité de la CRL.
+               * ⚠️ **Le piège du "Soft Fail"** : Si le serveur de CRL/CDP est injoignable, de nombreux clients acceptent le certificat par défaut, créant une faille si le service n'est pas hautement disponible.
+            """)
+
+    # =========================================================================
+    # TAB 3 : PFSENSE & MATRICE DES FLUX
+    # =========================================================================
+    with tab_c3:
+        st.subheader("3. Pare-feu pfSense, DMZ & Matrice des Flux Réseau")
+        st.markdown("""
+        <div class='ciel-card'>
+            <h4 style='color: #38bdf8; margin-top: 0;'>🧱 Pourquoi une Matrice des Flux avant de Configurer ?</h4>
+            <p><b>Pas de pare-feu sans plan !</b> Configurer un pare-feu au jugé crée des "trous de sécurité" béants ou bloque des services indispensables. La <b>Matrice des Flux</b> est le document de référence normatif validé par les équipes qui recense chaque communication autorisée.</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+        col_pf1, col_pf2 = st.columns(2)
+        with col_pf1:
+            st.markdown("""
+            #### 📐 Méthodologie en 4 Étapes
+            1. **Inventorier** : Recenser les équipements et leurs rôles (Clients Windows, Serveur AD, DMZ GLPI, Pare-feu pfSense).
+            2. **Lister les flux par service** : Identifier les couples source/destination, les protocoles (TCP/UDP) et les ports d'écoute.
+            3. **Identifier la traversée du pare-feu** :
+               * *Intra-VLAN / Intra-LAN (ex: Client vers SRV-AD01 sur le même switch)* : Le trafic ne traverse **PAS** pfSense -> Pas de règle !
+               * *Inter-Zones (ex: LAN -> DMZ, WAN -> DMZ)* : Le trafic traverse pfSense -> **Règle obligatoire sur l'interface d'entrée**.
+            4. **Traduire en configuration pfSense** : Créer des **Alias** (groupes d'IP ou de ports) et définir la règle `Action: Pass`, `Interface: Entrée`, `Source`, `Destination`, `Port`.
+
+            #### 🛡️ Architecture & Rôle de la DMZ
+            * **Zone Démilitarisée (DMZ)** : Zone tampon isolée accueillant les serveurs exposés à l'extérieur ou aux utilisateurs (Web, GLPI, DNS public).
+            * **Règle d'or absolue** :
+              * Un flux **DMZ -> LAN** est **STRICTEMENT INTERDIT** par défaut !
+              * Si le serveur GLPI en DMZ est compromis par une faille applicative, l'attaquant reste enfermé dans la DMZ et ne peut pas rebondir sur le contrôleur de domaine (AD) du LAN.
+            """)
+        with col_pf2:
+            st.markdown("""
+            #### 📋 Extrait de la Matrice des Flux Officielle (TP3)
+            | N° | Source | Destination | Proto/Port | Sens | Justification | Règle pfSense |
+            | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+            | **1** | Client LAN | SRV-AD01 (LAN) | UDP/TCP 53 | Client -> AD | Résolution DNS | *Intra-LAN (Pas de règle)* |
+            | **2** | Client LAN | SRV-AD01 (LAN) | TCP 88, 389 | Client -> AD | Auth Kerberos & LDAP | *Intra-LAN (Pas de règle)* |
+            | **3** | Client LAN | Debian GLPI (DMZ) | TCP 443 | Client -> DMZ | Accès Web HTTPS GLPI | **Pass sur Interface LAN** |
+            | **4** | Client LAN | pfSense (LAN) | TCP 443 | Client -> FW | Admin Web pfSense | **Pass sur Interface LAN** |
+            | **5** | Debian DMZ | SRV-AD01 (LAN) | TCP 636 | DMZ -> AD | Annuaire sécurisé LDAPS | **Pass restreint sur DMZ** |
+            | **6** | Debian DMZ | LAN (Tout le reste) | ANY | DMZ -> LAN | Trafic non sollicité | **BLOCK (Par défaut)** |
+            | **7** | WAN (Internet)| Debian GLPI (DMZ) | TCP 443 | WAN -> DMZ | Accès public distant | **NAT Port Forward sur WAN** |
+
+            #### 🔍 Audit des Logs & Preuve de Blocage
+            * Pour valider une règle, on consulte **Status > System Logs > Firewall**.
+            * Un paquet bloqué (croix rouge) sur WAN ou DMZ prouve que la politique restrictive s'applique.
+            """)
+
+    # =========================================================================
+    # TAB 4 : CHIFFRAGE & VPN
+    # =========================================================================
+    with tab_c4:
+        st.subheader("4. Chiffrage Cryptographique & Tunnels VPN (IPsec / OpenVPN)")
+        st.markdown("""
+        <div class='ciel-card'>
+            <h4 style='color: #38bdf8; margin-top: 0;'>🔒 Les 5 Piliers de la Cryptographie & Réseaux Privés Virtuels</h4>
+            <p>Concevoir un réseau sécurisé implique de protéger les communications en transit à travers des réseaux non fiables (Internet). Les protocoles VPN créent un tunnel chiffré étanche entre deux sites distants ou pour des utilisateurs nomades.</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+        col_vpn1, col_vpn2 = st.columns(2)
+        with col_vpn1:
+            st.markdown("""
+            #### 🛡️ Les 3 Familles de Chiffrement
+            * **Chiffrement Symétrique (Clé partagée secrète unique)** :
+              * Rapide, idéal pour chiffrer les gros volumes de données en transit.
+              * Standards certifiés ANSSI : **AES-128 / AES-256** (modes CBC ou GCM).
+            * **Chiffrement Asymétrique (Bi-clé Publique / Privée)** :
+              * Plus lent, utilisé pour l'authentification et l'échange de clés secrètes initial.
+              * Standards : **RSA (>= 2048 bits)**, **ECC / Ed25519** (courbes elliptiques).
+            * **Fonctions de Hachage (Empreinte à sens unique)** :
+              * Garantit l'**Intégrité** des paquets.
+              * Standards : **SHA-256 / SHA-512** (MD5 et SHA-1 sont formellement proscrits).
+
+            #### 🌐 VPN IPsec (Site-à-Site) : Les 2 Phases IKE
+            Le protocole IPsec s'articule impérativement en deux étapes distinctes :
+            * **Phase 1 (IKE SA - Internet Key Exchange)** :
+              * *Question* : **QUI êtes-vous ?**
+              * Authentification mutuelle des routeurs/pare-feux distants (via PSK ou certificat X.509) et négociation d'un canal sécurisé Diffie-Hellman (DH Group 14).
+              * Paramètres : Mode IKEv2, AES-256, SHA-256, DH 14, durée de vie **28 800 s (8 h)**.
+            * **Phase 2 (IPsec SA)** :
+              * *Question* : **QUOI protège-t-on ?**
+              * Spécifie les sous-réseaux locaux et distants autorisés à communiquer à travers le tunnel, et chiffre les paquets avec le protocole **ESP (Encapsulating Security Payload)**.
+              * Durée de vie plus courte : **3 600 s (1 h)**.
+            """)
+        with col_vpn2:
+            st.markdown("""
+            #### 💻 VPN Nomade : OpenVPN vs IPsec
+            * **Protocole OpenVPN** :
+              * Fonctionne en couche transport au-dessus de **UDP 1194** (rapide) ou **TCP 443** (permet de contourner les pare-feux stricts d'hôtels/entreprises).
+              * Utilise deux canaux étanches : **Canal de contrôle (chiffré en TLS)** et **Canal de données**.
+              * Modes d'interface : **TUN** (Routage IP Couche 3 - standard recommandé) ou **TAP** (Pontage Ethernet Couche 2).
+              * Déploiement : Exportation d'un profil client unique `.ovpn` intégrant la configuration et les certificats via le package `openvpn-client-export`.
+
+            #### ⚡ Split-Tunnel vs Full-Tunnel
+            | Mode | Trafic Internet du Client | Avantage | Risque |
+            | :--- | :--- | :--- | :--- |
+            | **Split Tunnel** | Sort directement par sa box/FAI locale | Économise la bande passante du siège | Le poste distant connecté n'est pas filtré |
+            | **Full Tunnel** | Tout le trafic passe par le VPN et pfSense | Filtrage et logs d'entreprise centralisés | Surcharge la ligne Internet du siège |
+
+            *Option pfSense* : Case à cocher **Redirect IPv4 Gateway** pour forcer le Full Tunnel.
+
+            #### 🔑 PSK vs Certificats : Le Scénario de Compromission
+            * **Pourquoi préférer les Certificats X.509 pour un VPN ?**
+              * Avec une **clé pré-partagée (PSK)** : si un ordinateur portable d'un salarié est volé, il faut modifier la clé secrète chez **l'ensemble des 50 salariés** !
+              * Avec des **Certificats X.509** : il suffit de **révoquer l'unique certificat du salarié volé dans la CRL** sur pfSense. Les 49 autres utilisateurs continuent de travailler sans interruption.
+            """)
+
+    # =========================================================================
+    # TAB 5 : LABS & SIMULATEURS PRATIQUES
+    # =========================================================================
+    with tab_c5:
+        st.subheader("5. Simulateurs & Exercices Pratiques d'Ingénierie Cyber")
+        lab_sel = st.selectbox("Sélectionnez l'atelier pratique à exécuter :", [
+            "Atelier A : Diagnostic d'une Panne VPN IPsec (Phase 1 vs Phase 2)",
+            "Atelier B : Détermination d'une Règle de Pare-feu pfSense (DMZ / LAN)",
+            "Atelier C : Analyse du Cycle de Vie d'un Certificat (CSR / CRL)"
+        ], key="sel_cyber_lab")
+
+        if "Atelier A" in lab_sel:
+            st.markdown("""
+            **Scénario d'incident en entreprise** :
+            Deux sites distants (Siège et Usine) sont interconnectés via un tunnel VPN IPsec configuré sur deux pare-feux pfSense.
+            *Symptôme constaté* : Les logs de pfSense indiquent `IKE SA established successfully`, mais aucun ping ne passe entre les postes du LAN Siège (`192.168.10.0/24`) et du LAN Usine (`192.168.20.0/24`). Les compteurs de paquets IPsec SA restent à 0.
+            """)
+            st.write("1. Quelle phase du tunnel IPsec est à l'origine du dysfonctionnement ?")
+            q_vpn_p = st.radio("Phase en cause :", ["Phase 1 (IKE SA)", "Phase 2 (IPsec SA)", "Panne physique du câble WAN", "Erreur DNS"], key="rad_vpn_p")
+            st.write("2. Quelle est la cause la plus probable de cet incident ?")
+            q_vpn_c = st.radio("Cause racine identifiée :", [
+                "Erreur de clé pré-partagée (Pre-Shared Key)",
+                "Désaccord sur la déclaration des réseaux locaux/distants (Phase 2 Proposals) ou règle manquante sur l'onglet IPsec",
+                "Le groupe Diffie-Hellman est mal configuré en Phase 1",
+                "Le port UDP 500 est bloqué sur le WAN"
+            ], key="rad_vpn_c")
+            if st.button("Valider le diagnostic IPsec", key="btn_diag_ipsec"):
+                if "Phase 2" in q_vpn_p and "Désaccord sur la déclaration" in q_vpn_c:
+                    st.success("🏆 **Diagnostic Parfait !** Si la Phase 1 est établie, l'authentification est réussie. Le blocage vient obligatoirement d'une discordance sur les réseaux Phase 2 ou de l'absence de règle autorisant le trafic dans Rules > IPsec (+25 XP).")
+                    add_user_points(25, "lab_ipsec_diag")
+                else:
+                    st.error("❌ Analysez bien : si l'IKE SA est 'established', la Phase 1 est opérationnelle. Le problème se situe en Phase 2.")
+
+        elif "Atelier B" in lab_sel:
+            st.markdown("""
+            **Scénario pfSense** :
+            Un nouveau serveur d'inventaire **GLPI** vient d'être déployé en DMZ (`192.168.90.10`). Les utilisateurs du LAN (`192.168.80.0/24`) doivent y accéder en interface web sécurisée HTTPS.
+            """)
+            st.write("Sur quelle interface de pfSense devez-vous créer la règle de filtrage pour autoriser ce trafic ?")
+            q_pf_int = st.radio("Interface cible :", ["Interface LAN", "Interface DMZ", "Interface WAN", "Onglet Floating Rules"], key="rad_pf_int")
+            st.write("Quelle doit être la règle de filtrage exacte ?")
+            q_pf_r = st.radio("Configuration de la règle :", [
+                "Action: Pass | Source: DMZ net | Dest: LAN net | Port: 443",
+                "Action: Pass | Source: LAN net | Dest: 192.168.90.10 | Port: TCP 443 (HTTPS)",
+                "Action: Pass | Source: ANY | Dest: ANY | Port: ALL",
+                "Action: Block | Source: 192.168.90.10 | Dest: LAN net"
+            ], key="rad_pf_r")
+            if st.button("Valider la règle pfSense", key="btn_val_pfsense"):
+                if "Interface LAN" in q_pf_int and "Source: LAN net | Dest: 192.168.90.10" in q_pf_r:
+                    st.success("✅ **Règle pfSense Exacte !** pfSense filtre toujours le trafic sur son **interface d'entrée** (LAN pour les paquets venant des utilisateurs). La règle autorise explicitement le port HTTPS vers l'IP cible (+20 XP).")
+                    add_user_points(20, "lab_pfsense_rule")
+                else:
+                    st.error("❌ Rappel de cours : Dans pfSense, les règles s'appliquent sur l'interface d'ENTRÉE du paquet (ici LAN) et ciblent le serveur DMZ.")
+
+        else:
+            st.markdown("""
+            **Scénario PKI / X.509** :
+            Un administrateur souhaite sécuriser l'accès au serveur web `pfsense.labo.local`. Il génère une requête de signature de certificat (**CSR**).
+            """)
+            st.write("1. Que contient impérativement le fichier CSR généré ?")
+            q_csr1 = st.radio("Contenu de la CSR :", [
+                "La clé publique et les identités demandées (CN, SAN)",
+                "La clé privée du serveur et son mot de passe",
+                "La liste de révocation CRL complète",
+                "Le certificat racine de la CA"
+            ], key="rad_csr1")
+            st.write("2. Si la clé privée du serveur vient à être dérobée par un attaquant, quelle action d'urgence neutralise la menace ?")
+            q_csr2 = st.radio("Action d'urgence :", [
+                "Supprimer le fichier temporaire sur le serveur",
+                "Révoquer le certificat auprès de l'Autorité de Certification et publier la mise à jour sur le point de distribution CRL (CDP)",
+                "Changer simplement l'adresse IP du serveur",
+                "Redémarrer le service Apache"
+            ], key="rad_csr2")
+            if st.button("Valider l'analyse PKI", key="btn_val_pki"):
+                if "clé publique" in q_csr1 and "Révoquer le certificat" in q_csr2:
+                    st.success("✅ **Parfait !** La CSR ne contient que la clé publique. En cas de vol de clé privée, la révocation immédiate via la CRL/CDP est la seule parade efficace (+20 XP).")
+                    add_user_points(20, "lab_pki_csr")
+                else:
+                    st.error("❌ Relisez le cours : la clé privée ne quitte jamais la machine, et la compromission s'arrête par révocation CRL.")
+
+    # =========================================================================
+    # TAB 6 : FLASHCARDS SPÉCIFIQUES CYBER (20 CARTES)
+    # =========================================================================
+    with tab_c6:
+        st.subheader("6. Flashcards Réflexes Spéciales Cybersécurité (20 Cartes)")
+        st.markdown("<p style='color:#94a3b8;'>Entraînez votre mémoire active sur les notions incontournables des 4 nouveaux cours d'examen.</p>", unsafe_allow_html=True)
+        
+        CYBER_CARDS_20 = [
+            {"q": "Quelle est la différence fondamentale d'objectif entre EBIOS RM et le PIA / AIPD ?", "a": "EBIOS RM (ANSSI) protège le système d'information et les actifs de l'organisation. Le PIA (CNIL) protège la vie privée, les droits et les libertés des personnes physiques (RGPD Art. 35)."},
+            {"q": "Quels sont les 5 ateliers d'EBIOS Risk Manager ?", "a": "1. Cadrage et socle de sécurité, 2. Sources de risque, 3. Scénarios stratégiques, 4. Scénarios opérationnels, 5. Traitement du risque."},
+            {"q": "Dans EBIOS RM, quelle est la distinction entre une Valeur Métier et un Bien Support ?", "a": "Une Valeur Métier est un processus ou une information critique (ex: facturation, brevets). Un Bien Support est la composante technique qui l'héberge (serveur, base de données, câble, admin)."},
+            {"q": "Qu'est-ce qu'une attaque par chaîne logistique (Supply Chain Attack) dans l'Atelier 3 d'EBIOS ?", "a": "Une attaque indirecte qui compromet d'abord un sous-traitant ou un partenaire de confiance moins bien sécurisé pour atteindre le système d'information cible par rebond."},
+            {"q": "Quelles sont les 4 options possibles pour le traitement d'un risque dans l'Atelier 5 d'EBIOS ?", "a": "1. Réduction/Atténuation (mesures de sécurité), 2. Refus/Évitement (abandon de l'activité), 3. Transfert/Partage (assurance), 4. Maintien/Acceptation (du risque résiduel)."},
+            {"q": "Pourquoi la clé privée ne doit-elle JAMAIS figurer dans une demande de certificat (CSR) ?", "a": "Parce que si la clé privée circulait sur le réseau, n'importe quel attaquant pourrait usurper l'identité du serveur. Elle reste strictement confinée sur la machine qui l'a créée."},
+            {"q": "Quelle est l'utilité essentielle de l'extension SAN (Subject Alternative Name) dans un certificat X.509 v3 ?", "a": "Elle permet de certifier plusieurs noms de domaine (FQDN) et adresses IP pour une même machine. Obligatoire pour être validé par les navigateurs modernes."},
+            {"q": "Quelle est la différence technique entre une CRL et le protocole OCSP ?", "a": "La CRL est une liste complète des certificats révoqués téléchargée périodiquement (fichier lourd). OCSP interroge le statut d'un certificat unique en temps réel (requête légère)."},
+            {"q": "Qu'est-ce que l'extension AIA (Authority Information Access) dans un certificat ?", "a": "Une URL pointant vers le certificat public de la CA émettrice, permettant au client de remonter la chaîne de certification jusqu'à la racine de confiance."},
+            {"q": "Quel est le risque de sécurité lié au phénomène de 'Soft Fail' lors de la vérification de révocation ?", "a": "Si le serveur CDP/OCSP est injoignable, le navigateur accepte quand même le certificat par défaut. Un attaquant bloquant l'accès au CDP peut donc faire accepter un certificat révoqué."},
+            {"q": "Pourquoi une Autorité de Certification Racine (Root CA) doit-elle être maintenue hors ligne (Offline) ?", "a": "Pour garantir qu'aucune cyberattaque réseau ne puisse compromettre la clé maîtresse suprême de l'organisation. Seules les CA subordonnées sont en ligne."},
+            {"q": "Dans une architecture pfSense, pourquoi interdit-on tout flux d'initiative DMZ vers LAN ?", "a": "Pour confiner un attaquant qui compromettrait un serveur web exposé en DMZ, l'empêchant de pivoter vers le cœur de réseau interne (Active Directory, bases sensibles)."},
+            {"q": "Sur quelle interface pfSense doit-on positionner une règle de pare-feu ?", "a": "Toujours sur l'interface d'ENTRÉE où pénètrent les paquets (sur l'interface LAN pour le trafic généré par les clients, sur WAN pour les accès extérieurs)."},
+            {"q": "Dans pfSense, qu'est-ce qu'un Alias et quel est son intérêt pour la sécurité ?", "a": "Un nom logique regroupant des adresses IP, réseaux ou ports. Il simplifie les règles de pare-feu, évite les erreurs humaines et facilite la maintenance centralisée."},
+            {"q": "Pourquoi une communication entre deux postes du même sous-réseau LAN ne nécessite-t-elle aucune règle pfSense ?", "a": "Parce que les paquets sont commutés directement en couche 2 par le switch Ethernet et ne traversent jamais la passerelle/pare-feu pfSense."},
+            {"q": "Dans un VPN IPsec, quelle est la différence entre la Phase 1 (IKE) et la Phase 2 (IPsec SA) ?", "a": "La Phase 1 répond à 'Qui êtes-vous ?' (authentification mutuelle des routeurs et canal sécurisé). La Phase 2 répond à 'Que protège-t-on ?' (déclaration des sous-réseaux et chiffrement ESP)."},
+            {"q": "Sur quels ports et protocoles opère OpenVPN et pourquoi peut-il utiliser le port TCP 443 ?", "a": "OpenVPN utilise par défaut UDP 1194. Il peut utiliser TCP 443 pour se fondre dans le trafic web HTTPS standard et traverser les pare-feux stricts d'hôtels ou d'entreprises."},
+            {"q": "Quelle est la différence entre un VPN en mode Split-Tunnel et en mode Full-Tunnel ?", "a": "Split-Tunnel : seul le trafic d'entreprise passe dans le tunnel (Internet sort par le FAI local). Full-Tunnel : l'intégralité du trafic passe par le VPN et le pare-feu central."},
+            {"q": "Pourquoi l'authentification par certificats X.509 est-elle supérieure à une clé partagée (PSK) pour un VPN de 50 nomades ?", "a": "En cas de vol d'un ordinateur portable, il suffit de révoquer son certificat dans la CRL sans impacter les 49 autres collègues. Avec une PSK, il faudrait reconfigurer les 50 postes."},
+            {"q": "Pourquoi le chiffrement d'un tunnel VPN ne dispense-t-il pas d'appliquer des règles de pare-feu (ACL) ?", "a": "Parce que le VPN sécurise uniquement le transport des données. Une fois les paquets sortis du tunnel, des ACL strictes doivent vérifier que l'utilisateur n'accède qu'aux serveurs autorisés."}
+        ]
+
+        if "fc_cyber_idx" not in st.session_state:
+            st.session_state.fc_cyber_idx = 0
+
+        idx_c = st.session_state.fc_cyber_idx
+        card = CYBER_CARDS_20[idx_c]
+
+        st.markdown(f"**Carte {idx_c + 1} / {len(CYBER_CARDS_20)}**")
+        st.markdown(f"""
+        <div class='flashcard-box-modern'>
+            <span style='font-size: 0.8rem; text-transform: uppercase; color: #38bdf8; font-weight: 700; letter-spacing: 0.05em;'>QUESTION CYBERSÉCURITÉ</span>
+            <div class='flashcard-q-text' style='margin-top: 12px;'>{card['q']}</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+        rev_c = st.checkbox("👁️ Révéler la Réponse Certifiée", key=f"rev_cyber_{idx_c}")
+        if rev_c:
+            st.markdown(f"""
+            <div class='flashcard-a-box'>
+                <b style='color: #059669;'>Réponse officielle :</b><br>
+                {card['a']}
+            </div>
+            """, unsafe_allow_html=True)
+
+        c_prev, c_next = st.columns(2)
+        with c_prev:
+            if st.button("⬅️ Carte Précédente", key="btn_c_prev") and idx_c > 0:
+                st.session_state.fc_cyber_idx -= 1
+                st.rerun()
+        with c_next:
+            if st.button("Carte Suivante ➡️", key="btn_c_next") and idx_c < len(CYBER_CARDS_20) - 1:
+                st.session_state.fc_cyber_idx += 1
+                st.rerun()
+
+    # =========================================================================
+    # TAB 7 : GRAND EXAMEN BLANC CYBER (20 QUESTIONS AVEC XP)
+    # =========================================================================
+    with tab_c7:
+        st.subheader("7. Grand Examen Blanc Certifiant : 20 Questions de Synthèse")
+        st.markdown("<p style='color:#94a3b8;'>Testez l'ensemble de vos connaissances sur les 4 cours pour valider votre maîtrise et créditer jusqu'à <b>+100 XP</b> sur votre profil.</p>", unsafe_allow_html=True)
+
+        CYBER_EXAM_20 = [
+            {"q": "1. Quel organisme français est l'auteur officiel de la méthode d'analyse de risques EBIOS Risk Manager ?", "opts": ["L'ANSSI", "La CNIL", "Le Ministère des Armées", "L'AFNOR"], "rep": "L'ANSSI", "expl": "EBIOS RM est développé et publié par l'ANSSI (conforme ISO 27005)."},
+            {"q": "2. Dans le cadre du RGPD, quel article impose la réalisation d'une Analyse d'Impact (PIA / AIPD) pour les traitements à risque élevé ?", "opts": ["Article 5", "Article 28", "Article 32", "Article 35"], "rep": "Article 35", "expl": "L'article 35 du RGPD régit l'AIPD."},
+            {"q": "3. Dans l'Atelier 1 d'EBIOS RM, un serveur de base de données PostgreSQL hébergeant des dossiers médicaux est qualifié de :", "opts": ["Valeur Métier", "Bien Support", "Source de Risque", "Événement Redouté"], "rep": "Bien Support", "expl": "Le serveur héberge la valeur métier (les dossiers médicaux), c'est donc un Bien Support."},
+            {"q": "4. Quel livrable clé est produit à l'issue de l'Atelier 3 d'EBIOS RM ?", "opts": ["La matrice de risques stratégiques (Gravité x Vraisemblance)", "Le rapport de câblage réseau", "Le fichier de révocation CRL", "La liste des employés formés"], "rep": "La matrice de risques stratégiques (Gravité x Vraisemblance)", "expl": "L'atelier 3 confronte les sources de risque à l'écosystème pour bâtir la matrice stratégique."},
+            {"q": "5. Quelle extension d'un certificat X.509 v3 est aujourd'hui impérativement exigée par les navigateurs pour valider un nom de domaine ou une IP ?", "opts": ["CN (Common Name)", "SAN (Subject Alternative Name)", "CRL (Certificate Revocation List)", "AIA (Authority Information Access)"], "rep": "SAN (Subject Alternative Name)", "expl": "Le champ SAN est obligatoire sous peine de rejet par Chrome, Edge et Firefox."},
+            {"q": "6. Dans une PKI d'entreprise, pour quelle raison fondamentale la CA Racine est-elle conservée HORS LIGNE (Offline) ?", "opts": ["Pour économiser l'électricité du data center", "Pour la prémunir totalement contre les compromissions réseau distantes", "Parce que Windows Server interdit la connexion réseau d'une CA racine", "Pour empêcher le renouvellement des baux DHCP"], "rep": "Pour la prémunir totalement contre les compromissions réseau distantes", "expl": "Si la Root CA est compromise, toute l'infrastructure s'effondre. Elle est donc physiquement isolée."},
+            {"q": "7. Quel élément d'un certificat indique au client l'adresse URL où il peut télécharger le certificat de l'autorité émettrice pour valider la chaîne ?", "opts": ["L'extension CDP", "L'extension AIA (Authority Information Access)", "La clé publique", "L'empreinte SHA-256"], "rep": "L'extension AIA (Authority Information Access)", "expl": "AIA fournit l'URL du certificat de l'autorité émettrice."},
+            {"q": "8. Quelle est la faiblesse de sécurité du protocole de révocation OCSP en mode 'Soft Fail' ?", "opts": ["Il ralentit la navigation web de 10 secondes", "Si le serveur OCSP est injoignable, le client valide quand même le certificat révoqué par défaut", "Il ne fonctionne pas avec l'algorithme RSA", "Il nécessite obligatoirement une connexion en UDP 53"], "rep": "Si le serveur OCSP est injoignable, le client valide quand même le certificat révoqué par défaut", "expl": "Le Soft Fail privilégie la disponibilité au détriment de la sécurité en cas de panne du répondeur."},
+            {"q": "9. Sur un pare-feu pfSense, sur quelle interface doit-on créer une règle autorisant un client du LAN à naviguer sur un serveur GLPI en DMZ ?", "opts": ["Sur l'interface LAN", "Sur l'interface DMZ", "Sur l'interface WAN", "Sur l'interface IPsec"], "rep": "Sur l'interface LAN", "expl": "pfSense filtre à l'ENTRÉE des paquets. Le flux étant émis par le client LAN, la règle se place sur LAN."},
+            {"q": "10. Dans une architecture réseau sécurisée avec pare-feu, pourquoi interdit-on catégoriquement les flux d'initiative DMZ vers LAN ?", "opts": ["Parce que le routeur ne dispose pas d'assez de mémoire vive", "Pour empêcher un attaquant ayant piraté un service web exposé en DMZ d'infiltrer le cœur du réseau interne", "Parce que le protocole TCP ne fonctionne pas de la DMZ vers le LAN", "Pour obliger l'utilisation du Wi-Fi invité"], "rep": "Pour empêcher un attaquant ayant piraté un service web exposé en DMZ d'infiltrer le cœur du réseau interne", "expl": "La DMZ est une zone semi-sûre qui ne doit jamais pouvoir initier de connexion vers le LAN sécurisé."},
+            {"q": "11. Quel protocole et quel port par défaut sont utilisés par OpenVPN ?", "opts": ["TCP 80", "UDP 1194", "TCP 22", "UDP 500"], "rep": "UDP 1194", "expl": "OpenVPN utilise standardisé UDP 1194 (pouvant être basculé sur TCP 443 si nécessaire)."},
+            {"q": "12. Dans un tunnel VPN IPsec, à quelle interrogation précise répond la Phase 1 (IKE SA) ?", "opts": ["Quels sont les sous-réseaux locaux et distants à chiffrer ?", "Qui êtes-vous ? (Authentification mutuelle des équipements et négociation du canal sécurisé)", "Combien d'octets ont été transférés ?", "Quel est le nom du serveur DNS de l'entreprise ?"], "rep": "Qui êtes-vous ? (Authentification mutuelle des équipements et négociation du canal sécurisé)", "expl": "Phase 1 = Identité et négociation IKE SA. Phase 2 = Quels réseaux transitent sous scellé IPsec SA."},
+            {"q": "13. Quelle est la durée de vie standard recommandée d'une Phase 1 (IKE) sous pfSense ?", "opts": ["60 secondes", "3 600 secondes (1 h)", "28 800 secondes (8 h)", "86 400 secondes (24 h)"], "rep": "28 800 secondes (8 h)", "expl": "La Phase 1 dure 28 800 s (8h) tandis que la Phase 2 est renouvelée toutes les 3 600 s (1h)."},
+            {"q": "14. Quel mode VPN fait passer l'intégralité du trafic Internet de l'utilisateur par le pare-feu du siège pour être filtré et journalisé ?", "opts": ["Split-Tunnel", "Full-Tunnel (Redirect Gateway)", "Tunnel GRE simple", "Proxy transparent"], "rep": "Full-Tunnel (Redirect Gateway)", "expl": "Le Full Tunnel achemine 100% des flux via la passerelle d'entreprise."},
+            {"q": "15. En cas de vol d'un PC portable chez un utilisateur nomade utilisant un VPN, quel est l'avantage décisif d'une authentification par certificat X.509 sur une clé partagée PSK ?", "opts": ["Le certificat est plus facile à taper sur le clavier", "Il suffit de révoquer l'unique certificat du poste volé dans la CRL sans impacter aucun autre utilisateur", "Le chiffrement par certificat est 1000 fois plus rapide", "La PSK est interdite par la norme IEEE"], "rep": "Il suffit de révoquer l'unique certificat du poste volé dans la CRL sans impacter aucun autre utilisateur", "expl": "Avec des certificats, la gestion de compromission est unitaire et indolore pour le reste de l'entreprise."},
+            {"q": "16. Quel protocole IPsec assure à la fois la confidentialité (chiffrement) et l'intégrité/authentification des paquets en Phase 2 ?", "opts": ["AH (Authentication Header)", "ESP (Encapsulating Security Payload)", "ICMP", "IGMP"], "rep": "ESP (Encapsulating Security Payload)", "expl": "ESP encapsule et chiffre les données tout en assurant l'intégrité."},
+            {"q": "17. Dans pfSense, quelle fonctionnalité permet d'accéder depuis l'extérieur (WAN) à un serveur web hébergé en DMZ sur une IP privée ?", "opts": ["Le routage dynamique OSPF", "Le NAT Port Forwarding (DNAT)", "L'agent relais DHCP", "Le protocole Spanning Tree"], "rep": "Le NAT Port Forwarding (DNAT)", "expl": "Le DNAT (redirection de port) mappe l'IP WAN publique sur l'IP privée du serveur en DMZ."},
+            {"q": "18. Pourquoi le chiffrement d'un tunnel VPN n'affranchit-il pas l'administrateur de configurer des règles de filtrage (ACL) sur le pare-feu ?", "opts": ["Parce que le tunnel VPN tombe en panne après 10 minutes", "Parce que le VPN sécurise uniquement le transport, mais des ACL restent indispensables pour contrôler ce que le client connecté a le droit d'atteindre", "Parce que le protocole IPsec désactive automatiquement le routage", "Pour faire plaisir aux auditeurs de l'ANSSI"], "rep": "Parce que le VPN sécurise uniquement le transport, mais des ACL restent indispensables pour contrôler ce que le client connecté a le droit d'atteindre", "expl": "Le chiffrement sécurise le canal de transit ; le pare-feu régule les autorisations d'accès aux ressources."},
+            {"q": "19. Quelle commande OpenSSL permet de vérifier les certificats présentés par un serveur distant sur le port 443 ?", "opts": ["openssl s_client -connect host:443 -showcerts", "openssl verify -all 443", "openssl ca -revoke 443", "openssl genrsa 443"], "rep": "openssl s_client -connect host:443 -showcerts", "expl": "s_client permet d'établir une session SSL/TLS de test et d'afficher la chaîne de certificats reçue."},
+            {"q": "20. Quelle action mène-t-on dans l'Atelier 4 d'EBIOS RM ?", "opts": ["La signature de la charte informatique par les salariés", "La construction technique des chaînes d'attaque opérationnelles détaillant le mode opératoire de l'attaquant", "L'achat d'un nouveau pare-feu pfSense", "La suppression de tous les comptes administrateurs"], "rep": "La construction technique des chaînes d'attaque opérationnelles détaillant le mode opératoire de l'attaquant", "expl": "L'atelier 4 décortique concrètement le mode opératoire technique (Cyber Kill Chain)."}
+        ]
+
+        with st.form(key="form_cyber_exam_20"):
+            user_exam_ans = {}
+            for idx_e, qitem in enumerate(CYBER_EXAM_20):
+                st.markdown(f"**Q{idx_e + 1} : {qitem['q']}**")
+                user_exam_ans[idx_e] = st.radio(f"Choix Q{idx_e + 1} :", qitem["opts"], key=f"rad_exam_c_{idx_e}")
+                st.markdown("<div style='margin-bottom: 8px;'></div>", unsafe_allow_html=True)
+            
+            sub_exam = st.form_submit_button("Valider mon Examen Blanc Cybersécurité (20 Questions)", type="primary")
+
+        if sub_exam:
+            score_e = 0
+            st.markdown("---")
+            st.markdown("### 📊 Résultats Officiels de l'Examen Blanc")
+            for idx_e, qitem in enumerate(CYBER_EXAM_20):
+                u_a = user_exam_ans[idx_e]
+                if u_a == qitem["rep"]:
+                    score_e += 1
+                    st.success(f"✅ **Q{idx_e + 1} Exact !** ({u_a})\n\n💡 *Explication :* {qitem['expl']}")
+                else:
+                    st.error(f"❌ **Q{idx_e + 1} Erreur.** Vous avez répondu : *{u_a}* | Attendu : **{qitem['rep']}**\n\n💡 *Explication :* {qitem['expl']}")
+
+            pct_e = (score_e / len(CYBER_EXAM_20)) * 100
+            xp_gagnes = score_e * 5
+            add_user_points(xp_gagnes, "cyber_master_exam")
+            save_score(score_e, len(CYBER_EXAM_20), {"Cybersécurité": score_e})
+
+            if score_e >= 16:
+                st.success(f"🏆 **Félicitations ! Score Remarquable : {score_e} / 20 ({pct_e:.1f}%) !** Vous remportez **+{xp_gagnes} XP** sur votre profil.")
+                st.balloons()
+            elif score_e >= 10:
+                st.info(f"👍 **Examen Validé : {score_e} / 20 ({pct_e:.1f}%) !** Vous remportez **+{xp_gagnes} XP**. Relisez les points où vous avez hésité.")
+            else:
+                st.warning(f"⚠️ **Score : {score_e} / 20 ({pct_e:.1f}%)**. Vous gagnez **+{xp_gagnes} XP**. Révisez les onglets de cours et pratiquez les 20 flashcards.")
 
 
 elif page == '📖 Culture Générale & Expression (CGE)':
