@@ -17,8 +17,11 @@
   <style>
     html, body { margin: 0; height: 100%; background: #000; overflow: hidden;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, sans-serif; color: #f5f5f7; }
-    #app { position: fixed; inset: 0; width: 100%; height: 100%; border: 0; background: #000;
-      padding-bottom: env(safe-area-inset-bottom); box-sizing: border-box; }
+    /* Streamlit Cloud ajoute en bas une barre blanche « Built with Streamlit / Fullscreen » qu'on ne peut pas désactiver.
+       On rend le site 40 px plus haut que l'écran : la barre se retrouve sous le bord, invisible. */
+    :root { --barre-streamlit: 40px; }
+    #app { position: fixed; top: 0; left: 0; width: 100%; border: 0; background: #000;
+      height: calc(100vh + var(--barre-streamlit)); height: calc(100dvh + var(--barre-streamlit)); }
     #ecran { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
       gap: 18px; background: #000; text-align: center; padding: 24px; transition: opacity .35s; z-index: 2; }
     #ecran.cache { opacity: 0; pointer-events: none; }
