@@ -300,59 +300,27 @@ FLASHCARDS_DATA = [{'id': 1, 'module': '📶 Réseaux & Télécoms', 'chap': '1.
 
 
 GRAND_QUIZ_DATA = [{'chap': '2. Adressage IPv4, IPv6 & Calcul de Sous-Réseaux (VLSM)', 'expl': 'Pour faire 4 sous-réseaux (2^2), il faut emprunter 2 bits au masque /24, ce qui donne un masque /26, soit 255.255.255.192.', 'mod': '📶 Réseaux & Télécoms', 'options': ['255.255.255.128 (/25)', '255.255.255.192 (/26)', '255.255.255.224 (/27)', '255.255.255.240 (/28)'], 'q': 'Q1 : Vous disposez du réseau 192.168.10.0/24. Vous devez créer 4 sous-réseaux de taille égale. Quel sera le nouveau masque ?', 'rep': '255.255.255.192 (/26)'}, {'chap': '3. VLANs, Trunking IEEE 802.1Q & Routage Inter-VLAN', 'expl': "Sur une sous-interface de routeur (ex: g0/0.10), on configure l'encapsulation de type trunking à l'aide de la commande 'encapsulation dot1Q 10' où 10 est l'ID du VLAN.", 'mod': '📶 Réseaux & Télécoms', 'options': ['switchport access vlan 10', 'encapsulation dot1Q 10', 'trunk allowed vlan 10', 'ip route vlan 10'], 'q': "Q2 : Quelle commande Cisco IOS permet d'activer le routage inter-VLAN sur une sous-interface de routeur en spécifiant l'encapsulation 802.1Q pour le VLAN 10 ?", 'rep': 'encapsulation dot1Q 10'}, {'chap': '1. Langage C++ : Mémoire, Pointeurs & POO', 'expl': 'Une classe comportant au moins une méthode virtuelle pure (déclarée avec = 0) est appelée classe de base abstraite. Elle ne peut pas être instanciée.', 'mod': '💻 Programmation / Dev', 'options': ['Une classe scellée (sealed)', 'Une interface statique', 'Une classe de base abstraite', 'Une classe dérivée'], 'q': 'Q3 : En C++, si une classe B hérite publiquement de la classe A, et que la classe A possède au moins une méthode virtuelle pure, comment qualifie-t-on la classe A ?', 'rep': 'Une classe de base abstraite'}, {'chap': '1. Permissions GNU/Linux & Services système', 'expl': "'u+x' signifie User + eXecution (droit d'exécution pour le propriétaire). 'g-w' signifie Group - Write (retrait du droit d'écriture pour le groupe).", 'mod': '🖥️ Administration Système', 'options': ["Ajoute le droit d'exécution au propriétaire et retire le droit d'écriture au groupe", "Ajoute l'écriture pour l'utilisateur et retire l'exécution pour le groupe", 'Donne tous les droits au propriétaire et supprime les droits du groupe', 'Rend le fichier exécutable par tout le monde'], 'q': "Q4 : Quel est l'effet de la commande Linux 'chmod u+x,g-w script.sh' ?", 'rep': "Ajoute le droit d'exécution au propriétaire et retire le droit d'écriture au groupe"}, {'chap': '1. Échantillonnage, CAN/CNA & Théorème de Shannon', 'expl': 'q = 5 / (2^12 - 1) = 5 / 4095 = 0.001221 V. N = arrondi(3.12 / 0.001221) = 2555. (Sujet officiel BTS CIEL 2025).', 'mod': '🔌 Électronique & IoT', 'options': ['2048', '2555', '2560', '3120'], 'q': "Q5 : Un convertisseur analogique-numérique (CAN) possède une résolution de 12 bits et une plage d'entrée de 0 à 5V. Quelle est la valeur numérique entière générée pour une tension de 3.12V ?", 'rep': '2555'}, {'chap': '1. Modèle OSI vs TCP/IP & Encapsulation', 'expl': "IPsec opère au niveau de la couche Réseau (couche 3) pour chiffrer et encapsuler l'intégralité du trafic entre deux passerelles réseau.", 'mod': '📶 Réseaux & Télécoms', 'options': ['TLS/SSL', 'IPsec', 'HTTPS', 'WPA3'], 'q': 'Q6 : Quel protocole de sécurisation réseau fournit une authentification et un chiffrement robustes au niveau de la couche réseau (Couche 3 du modèle OSI) ?', 'rep': 'IPsec'}, {'chap': '2. Services Active Directory & GPO (Windows Server)', 'expl': "Les stratégies de groupe (GPO) permettent d'appliquer de façon centralisée des configurations de sécurité et des environnements aux postes de travail.", 'mod': '🖥️ Administration Système', 'options': ['Enregistrements DNS', 'Base SAM locale', 'GPO (Group Policy Object)', 'Serveur DHCP'], 'q': "Q7 : Quel composant Active Directory gère l'application centralisée de stratégies de groupe sur les ordinateurs du domaine ?", 'rep': 'GPO (Group Policy Object)'}, {'chap': '2. Protocoles IoT (MQTT & LoRaWAN)', 'expl': "LoRaWAN est conçu pour transmettre de petits volumes de données sur des distances kilométriques à partir d'objets alimentés sur piles.", 'mod': '🔌 Électronique & IoT', 'options': ['Wi-Fi 6', 'LoRaWAN', 'WebSockets', 'HTTP REST'], 'q': 'Q8 : Quel protocole IoT est particulièrement optimisé pour la communication longue portée (LPWAN) avec une consommation ultra-faible ?', 'rep': 'LoRaWAN'}, {'chap': '2. Scripting & Automatisation en Python (Réseaux)', 'expl': 'La commande \'git commit -m "message"\' crée un point de sauvegarde local de vos modifications indexées dans l\'historique du dépôt.', 'mod': '💻 Programmation / Dev', 'options': ['git push', 'git save', 'git commit', 'git checkout'], 'q': "Q9 : Dans Git, quelle commande permet d'enregistrer localement vos modifications indexées en y associant un message explicatif ?", 'rep': 'git commit'}, {'chap': '2. Diagrammes SysML (BDD, IBD, Exigences)', 'expl': "L'IBD (Internal Block Diagram) représente l'agencement interne et les flux de matière, d'énergie ou de données reliant les ports d'un bloc.", 'mod': '📐 Modélisation UML & SysML', 'options': ['BDD (Block Definition Diagram)', 'IBD (Internal Block Diagram)', 'Requirement Diagram', 'Use Case Diagram'], 'q': 'Q10 : En SysML, quel diagramme permet de modéliser les flux internes (matière, énergie, données) entre les ports des blocs ?', 'rep': 'IBD (Internal Block Diagram)'}, {'chap': '5. Modulations & Transmissions de Signaux (FSK, ASK, PSK, QAM)', 'expl': 'Une modulation 16-QAM code n = log2(16) = 4 bits par symbole. Le débit binaire est D = R * n. Donc R = D / n = 9600 / 4 = 2400 Bauds.', 'mod': '📶 Réseaux & Télécoms', 'options': ['2400 Bauds', '4800 Bauds', '9600 Bauds', '19200 Bauds'], 'q': 'Q11 : Quelle est la rapidité de modulation minimale (en Bauds) pour transmettre un débit binaire de 9600 bps avec une modulation 16-QAM ?', 'rep': '2400 Bauds'}, {'chap': '2. Adressage IPv4, IPv6 & Calcul de Sous-Réseaux (VLSM)', 'expl': "Le protocole NDP (Neighbor Discovery Protocol) s'appuie sur ICMPv6 pour réaliser la découverte d'adresse physique (ARP en IPv4), la détection d'adresses dupliquées, et la découverte de routeurs (SLAAC).", 'mod': '📶 Réseaux & Télécoms', 'options': ['ICMPv4', 'NDP (Neighbor Discovery Protocol)', 'DHCPv6', 'SNDP'], 'q': "Q12 : Quel protocole de l'architecture IPv6 prend en charge la découverte des voisins et l'auto-configuration SLAAC, remplaçant le protocole ARP ?", 'rep': 'NDP (Neighbor Discovery Protocol)'}, {'chap': '3. Durcissement & Filtrage : Pare-feux (Linux) & Port Security', 'expl': "Le mode 'protect' rejette silencieusement le trafic suspect sans bloquer l'interface et sans incrémenter le compteur de violation, à l'inverse du mode 'restrict' qui l'incrémente.", 'mod': '🔒 Cybersécurité', 'options': ['switchport port-security violation shutdown', 'switchport port-security violation restrict', 'switchport port-security violation protect', 'switchport port-security violation disable'], 'q': "Q13 : Dans un commutateur Cisco, comment configure-t-on le Port Security pour rejeter silencieusement le trafic suspect en cas d'intrusion, sans désactiver l'interface ?", 'rep': 'switchport port-security violation protect'}, {'chap': '4. Protocoles Sécurisés (VPN, SSHv2, HTTPS, MQTTS)', 'expl': "La poignée de main TLS commence par le 'Client Hello' (propositions d'algorithmes), suivi du 'Server Hello' (choix d'algorithme), de l'envoi des certificats par le serveur, de l'échange de clés (Key Exchange) et de la validation finale ('Finished').", 'mod': '🔒 Cybersécurité', 'options': ['Client Hello -> Server Hello -> Exchange Certificates -> Key Exchange -> Finished', 'Server Hello -> Client Hello -> Exchange Certificates -> Finished', 'Exchange Certificates -> Client Hello -> Server Hello -> Finished', 'Client Hello -> Exchange Certificates -> finished'], 'q': "Q14 : Quel est l'ordre des messages échangés lors de la poignée de main TLS (TLS Handshake) au début d'une connexion HTTPS ?", 'rep': 'Client Hello -> Server Hello -> Exchange Certificates -> Key Exchange -> Finished'}, {'chap': '3. Threads, Mutex & Sockets Multi-Client (C++11)', 'expl': "std::lock_guard utilise le principe RAII. Si une fonction lève une exception ou se termine prématurément par un 'return', le destructeur de std::lock_guard est invoqué et le mutex est libéré, évitant un interblocage permanent (Deadlock).", 'mod': '💻 Programmation / Dev', 'options': ['Il permet de verrouiller plusieurs mutex simultanément de manière statique', 'Il garantit le déverrouillage automatique en fin de bloc, même si une exception est levée', "Il est plus rapide à l'exécution de 50%", 'Il supprime automatiquement les conditions de concurrence'], 'q': "Q15 : En C++, quel est le principal avantage de l'utilisation de 'std::lock_guard' par rapport à l'appel direct de '.lock()' et '.unlock()' sur un mutex ?", 'rep': 'Il garantit le déverrouillage automatique en fin de bloc, même si une exception est levée'}, {'chap': '2. Scripting & Automatisation en Python (Réseaux)', 'expl': "La méthode 'accept()' est bloquante. Dès qu'un client se connecte, elle renvoie une nouvelle socket dédiée à la communication avec ce client, ainsi qu'un tuple contenant son adresse IP et son port.", 'mod': '💻 Programmation / Dev', 'options': ['bind()', 'listen()', 'connect()', 'accept()'], 'q': "Q16 : Quelle méthode de la bibliothèque 'socket' en Python bloque l'exécution du serveur et attend la connexion d'un client distant ?", 'rep': 'accept()'}, {'chap': '3. Gestion Avancée Linux & Sécurisation (ACLs, SUID/SGID, umask)', 'expl': "La commande 'umask 002' soustrait le bit d'écriture aux Autres (Others) lors de la création d'un fichier (666 - 002 = 664) ou d'un dossier (777 - 002 = 775).", 'mod': '🖥️ Administration Système', 'options': ['chmod 775', 'umask 002', 'setfacl -m umask:002', 'chown 002'], 'q': "Q17 : Sous Linux, comment définit-on un umask égal à 002 pour s'assurer que les nouveaux répertoires de projet soient créés par défaut avec les droits 775 (rwxrwxr-x) ?", 'rep': 'umask 002'}, {'chap': '4. Bus Réseau Industriel CAN (Controller Area Network)', 'expl': "Le bus CAN utilise le protocole CSMA/CR. Lorsqu'un bit dominant (0) est émis en même temps qu'un bit récessif (1), l'état dominant (0) l'emporte physiquement sur la ligne. Le nœud émettant le bit récessif détecte cette différence et s'arrête instantanément de transmettre.", 'mod': '🔌 Électronique & IoT', 'options': ['Le protocole CSMA/CD basé sur la détection de collision physique', "L'identifiant de la trame et la priorité des bits dominants (0) sur les bits récessifs (1)", "Un jeton d'émission circulant d'un contrôleur à l'autre", "Le signal d'horloge commun SCL"], 'q': "Q18 : Sur le bus réseau de communication CAN, quel élément garantit l'arbitrage non destructif et instantané lorsque deux nœuds transmettent au même moment ?", 'rep': "L'identifiant de la trame et la priorité des bits dominants (0) sur les bits récessifs (1)"}, {'chap': "1. Modélisation Logicielle UML (Classes, Séquence, Cas d'Utilisation)", 'expl': "En diagramme de classes UML, l'agrégation se dessine avec un losange vide ◇ à l'extrémité du contenant, tandis que la composition se dessine avec un losange plein ◆.", 'mod': '📐 Modélisation UML & SysML', 'options': ['Agrégation = Losange vide ◇ | Composition = Losange plein ◆', 'Agrégation = Losange plein ◆ | Composition = Losange vide ◇', 'Agrégation = Flèche simple -> | Composition = Flèche double =>', 'Agrégation = Ligne pointillée | Composition = Ligne continue'], 'q': "Q19 : En UML, comment représente-t-on graphiquement une relation d'agrégation simple par rapport à une relation de composition ?", 'rep': 'Agrégation = Losange vide ◇ | Composition = Losange plein ◆'}, {'chap': "3. Diagramme d'États-Transitions UML", 'expl': "Le diagramme de machine à états (State Machine) modélise le cycle de vie réactif d'un objet, en décrivant ses états, ses transitions et ses actions d'états (entry, do, exit).", 'mod': '📐 Modélisation UML & SysML', 'options': ['Le diagramme de séquence', "Le diagramme de cas d'utilisation", 'Le diagramme de machine à états', "Le diagramme d'activité"], 'q': "Q20 : Quel diagramme d'États-Transitions UML permet de modéliser le comportement réactif d'un objet en définissant des actions à l'entrée et à la sortie d'un état ?", 'rep': 'Le diagramme de machine à états'}, {'chap': '1. Modèle OSI vs TCP/IP & Encapsulation', 'expl': "OSPF (Open Shortest Path First) est un protocole de routage dynamique interne à état de lien (Link-State) qui utilise l'algorithme de Dijkstra pour calculer le chemin le plus court.", 'mod': '📶 Réseaux & Télécoms', 'options': ['RIP', 'BGP', 'OSPF', 'EIGRP'], 'q': "Q21 : Quel est le protocole de routage dynamique interne de type 'État de lien' le plus utilisé, fonctionnant avec le découpage de zones (Areas) ?", 'rep': 'OSPF'}, {'chap': '2. Adressage IPv4, IPv6 & Calcul de Sous-Réseaux (VLSM)', 'expl': "Pour /28, la taille de sous-réseau est de 16 IP. Les sous-réseaux commencent à 172.16.50.0, .16, .32, .48, etc. L'IP .40 est dans le sous-réseau .32. L'adresse réseau est .32, et la première IP d'hôte utilisable est .33.", 'mod': '📶 Réseaux & Télécoms', 'options': ['172.16.50.32', '172.16.50.33', '172.16.50.41', '172.16.50.1'], 'q': "Q22 : En adressage IPv4, quelle est la première adresse IP d'hôte utilisable pour le sous-réseau contenant l'hôte 172.16.50.40/28 ?", 'rep': '172.16.50.33'}, {'chap': '1. Cryptographie : Symétrique, Asymétrique & Hachage', 'expl': "L'autorité de certification est un tiers de confiance qui valide l'identité du possesseur du certificat en le signant avec sa propre clé privée, permettant l'utilisation de HTTPS en toute confiance.", 'mod': '🔒 Cybersécurité', 'options': ['Chiffrer les requêtes de base de données à la volée', 'Générer et signer numériquement des certificats X.509 pour lier une clé publique à une identité', 'Bloquer les attaques par déni de service distribué (DDoS)', 'Détecter les intrusions physiques sur les commutateurs Cisco'], 'q': "Q23 : En cybersécurité, quelle est la principale fonction d'une autorité de certification (CA) ?", 'rep': 'Générer et signer numériquement des certificats X.509 pour lier une clé publique à une identité'}, {'chap': '3. Gestion Avancée Linux & Sécurisation (ACLs, SUID/SGID, umask)', 'expl': "La commande 'getfacl' permet d'afficher les permissions étendues (ACLs) configurées sur un fichier ou un répertoire Linux.", 'mod': '🖥️ Administration Système', 'options': ['ls -la', 'getfacl', 'setfacl -l', 'acl-list'], 'q': "Q24 : Quelle commande Linux permet de lister de manière détaillée les listes de contrôle d'accès (ACL) configurées sur un dossier spécifique ?", 'rep': 'getfacl'}, {'chap': '1. Langage C++ : Mémoire, Pointeurs & POO', 'expl': 'RAII est le paradigme fondamental en C++. Les classes encapsulent la gestion des ressources dans leur constructeur et leur destructeur (comme std::lock_guard ou std::unique_ptr), rendant la gestion de ressources automatique et sûre.', 'mod': '💻 Programmation / Dev', 'options': ["L'héritage virtuel", 'Le patron de conception (design pattern)', 'Le RAII (Resource Acquisition Is Initialization)', 'Le polymorphisme dynamique'], 'q': "Q25 : En C++, comment s'appelle le mécanisme qui permet de s'assurer qu'une ressource (comme de la mémoire ou un verrou) est acquise lors de l'instanciation d'un objet et libérée automatiquement lors de sa destruction ?", 'rep': 'Le RAII (Resource Acquisition Is Initialization)'}, {'chap': '2. Protocoles IoT (MQTT & LoRaWAN)', 'expl': 'MQTT est le standard de fait en IoT industriel pour transmettre de manière asynchrone des télémétries à un Broker via un modèle Publish/Subscribe.', 'mod': '🔌 Électronique & IoT', 'options': ['HTTP REST', 'FTP', 'MQTT', 'SNMP'], 'q': "Q26 : Dans un projet d'examen E6, quel protocole est typiquement utilisé pour transmettre de manière fiable et périodique des mesures de capteurs IoT à travers une passerelle via des Topics ?", 'rep': 'MQTT'}, {'chap': '3. Bus de Communication Série (I2C, SPI, UART)', 'expl': "C'est toujours le maître qui prend l'initiative de la communication et génère le signal d'horloge de synchronisation SCL.", 'mod': '🔌 Électronique & IoT', 'options': ['Le circuit de tirage (Pull-up)', 'Le composant maître (Master)', "N'importe quel esclave actif", 'Le courtier réseau'], 'q': "Q27 : Sur un bus de communication I2C, quel est le composant responsable de générer l'horloge SCL servant de cadencement ?", 'rep': 'Le composant maître (Master)'}, {'chap': '2. Diagrammes SysML (BDD, IBD, Exigences)', 'expl': "Le BDD (Block Definition Diagram) permet d'avoir une vision globale statique de la structure du système, équivalent SysML du diagramme de classes UML.", 'mod': '📐 Modélisation UML & SysML', 'options': ["Le diagramme d'exigences (RD)", 'Le diagramme de définition de bloc (BDD)', "Le diagramme de cas d'utilisation (UCD)", 'Le diagramme de séquence (SD)'], 'q': "Q28 : Quel diagramme SysML modélise le découpage hiérarchique et les relations structurelles globales (physiques ou logiques) entre les blocs d'un système ?", 'rep': 'Le diagramme de définition de bloc (BDD)'}, {'chap': '3. Threads, Mutex & Sockets Multi-Client (C++11)', 'expl': "std::thread est l'objet natif en C++11 pour créer et démarrer un nouveau thread d'exécution parallèle au sein d'un processus.", 'mod': '💻 Programmation / Dev', 'options': ['std::thread', 'std::mutex', 'std::fork', 'std::async_task'], 'q': "Q29 : En C++11, quelle classe permet d'instancier et de démarrer l'exécution parallèle d'une fonction dans un fil d'exécution séparé ?", 'rep': 'std::thread'}, {'chap': '2. Services Active Directory & GPO (Windows Server)', 'expl': "Active Directory s'appuie obligatoirement sur un serveur DNS (souvent hébergé directement sur le DC) pour stocker les enregistrements de service de domaine (SRV).", 'mod': '🖥️ Administration Système', 'options': ['Le service WINS', 'Le service DNS', 'Le service DHCP', 'Le service IIS'], 'q': "Q30 : Dans Active Directory, quel service réseau indispensable s'occupe de traduire les requêtes de résolution de noms de domaine des contrôleurs de domaine (DC) ?", 'rep': 'Le service DNS'}, {'chap': '2. Adressage IPv4, IPv6 & Calcul de Sous-Réseaux (VLSM)', 'expl': "Un /28 offre 16 adresses IP au total. Moins l'adresse réseau et l'adresse de broadcast, il reste 14 adresses d'hôtes utilisables. C'est le dimensionnement exact.", 'mod': '📶 Réseaux & Télécoms', 'options': ['/26', '/27', '/28', '/29'], 'q': "Q31 : Dans le sujet d'examen officiel BTS CIEL 2024, quel masque de sous-réseau CIDR est préconisé pour un réseau de 14 hôtes utiles au maximum ?", 'rep': '/28'}, {'chap': '2. Top 10 OWASP & Sécurité Applicative', 'expl': "Le CSRF consiste à usurper l'identité d'un utilisateur connecté en transmettant des requêtes malveillantes à son insu via son propre navigateur vers un site qu'il a déjà authentifié.", 'mod': '🔒 Cybersécurité', 'options': ['CSRF (Cross-Site Request Forgery)', 'Injection SQL', 'XSS (Cross-Site Scripting)', 'Broken Authentication'], 'q': "Q32 : Quelle vulnérabilité web critique (Top 10 OWASP) permet à un attaquant de forcer le navigateur d'une victime authentifiée à exécuter des actions non souhaitées sur un site tiers ?", 'rep': 'CSRF (Cross-Site Request Forgery)'}, {'chap': '3. Gestion Avancée Linux & Sécurisation (ACLs, SUID/SGID, umask)', 'expl': "L'ajout du SUID s'effectue via 'chmod u+s' (ou au format octal chmod 4755, où le 4 active le SUID).", 'mod': '🖥️ Administration Système', 'options': ['chmod u+s <programme>', 'chmod 777 <programme>', 'chmod +x <programme>', 'chown root <programme>'], 'q': "Q33 : Quelle commande Linux permet d'accorder le droit d'exécution temporaire avec les privilèges de son propriétaire (SUID) à un programme exécutable ?", 'rep': 'chmod u+s <programme>'}, {'chap': '1. Échantillonnage, CAN/CNA & Théorème de Shannon', 'expl': 'La fréquence maximale du signal est Fmax = 12 kHz. Selon Shannon, Fe >= 2 * Fmax = 2 * 12 kHz = 24 kHz.', 'mod': '🔌 Électronique & IoT', 'options': ['12 kHz', '24 kHz', '24.2 kHz', '48 kHz'], 'q': "Q34 : Quelle est la fréquence d'échantillonnage minimale requise pour numériser un signal analogique dont la bande passante s'étend de 100 Hz à 12 kHz sans subir de repliement de spectre ?", 'rep': '24 kHz'}, {'chap': "1. Modélisation Logicielle UML (Classes, Séquence, Cas d'Utilisation)", 'expl': 'Le diagramme de séquence est un diagramme dynamique temporel décrivant la chronologie des échanges de messages entre lignes de vie.', 'mod': '📐 Modélisation UML & SysML', 'options': ['Diagramme de classes', "Diagramme de cas d'utilisation", 'Diagramme de séquence', "Diagramme d'activité"], 'q': "Q35 : En UML, comment s'appelle le diagramme comportemental décrivant l'enchaînement chronologique des interactions entre acteurs et objets à l'aide de lignes de vie ?", 'rep': 'Diagramme de séquence'}, {'chap': "1. Modélisation Logicielle UML (Classes, Séquence, Cas d'Utilisation)", 'expl': "Les tests de non-régression consistent à rejouer le plan de test suite à des modifications pour s'assurer que les fonctionnalités stables antérieures n'ont pas subi d'altérations.", 'mod': '📐 Modélisation UML & SysML', 'options': ['Les tests unitaires', "Les tests d'intégration", 'Les tests de régression (ou non-régression)', 'Les tests de boîte blanche'], 'q': "Q36 : Dans un projet d'examen E6, quelle section du Plan de Validation Logicielle (PVL) s'assure que les modifications apportées à un module n'ont pas introduit d'effets de bord négatifs sur les modules existants ?", 'rep': 'Les tests de régression (ou non-régression)'}, {'chap': '4. Bus Réseau Industriel CAN (Controller Area Network)', 'expl': "À l'état récessif (bit 1), les fils CAN_H et CAN_L sont tous deux maintenus à une tension moyenne d'environ 2.5V, la tension différentielle mesurée est nulle ($V_{diff} = 0 \\text{V}$).", 'mod': '🔌 Électronique & IoT', 'options': ['CAN_H = 3.5V et CAN_L = 1.5V (Vdiff = 2.0V)', 'CAN_H = 2.5V et CAN_L = 2.5V (Vdiff = 0V)', 'CAN_H = 5.0V et CAN_L = 0V (Vdiff = 5.0V)', 'CAN_H = 0V et CAN_L = 5.0V'], 'q': 'Q37 : Sur un bus différentiel CAN, quel état physique des tensions sur les fils correspond à un bit récessif (Logique 1) ?', 'rep': 'CAN_H = 2.5V et CAN_L = 2.5V (Vdiff = 0V)'}, {'chap': '1. Permissions GNU/Linux & Services système', 'expl': "En Bash Linux, la variable '$?' contient le statut de sortie de la dernière commande. Un code de 0 indique un succès, et un code supérieur à 0 indique une erreur.", 'mod': '🖥️ Administration Système', 'options': ['$?', '$#', '$$', '$*'], 'q': "Q38 : Dans un script d'administration Linux, quelle variable spéciale renvoie le code de retour d'erreur de la dernière commande exécutée en console ?", 'rep': '$?'}, {'chap': '4. Protocoles Sécurisés (VPN, SSHv2, HTTPS, MQTTS)', 'expl': "HTTPS est le protocole de navigation Web sécurisé. Il encapsule le protocole HTTP classique au sein d'une session de chiffrement TLS de couche Transport/Application.", 'mod': '🔒 Cybersécurité', 'options': ["HTTPS (s'appuyant sur TLS)", 'IPsec', 'WPA3', 'SSHv2'], 'q': 'Q39 : Quel protocole sécurisé opère au niveau de la couche Application (Port TCP 443) pour négocier des connexions Web chiffrées ?', 'rep': "HTTPS (s'appuyant sur TLS)"}, {'chap': '3. VLANs, Trunking IEEE 802.1Q & Routage Inter-VLAN', 'expl': "Par convention sous la norme IEEE 802.1Q, les trames appartenant au VLAN natif (souvent le VLAN 1 par défaut) traversent les liens Trunk sans recevoir de tag d'identification.", 'mod': '📶 Réseaux & Télécoms', 'options': ['Elle est taguée obligatoirement avec un VLAN ID égal à 1', 'Elle circule de manière non taguée', "Elle est chiffrée avec l'algorithme AES", 'Elle est rejetée silencieusement'], 'q': "Q40 : Sur un lien d'interconnexion Trunk entre deux commutateurs, comment circule une trame Ethernet appartenant au VLAN natif ?", 'rep': 'Elle circule de manière non taguée'}, {'chap': '5. Protocoles Industriels & Bus de terrain (Modbus, Profibus)', 'expl': "Le code de fonction standard 03 (Read Holding Registers) permet de lire les registres d'écriture/lecture analogiques de 16 bits (Holding Registers). Le code 04 permet de lire les registres d'entrée en lecture seule (Input Registers).", 'mod': '📶 Réseaux & Télécoms', 'options': ['01 (Read Coils)', '02 (Read Discrete Inputs)', '03 (Read Holding Registers)', '04 (Read Input Registers)'], 'q': "Q41 : Dans le cadre de l'interfaçage de réseaux industriels avec le protocole Modbus RTU (série RS-485), quel code de fonction (Function Code) standard permet de lire la valeur de registres de sortie analogiques (Holding Registers) ?", 'rep': '03 (Read Holding Registers)'}, {'chap': "4. Services d'Infrastructure : DHCP, DNS, NAT/PAT", 'expl': "L'émission de la requête ARP (ARP Request) s'effectue par diffusion générale (Broadcast) à destination de toutes les machines du domaine de diffusion locale (adresse MAC destination FF:FF:FF:FF:FF:FF). La réponse (ARP Reply) est ensuite renvoyée en Unicast.", 'mod': '📶 Réseaux & Télécoms', 'options': ['Unicast (adresse MAC du routeur)', 'Multicast (adresse MAC IPv6)', 'Broadcast (adresse MAC FF:FF:FF:FF:FF:FF)', 'Anycast (adresse MAC dynamique)'], 'q': "Q42 : Lors de la résolution d'adresse physique via le protocole ARP (Address Resolution Protocol), quel type de trame Ethernet est émise par une machine pour interroger le réseau, et quelle est l'adresse MAC de destination de cette trame ?", 'rep': 'Broadcast (adresse MAC FF:FF:FF:FF:FF:FF)'}, {'chap': "4. Lois Fondamentales d'Électricité & Composants Passifs", 'expl': "L'énergie emmagasinée dans un condensateur se calcule par la formule E = (1/2) * C * U^2. Donc, E = 0,5 * (220 * 10^-6 F) * (10 V)^2 = 0,5 * 0,00022 * 100 = 0,011 J = 11 mJ.", 'mod': '🔌 Électronique & IoT', 'options': ['1,1 mJ', '11 mJ', '22 mJ', '110 mJ'], 'q': "Q43 : Un condensateur de capacité C = 220 µF est raccordé dans un circuit électrique continu sous une tension d'alimentation stable U = 10 V. Quelle est l'énergie électrostatique E emmagasinée par ce condensateur ?", 'rep': '11 mJ'}, {'chap': "4. Lois Fondamentales d'Électricité & Composants Passifs", 'expl': "Pour deux résistances en parallèle, la résistance équivalente s'obtient par la formule : Req = (R1 * R2) / (R1 + R2) = (100 * 300) / (100 + 300) = 30000 / 400 = 75 Ω.", 'mod': '🔌 Électronique & IoT', 'options': ['75 Ω', '200 Ω', '400 Ω', '300 Ω'], 'q': 'Q44 : Deux résistances ohmiques R1 = 100 Ω et R2 = 300 Ω sont branchées en parallèle dans un circuit de filtrage. Quelle est la valeur de la résistance équivalente Req de cette association ?', 'rep': '75 Ω'}, {'chap': '6. Transmission optique (Fibres optiques Monomodes & Multimodes)', 'expl': 'La fibre Monomode possède un cœur très étroit (9 µm) par rapport à la Multimode (50 µm ou 62,5 µm). Elle limite la propagation à un faisceau rectiligne unique (mode axial), ce qui annule la dispersion modale temporelle et permet de très hauts débits sur de très longues distances sans répéteur.', 'mod': '📶 Réseaux & Télécoms', 'options': ["La fibre Monomode a un diamètre de cœur très fin (≈ 9 µm) et ne transmet qu'un seul mode de propagation laser, réduisant presque à zéro la dispersion modale.", "La fibre Monomode utilise une source lumineuse LED de faible coût et souffre d'une forte atténuation sur de courtes distances.", 'La fibre Multimode est réservée exclusivement aux liaisons océaniques intercontinentales de très longue distance.', "La fibre Monomode utilise un cœur de grand diamètre (≈ 50 µm ou 62,5 µm) permettant d'injecter plusieurs longueurs d'ondes à la fois."], 'q': "Q45 : Dans l'épreuve de transmission optique, quelle caractéristique distingue fondamentalement une fibre optique Monomode (Single-mode) d'une fibre optique Multimode (Multi-mode) ?", 'rep': "La fibre Monomode a un diamètre de cœur très fin (≈ 9 µm) et ne transmet qu'un seul mode de propagation laser, réduisant presque à zéro la dispersion modale."}, {'chap': '3. Structures de données avancées & Unions en Langage C', 'expl': 'Contrairement à une structure (struct) qui additionne la taille de ses membres (plus alignement), une union partage le même espace mémoire pour tous ses membres. Sa taille totale correspond donc à la taille de son plus grand membre, qui est ici le float (4 octets).', 'mod': '💻 Programmation / Dev', 'options': ['1 octet', '4 octets', '7 octets', '8 octets'], 'q': "Q46 : En programmation système C/C++ pour l'embarqué, si un programme définit un type 'union' contenant un 'char' (1 octet), un 'short' (2 octets) et un 'float' (4 octets), quelle sera l'occupation mémoire en octets d'une instance de cette union ?", 'rep': '4 octets'}, {'chap': '2. Active Directory, Domaines & GPO', 'expl': "L'enregistrement PTR (Pointer Record) est utilisé dans la zone de recherche inverse (Reverse Lookup Zone) pour associer une adresse IP à un nom DNS, indispensable pour certains services de sécurité et de filtrage anti-spam.", 'mod': '🖥️ Administration Système', 'options': ['Enregistrement A', 'Enregistrement CNAME', 'Enregistrement PTR', 'Enregistrement NS'], 'q': "Q47 : Dans la configuration de zones d'un serveur de noms de domaine (DNS), quel type d'enregistrement (Resource Record) doit obligatoirement être créé pour assurer la résolution inverse (traduire une adresse IP publique ou privée en nom de domaine complet FQDN) ?", 'rep': 'Enregistrement PTR'}, {'chap': '1. Droits Linux & Commandes Système', 'expl': "Le SUID (Set User ID) permet d'exécuter un fichier binaire avec les droits de son propriétaire (généralement root). Il est représenté par la lettre 's' à la place du droit d'exécution du propriétaire (ex: rwsr-xr-x) et vaut 4 au premier chiffre en octal (ex: chmod 4755).", 'mod': '🖥️ Administration Système', 'options': ['Le SUID (Set User ID, valeur numérique 4000)', 'Le SGID (Set Group ID, valeur numérique 2000)', 'Le Sticky Bit (valeur numérique 1000)', "L'ACL d'accès spécifique"], 'q': "Q48 : Sous GNU/Linux, quelle permission spéciale permet à un utilisateur d'exécuter un fichier binaire avec les privilèges d'accès du propriétaire du fichier (par exemple, pour permettre à un simple utilisateur de changer son mot de passe avec l'exécutable '/usr/bin/passwd') ?", 'rep': 'Le SUID (Set User ID, valeur numérique 4000)'}, {'chap': "4. Lois Fondamentales d'Électricité & Composants Passifs", 'expl': "D'après la formule du pont diviseur de tension, la tension aux bornes de R2 s'exprime par : U_R2 = E * [R2 / (R1 + R2)] = 12 V * [400 / (800 + 400)] = 12 V * [400 / 1200] = 12 V * (1/3) = 4 V.", 'mod': '🔌 Électronique & IoT', 'options': ['4 V', '6 V', '8 V', '12 V'], 'q': 'Q49 : Dans un montage électrique continu alimenté par un générateur de tension E = 12 V, un pont diviseur de tension est constitué de deux résistances en série R1 = 800 Ω et R2 = 400 Ω. Quelle est la tension de sortie U_R2 mesurée aux bornes de la résistance R2 ?', 'rep': '4 V'}, {'chap': '2. Active Directory, Domaines & GPO', 'expl': "Une Unité d'Organisation (OU) est un conteneur logique. On ne peut pas y attribuer directement des droits de partage de fichiers (ce n'est pas un groupe de sécurité), mais elle permet d'organiser les comptes utilisateurs/ordinateurs pour y lier des GPO ou déléguer le contrôle d'administration (ex: réinitialiser un mot de passe).", 'mod': '🖥️ Administration Système', 'options': ["Organiser logiquement les objets du domaine pour appliquer des stratégies de groupe (GPO) et déléguer des tâches d'administration.", "Créer des principaux de sécurité sur lesquels on peut attribuer directement des droits d'accès aux partages de fichiers.", "Établir des relations d'approbation d'accès sécurisées (Trust Relationships) avec d'autres forêts de serveurs.", "Augmenter le niveau fonctionnel global de la forêt AD sans modifier l'infrastructure physique."], 'q': "Q50 : Dans la structuration hiérarchique d'un annuaire Active Directory sous Windows Server, quel est le principal intérêt de la création d'Unités d'Organisation (OU) ?", 'rep': "Organiser logiquement les objets du domaine pour appliquer des stratégies de groupe (GPO) et déléguer des tâches d'administration."}, {'q': "Q41 : En transmission par fibre optique, quelle est la caractéristique majeure d'une fibre Monomode (SMF) par rapport à une fibre Multimode (MMF) ?", 'options': ["Un cœur large de 50 µm et l'utilisation de LED sur courte distance", "Un cœur très étroit (~9 µm), l'absence de dispersion modale et des portées de plusieurs dizaines de kilomètres", 'Une forte dispersion modale limitant la portée à 300 mètres', "L'utilisation exclusive de connecteurs ST"], 'rep': "Un cœur très étroit (~9 µm), l'absence de dispersion modale et des portées de plusieurs dizaines de kilomètres", 'mod': '📶 Réseaux & Télécoms', 'chap': '6. Transmissions Optiques & Fibre Optique (Monomode vs Multimode)', 'expl': "La fibre Monomode (SMF) possède un cœur très fin (~9 µm) dans lequel ne se propage qu'un seul mode lumineux (Laser). Sans dispersion modale, elle permet d'atteindre des distances de 40 à 100 km."}, {'q': 'Q42 : Dans le protocole Modbus RTU, quel code fonction (Function Code) permet de lire des registres de lecture/écriture 16 bits (Holding Registers) ?', 'options': ['Code 01', 'Code 03', 'Code 06', 'Code 16 (0x10)'], 'rep': 'Code 03', 'mod': '📶 Réseaux & Télécoms', 'chap': '7. Protocoles Industriels : Modbus RTU & Bus RS485', 'expl': 'Le code fonction Modbus 03 (Read Holding Registers) permet au maître de lire le contenu de registres de configuration ou de données 16 bits.'}, {'q': "Q43 : Conformément au RGPD et aux directives CNIL, quand la réalisation d'une Analyse d'Impact relative à la Protection des Données (AIPD / PIA) est-elle légalement obligatoire ?", 'options': ['Uniquement pour les entreprises de plus de 500 salariés', 'Dès lors que le traitement répond à au moins 2 des 9 critères de risque de la grille CNIL/CEPD', 'Uniquement en cas de traitement de coordonnées bancaires', 'Elle est toujours facultative'], 'rep': 'Dès lors que le traitement répond à au moins 2 des 9 critères de risque de la grille CNIL/CEPD', 'mod': '🔒 Cybersécurité', 'chap': "6. Analyse d'Impact sur la Vie Privée PIA / AIPD (RGPD & CNIL)", 'expl': "L'AIPD devient légalement obligatoire si un traitement de données personnelles accumule au moins 2 critères parmi les 9 définis par les autorités européennes (profilage, données sensibles, grande échelle, personnes vulnérables, etc.)."}, {'q': "Q44 : Dans une architecture de pare-feu pfSense, pourquoi est-il strictement interdit d'autoriser le flux d'initiation de connexion depuis la DMZ vers le réseau interne LAN ?", 'options': ['Parce que pfSense ne sait pas router les paquets entre DMZ et LAN', "Pour éviter qu'un attaquant compromettant un serveur public en DMZ ne puisse pivoter vers le réseau interne de l'entreprise", 'Parce que les requêtes DNS ne fonctionnent que du LAN vers la DMZ', "Pour économiser la bande passante de l'interface WAN"], 'rep': "Pour éviter qu'un attaquant compromettant un serveur public en DMZ ne puisse pivoter vers le réseau interne de l'entreprise", 'mod': '🔒 Cybersécurité', 'chap': '8. Matrice des Flux & Architecture Pare-Feu pfSense (LAN/DMZ/WAN/AD)', 'expl': "La DMZ héberge des serveurs exposés à Internet. En interdisant l'initiation de connexions de la DMZ vers le LAN, on empêche un pirate d'utiliser le serveur compromis comme rebond vers les machines internes."}, {'q': "Q45 : En langage C, quelle est la particularité fondamentale de la mémoire d'une 'union' par rapport à une 'struct' ?", 'options': ["Une union est allouée dynamiquement sur le tas alors qu'une struct est sur la pile", "Tous les membres d'une union partagent le même espace mémoire, et sa taille vaut celle de son plus grand membre", 'Une union ne peut pas contenir de variables entières', "Une struct utilise systématiquement moins de mémoire qu'une union"], 'rep': "Tous les membres d'une union partagent le même espace mémoire, et sa taille vaut celle de son plus grand membre", 'mod': '💻 Programmation / Dev', 'chap': '2. Langage C : Structures struct & Unions union', 'expl': "Dans une union, les membres chevauchent la même adresse mémoire. Écrire dans un membre écrase la valeur des autres. C'est idéal pour convertir un float 32 bits en 4 octets."}, {'q': 'Q46 : En C++11 multithread, quel composant doit être utilisé pour protéger une variable partagée dans une section critique contre les conditions de concurrence (Race Conditions) ?', 'options': ['std::vector', 'std::mutex avec std::lock_guard', 'std::thread::sleep_for', 'std::atomic_bool uniquement'], 'rep': 'std::mutex avec std::lock_guard', 'mod': '💻 Programmation / Dev', 'chap': '4. Programmation Concurrente C++11 : Threads, Mutex & Section Critique', 'expl': "Un mutex verrouille l'accès à la section critique. Le wrapper std::lock_guard applique le principe RAII : il verrouille le mutex à l'instanciation et le libère automatiquement à la sortie du bloc."}, {'q': "Q47 : Dans la technologie IoT LoRaWAN, quelle classe d'équipements offre la plus faible consommation énergétique en n'ouvrant des fenêtres de réception qu'immédiatement après une émission ?", 'options': ['Classe A', 'Classe B', 'Classe C', 'Classe D'], 'rep': 'Classe A', 'mod': '🔌 Électronique & IoT', 'chap': '5. Protocoles Connectés : MQTT & LoRaWAN', 'expl': "Les équipements LoRaWAN de Classe A restent en veille quasi-permanente. Ils n'ouvrent deux courtes fenêtres de réception qu'après avoir émis un message, offrant une autonomie de batterie maximale."}, {'q': "Q48 : Dans une architecture PKI, quel est le rôle principal d'une Autorité de Certification Intermédiaire (Issuing CA) ?", 'options': ['Signer le certificat de la CA Racine', 'Délivrer et signer les certificats X.509 opérationnels des serveurs et utilisateurs tout en gardant la CA Racine hors ligne', 'Stocker les clés privées de tous les utilisateurs Internet', 'Remplacer le serveur DNS'], 'rep': 'Délivrer et signer les certificats X.509 opérationnels des serveurs et utilisateurs tout en gardant la CA Racine hors ligne', 'mod': '🔒 Cybersécurité', 'chap': '7. PKI & Gestion des Certificats Numériques X.509', 'expl': 'Pour protéger la CA Racine (Root CA) maintenue hors ligne dans un coffre-fort, la CA Intermédiaire prend en charge la délivrance quotidienne des certificats.'}, {'q': "Q49 : En communication Modbus RTU sur liaison RS485, comment la fin d'une trame est-elle détectée par les automates récepteurs ?", 'options': ['Par un caractère de saut de ligne ASCII \\r\\n', 'Par un silence sur le bus supérieur ou égal à 3,5 temps caractères', "Par un octet d'en-tête specifique 0x7E", 'Par une impulsion sur une ligne physique séparée'], 'rep': 'Par un silence sur le bus supérieur ou égal à 3,5 temps caractères', 'mod': '📶 Réseaux & Télécoms', 'chap': '7. Protocoles Industriels : Modbus RTU & Bus RS485', 'expl': "Modbus RTU utilise un délimiteur temporel : un intervalle de silence de 3.5 caractères marque la fin d'une trame et le début de la suivante."}, {'q': "Q50 : Quel est l'intérêt principal des extensions SAN (Subject Alternative Name) dans un certificat TLS X.509 ?", 'options': ['Compresser la taille du certificat', 'Autoriser plusieurs noms de domaine (FQDN) et adresses IP sous un seul et même certificat', 'Chiffrer la clé privée sur le disque', 'Désactiver TLS 1.3'], 'rep': 'Autoriser plusieurs noms de domaine (FQDN) et adresses IP sous un seul et même certificat', 'mod': '🔒 Cybersécurité', 'chap': '7. PKI & Gestion des Certificats Numériques X.509', 'expl': "L'extension SAN permet de lister l'ensemble des noms d'hôtes (ex: www.ciel.fr, mail.ciel.fr, IP) valides pour le certificat."}, {'q': "Q61 : Selon la loi de Shannon-Hartley, quelle est la capacité maximale C d'un canal de bande passante B = 1 MHz ayant un rapport signal/bruit S/N = 15 (linéaire) ?", 'options': ['1 Mbps', '4 Mbps', '15 Mbps', '16 Mbps'], 'rep': '4 Mbps', 'mod': '📶 Réseaux & Télécoms', 'chap': '5. Modulations & Transmissions de Signaux (FSK, ASK, PSK, QAM)', 'expl': 'C = B * log2(1 + S/N) = 1 MHz * log2(1 + 15) = 1 MHz * log2(16) = 1 MHz * 4 = 4 Mbps.'}, {'q': 'Q62 : Quel protocole de prévention des boucles de commutation (Spanning Tree) offre une convergence rapide en quelques millisecondes sous la norme IEEE 802.1w ?', 'options': ['STP (802.1D)', 'RSTP (802.1w)', 'PVST+', 'MSTP (802.1s)'], 'rep': 'RSTP (802.1w)', 'mod': '📶 Réseaux & Télécoms', 'chap': '3. VLANs, Trunking IEEE 802.1Q & Routage Inter-VLAN', 'expl': 'Rapid Spanning Tree Protocol (RSTP - 802.1w) offre une réadaptation quasi-instantanée de la topologie réseau.'}, {'q': "Q63 : En C++11, quel pointeur intelligent (Smart Pointer) doit être utilisé pour garantir qu'un objet dynamique ne possède qu'un seul et unique propriétaire ?", 'options': ['std::shared_ptr', 'std::unique_ptr', 'std::weak_ptr', 'std::auto_ptr'], 'rep': 'std::unique_ptr', 'mod': '💻 Programmation / Dev', 'chap': '1. Langage C++ : Mémoire, Pointeurs & POO', 'expl': 'std::unique_ptr exécute la gestion de propriété exclusive sans surcoût de compteur de références.'}, {'q': "Q64 : Quelle commande Linux permet de rechercher toutes les lignes contenant le mot 'ERROR' dans tous les fichiers .log du dossier /var/log de manière récursive ?", 'options': ["find /var/log -name 'ERROR'", "grep -r 'ERROR' /var/log/*.log", "cat /var/log | grep 'ERROR'", "locate 'ERROR' /var/log"], 'rep': "grep -r 'ERROR' /var/log/*.log", 'mod': '🖥️ Administration Système', 'chap': '1. Droits Linux & Commandes Système', 'expl': "L'option -r de grep effectue une recherche récursive dans tous les fichiers correspondant au motif."}, {'q': "Q65 : Quelle est la fréquence de coupure fc d'un filtre RC passe-bas constitué d'une résistance R = 1 kΩ et d'un condensateur C = 159 nF ?", 'options': ['100 Hz', '1 kHz', '10 kHz', '100 kHz'], 'rep': '1 kHz', 'mod': '🔌 Électronique & IoT', 'chap': '1. Échantillonnage, CAN/CNA & Théorème de Shannon', 'expl': 'fc = 1 / (2 * pi * R * C) = 1 / (2 * 3.14159 * 1000 * 159e-9) ≈ 1000 Hz = 1 kHz.'}, {'q': "Q66 : En mathématiques, quelle est la dérivée f'(x) de la fonction f(x) = ln(3x^2 + 1) sur R ?", 'options': ["f'(x) = 1 / (3x^2 + 1)", "f'(x) = 6x / (3x^2 + 1)", "f'(x) = 6x * (3x^2 + 1)", "f'(x) = 3 / x"], 'rep': "f'(x) = 6x / (3x^2 + 1)", 'mod': '📈 Mathématiques', 'chap': 'Fonctions, Exponentielle & Logarithme', 'expl': "Pour f(x) = ln(u(x)), la dérivée est u'(x) / u(x). Avec u(x) = 3x^2 + 1, u'(x) = 6x. Donc f'(x) = 6x / (3x^2 + 1)."}, {'q': "Q67 : Dans le protocole d'authentification Wi-Fi 802.1X / Enterprise, quel serveur est chargé de vérifier les identifiants et certificats des utilisateurs ?", 'options': ['Serveur DHCP', 'Serveur RADIUS', 'Serveur DNS', 'Serveur NTP'], 'rep': 'Serveur RADIUS', 'mod': '🔒 Cybersécurité', 'chap': '4. Protocoles Sécurisés (VPN, SSHv2, HTTPS, MQTTS)', 'expl': "Le serveur RADIUS centralise la gestion de l'authentification AAA (Authentication, Authorization, Accounting) en 802.1X."}, {'q': "Q68 : Sur un réseau de communication Modbus RTU sur liaison série RS-485, quel est le nombre maximal théorique d'esclaves adressables sans répéteur ?", 'options': ['16 esclaves', '32 esclaves', '127 esclaves', '247 esclaves'], 'rep': '247 esclaves', 'mod': '🔌 Électronique & IoT', 'chap': '2. Bus Série Matériels : I2C, SPI, UART & CAN Bus', 'expl': "La plage d'adresses esclaves Modbus s'étend de 1 à 247 (l'adresse 0 étant réservée à la diffusion / broadcast)."}, {'q': 'Q69 : En SysML, quel diagramme permet de définir la hiérarchie des exigences du cahier des charges et leurs relations de traçabilité (deriveReqt, verify) ?', 'options': ['BDD (Block Definition Diagram)', 'IBD (Internal Block Diagram)', 'Requirement Diagram', 'Use Case Diagram'], 'rep': 'Requirement Diagram', 'mod': '📐 Modélisation UML & SysML', 'chap': '2. Diagrammes SysML (BDD, IBD, Exigences)', 'expl': 'Le Requirement Diagram modélise les exigences fonctionnelles et non-fonctionnelles et leur traçabilité.'}, {'q': "Q70 : En C++, quel mot-clé permet d'indiquer qu'une méthode d'une classe dérivée est destinée à redéfinir une méthode virtuelle de sa classe mère ?", 'options': ['virtual', 'override', 'overload', 'static'], 'rep': 'override', 'mod': '💻 Programmation / Dev', 'chap': '1. Langage C++ : Mémoire, Pointeurs & POO', 'expl': "Le spécificateur 'override' (C++11) garantit au compilateur que la méthode redéfinit exactement une méthode virtuelle de la classe de base."}]
-SCORES_FILE = 'scores_history_v7.json'
-
-def load_scores():
-    if os.path.exists(SCORES_FILE):
-        try:
-            with open(SCORES_FILE, 'r') as f:
-                return json.load(f)
-        except:
-            pass
-    today = datetime.now()
-    default_hist = [{'date': (today - timedelta(days=21)).strftime('%Y-%m-%d %H:%M'), 'score': 5, 'total': 10, 'details': {'Réseaux': 1, 'Cybersécurité': 1, 'Prog': 1, 'SysAdmin': 1, 'Elec': 1, 'UML': 0}}, {'date': (today - timedelta(days=14)).strftime('%Y-%m-%d %H:%M'), 'score': 7, 'total': 10, 'details': {'Réseaux': 2, 'Cybersécurité': 1, 'Prog': 2, 'SysAdmin': 1, 'Elec': 1, 'UML': 0}}, {'date': (today - timedelta(days=7)).strftime('%Y-%m-%d %H:%M'), 'score': 8, 'total': 10, 'details': {'Réseaux': 2, 'Cybersécurité': 2, 'Prog': 1, 'SysAdmin': 1, 'Elec': 1, 'UML': 1}}, {'date': (today - timedelta(days=2)).strftime('%Y-%m-%d %H:%M'), 'score': 9, 'total': 10, 'details': {'Réseaux': 2, 'Cybersécurité': 2, 'Prog': 2, 'SysAdmin': 1, 'Elec': 1, 'UML': 1}}]
-    with open(SCORES_FILE, 'w') as f:
-        json.dump(default_hist, f)
-    return default_hist
-
-def save_score(score, total, details):
-    history = load_scores()
-    history.append({'date': datetime.now().strftime('%Y-%m-%d %H:%M'), 'score': score, 'total': total, 'details': details})
-    with open(SCORES_FILE, 'w') as f:
-        json.dump(history, f)
-
-# --- NAVIGATION MODERNE PAR 4 GRANDS HUBS ---
-
-
+# Advanced Multi-User & Stats Engine for BTS CIEL Studio Pro
 import json
 import os
 import hashlib
-from datetime import datetime
+from datetime import datetime, timedelta
+import pandas as pd
+import streamlit as st
 
-USERS_FILE = 'users_db.json'
+USERS_FILE = 'users_db_v2.json'
 
-def init_user_session():
-    if 'current_user' not in st.session_state:
-        st.session_state.current_user = 'Invité BTS CIEL'
-    if 'user_role' not in st.session_state:
-        st.session_state.user_role = 'Candidat Option A'
-    if 'user_progress' not in st.session_state:
-        st.session_state.user_progress = {
-            'quizzes_completed': {},
-            'labs_completed': {},
-            'cards_reviewed': 0,
-            'points': 0,
-            'level': 'Apprenti Technicien'
-        }
-    if 'cloud_sync_status' not in st.session_state:
-        st.session_state.cloud_sync_status = 'Mode Local Actif (Cloud Ready)'
+DEFAULT_USER = 'Invité BTS CIEL'
+
+def get_current_user_name():
+    return st.session_state.get('current_user', DEFAULT_USER)
 
 def load_users():
     if os.path.exists(USERS_FILE):
         try:
             with open(USERS_FILE, 'r', encoding='utf-8') as f:
                 return json.load(f)
-        except:
+        except Exception:
             return {}
     return {}
 
@@ -360,103 +328,140 @@ def save_users(db):
     try:
         with open(USERS_FILE, 'w', encoding='utf-8') as f:
             json.dump(db, f, ensure_ascii=False, indent=2)
-    except:
+    except Exception:
         pass
 
-def add_user_points(points, activity_key):
-    init_user_session()
-    if activity_key not in st.session_state.user_progress['quizzes_completed']:
-        st.session_state.user_progress['quizzes_completed'][activity_key] = True
-        st.session_state.user_progress['points'] += points
-        
-        # update level
-        pts = st.session_state.user_progress['points']
-        if pts >= 500:
-            st.session_state.user_progress['level'] = 'Major de Promotion BTS CIEL 🎓'
-        elif pts >= 300:
-            st.session_state.user_progress['level'] = 'Expert Cybersécurité & Réseaux 🛡️'
-        elif pts >= 150:
-            st.session_state.user_progress['level'] = 'Technicien Supérieur Confirmé ⚡'
-        elif pts >= 50:
-            st.session_state.user_progress['level'] = 'Développeur & Intégrateur 💻'
-        else:
-            st.session_state.user_progress['level'] = 'Apprenti Technicien 🚀'
-            
-        # persist to user db if logged in
-        u = st.session_state.current_user
-        if u != 'Invité BTS CIEL':
-            db = load_users()
-            if u in db:
-                db[u]['progress'] = st.session_state.user_progress
-                save_users(db)
-
-
-# Extensive 10-question quizzes for key chapters to update progress dynamically
-import streamlit as st
-
-QUIZZES_BANK_10 = {
-    "Suites": [
-        {"q": "1. Une suite arithmétique de premier terme u0 = 4 et de raison r = -3 a pour terme u10 :", "opts": ["-26", "-30", "34", "-23"], "rep": "-26", "expl": "u10 = u0 + 10*r = 4 + 10*(-3) = 4 - 30 = -26."},
-        {"q": "2. La somme S des 20 premiers termes d'une suite arithmétique (de u0 à u19) avec u0 = 2 et u19 = 59 vaut :", "opts": ["610", "1220", "590", "600"], "rep": "610", "expl": "S = N * (u_premier + u_dernier) / 2 = 20 * (2 + 59) / 2 = 10 * 61 = 610."},
-        {"q": "3. Une suite géométrique a pour premier terme u0 = 100 et raison q = 0.5. Quel est son comportement à l'infini ?", "opts": ["Diverge vers +infini", "Converge vers 0", "Oscille indéfiniment", "Constante"], "rep": "Converge vers 0", "expl": "Pour 0 < q < 1, lim_{n -> +inf} q^n = 0, donc u_n converge vers 0."},
-        {"q": "4. Une atténuation de 15% par mètre de câble optique correspond à une raison géométrique q de :", "opts": ["0.15", "0.85", "1.15", "-0.15"], "rep": "0.85", "expl": "Une baisse de 15% correspond à un coefficient multiplicateur q = 1 - 15/100 = 0.85."},
-        {"q": "5. Si u_n = (3n + 1) / (n + 2), quelle est la fonction associée f(x) pour dériver ?", "opts": ["f(x) = (3x + 1)/(x + 2)", "f(x) = 3x / 2", "f(x) = (3x+1)^2", "f(x) = 3x + 1"], "rep": "f(x) = (3x + 1)/(x + 2)", "expl": "On remplace la variable entière n par la variable réelle x >= 0."},
-        {"q": "6. La dérivée de f(x) = (3x + 1) / (x + 2) est f'(x) = :", "opts": ["5 / (x+2)^2", "3 / (x+2)^2", "(6x+5)/(x+2)^2", "1 / (x+2)"], "rep": "5 / (x+2)^2", "expl": "(u'v - uv')/v^2 = (3*(x+2) - (3x+1)*1)/(x+2)^2 = (3x+6 - 3x - 1)/(x+2)^2 = 5/(x+2)^2 > 0."},
-        {"q": "7. Comme f'(x) = 5 / (x+2)^2 > 0 pour tout x >= 0, la suite (u_n) est :", "opts": ["Strictement croissante", "Strictement décroissante", "Constante", "Non monotone"], "rep": "Strictement croissante", "expl": "Une dérivée strictement positive implique une fonction f et donc une suite u_n strictement croissante."},
-        {"q": "8. Quelle est la limite de u_n = (3n + 1) / (n + 2) quand n tend vers +infini ?", "opts": ["3", "1/2", "0", "+infini"], "rep": "3", "expl": "Rapport des termes de plus haut degré : 3n / n = 3."},
-        {"q": "9. Dans une suite géométrique, la formule de la somme S = u0 * (1 - q^N) / (1 - q) nécessite que :", "opts": ["q != 1", "q > 1", "q < 0", "q soit entier"], "rep": "q != 1", "expl": "Si q = 1, le dénominateur s'annule (division par zéro). Pour q=1, S = N * u0."},
-        {"q": "10. Le terme de rang 4 d'une suite géométrique avec u0 = 3 et q = 2 est u4 = :", "opts": ["48", "24", "96", "16"], "rep": "48", "expl": "u4 = u0 * q^4 = 3 * 2^4 = 3 * 16 = 48."}
-    ],
-    "Fonctions": [
-        {"q": "1. Que vaut la dérivée de f(x) = e^(-3x) ?", "opts": ["-3 e^(-3x)", "e^(-3x)", "3 e^(-3x)", "-1/3 e^(-3x)"], "rep": "-3 e^(-3x)", "expl": "(e^(u(x)))' = u'(x) * e^(u(x)) avec u'(x) = -3."},
-        {"q": "2. La solution de l'équation ln(x) = 4 est :", "opts": ["x = e^4", "x = 4/e", "x = 10^4", "x = ln(4)"], "rep": "x = e^4", "expl": "Par bijection réciproque, ln(x) = k <=> x = e^k."},
-        {"q": "3. Que vaut ln(1) et e^0 ?", "opts": ["0 et 1", "1 et 0", "1 et 1", "0 et 0"], "rep": "0 et 1", "expl": "ln(1) = 0 et e^0 = 1."},
-        {"q": "4. La dérivée de f(x) = ln(2x + 5) sur ]-2.5 ; +inf[ est :", "opts": ["2 / (2x + 5)", "1 / (2x + 5)", "2x / (2x + 5)", "1 / 2"], "rep": "2 / (2x + 5)", "expl": "(ln(u(x)))' = u'(x) / u(x) = 2 / (2x + 5)."},
-        {"q": "5. Si la puissance P2 vaut 100 mW et P1 vaut 10 mW, le gain en dB A_dB = 10*log10(P2/P1) est de :", "opts": ["+10 dB", "+20 dB", "+3 dB", "+100 dB"], "rep": "+10 dB", "expl": "10 * log10(100/10) = 10 * log10(10) = 10 * 1 = +10 dB."},
-        {"q": "6. Une division de la puissance par 2 correspond à une variation d'environ :", "opts": ["-3 dB", "-6 dB", "-10 dB", "-1 dB"], "rep": "-3 dB", "expl": "10 * log10(0.5) = 10 * (-0.3010) ≈ -3.01 dB."},
-        {"q": "7. Dans un circuit RC série alimenté sous tension continue E, la tension aux bornes du condensateur pendant la charge est :", "opts": ["u_C(t) = E(1 - e^(-t/tau))", "u_C(t) = E * e^(-t/tau)", "u_C(t) = E * t / tau", "u_C(t) = E(1 + e^(-t/tau))"], "rep": "u_C(t) = E(1 - e^(-t/tau))", "expl": "À t=0, u_C=0. À t->+inf, u_C=E."},
-        {"q": "8. La constante de temps d'un circuit RC avec R = 10 kΩ et C = 100 µF vaut :", "opts": ["1.0 s", "0.1 s", "10 s", "100 ms"], "rep": "1.0 s", "expl": "tau = R * C = 10 000 * 100e-6 = 1.0 seconde."},
-        {"q": "9. À l'instant t = tau, la charge du condensateur atteint environ :", "opts": ["63.2 % de E", "50 % de E", "95 % de E", "99 % de E"], "rep": "63.2 % de E", "expl": "1 - e^(-1) = 1 - 0.368 = 0.632 = 63.2%."},
-        {"q": "10. Le condensateur est considéré comme totalement chargé ou déchargé à :", "opts": ["5 tau", "1 tau", "3 tau", "10 tau"], "rep": "5 tau", "expl": "À t = 5*tau, 1 - e^(-5) = 99.3%, le régime transitoire est terminé."}
-    ],
-    "Kirchhoff": [
-        {"q": "1. La Loi d'Ohm en convention récepteur s'écrit :", "opts": ["U = R * I", "U = R / I", "I = R * U", "P = U / I"], "rep": "U = R * I", "expl": "La tension est proportionnelle à l'intensité."},
-        {"q": "2. La conductance G est l'inverse de la résistance R (G = 1/R). Son unité SI est :", "opts": ["Le Siemens (S)", "L'Ohm (Ω)", "Le Farad (F)", "Le Henry (H)"], "rep": "Le Siemens (S)", "expl": "1 Siemens = 1 Ω^(-1)."},
-        {"q": "3. Deux résistances de 100 Ω et 300 Ω associées en parallèle ont pour résistance équivalente :", "opts": ["75 Ω", "400 Ω", "200 Ω", "50 Ω"], "rep": "75 Ω", "expl": "R_eq = (R1 * R2) / (R1 + R2) = (100 * 300) / 400 = 30000 / 400 = 75 Ω."},
-        {"q": "4. Dans un pont diviseur de tension avec E = 24V, R1 = 100 Ω et R2 = 300 Ω, la tension U2 vaut :", "opts": ["18 V", "6 V", "12 V", "8 V"], "rep": "18 V", "expl": "U2 = E * R2 / (R1 + R2) = 24 * 300 / 400 = 24 * 0.75 = 18V."},
-        {"q": "5. La puissance électrique dissipée par effet Joule dans une résistance peut s'exprimer par :", "opts": ["P = R * I^2", "P = R^2 * I", "P = U * R", "P = I / U"], "rep": "P = R * I^2", "expl": "P = U * I = (R * I) * I = R * I^2 = U^2 / R."},
-        {"q": "6. Un courant principal de 3A arrive à un nœud et se sépare entre R1 = 20 Ω et R2 = 40 Ω. Quel courant I1 traverse R1 ?", "opts": ["2 A", "1 A", "1.5 A", "2.5 A"], "rep": "2 A", "expl": "Diviseur de courant : I1 = I * R2 / (R1 + R2) = 3 * 40 / 60 = 2 A."},
-        {"q": "7. La Loi des Mailles stipule que :", "opts": ["La somme algébrique des tensions le long d'une maille fermée est nulle", "La somme des courants est égale à la tension", "Toutes les tensions sont positives", "Le courant est constant partout"], "rep": "La somme algébrique des tensions le long d'une maille fermée est nulle", "expl": "sum U_k = 0."},
-        {"q": "8. Quelle est l'énergie E_c stockée dans un condensateur de capacité C sous une tension U ?", "opts": ["E_c = 1/2 * C * U^2", "E_c = C * U", "E_c = 1/2 * C^2 * U", "E_c = R * I^2 * t"], "rep": "E_c = 1/2 * C * U^2", "expl": "L'énergie s'exprime en Joules : E_c = 1/2 * C * U^2."},
-        {"q": "9. Un générateur réel de f.e.m. E = 12V et de résistance interne r = 0.5 Ω débite un courant I = 4A. La tension à ses bornes est :", "opts": ["10 V", "14 V", "12 V", "8 V"], "rep": "10 V", "expl": "En convention générateur, U = E - r*I = 12 - 0.5*4 = 12 - 2 = 10V."},
-        {"q": "10. Une batterie d'une capacité de 60 Ah débitant un courant constant de 2.5 A a une autonomie théorique de :", "opts": ["24 heures", "150 heures", "15 heures", "48 heures"], "rep": "24 heures", "expl": "Delta_t = C / I = 60 / 2.5 = 24 heures."}
-    ],
-    "Oscilloscope": [
-        {"q": "1. Sur un oscilloscope, si la sensibilité verticale est de 2 V/div et que le signal crête-à-crête occupe 6 divisions, que vaut Vpp ?", "opts": ["12 V", "6 V", "3 V", "24 V"], "rep": "12 V", "expl": "Vpp = Nb_div * S_v = 6 * 2 = 12 V."},
-        {"q": "2. Pour un signal sinusoïdal pur sans composante continue, l'amplitude maximale Vmax est égale à :", "opts": ["Vpp / 2", "Vpp", "Vpp * sqrt(2)", "Vpp / sqrt(2)"], "rep": "Vpp / 2", "expl": "Vmax = Vpp / 2 = 12 / 2 = 6 V."},
-        {"q": "3. La tension efficace Veff d'une onde sinusoïdale d'amplitude Vmax = 10 V est environ :", "opts": ["7.07 V", "14.14 V", "5.0 V", "10 V"], "rep": "7.07 V", "expl": "Veff = Vmax / sqrt(2) ≈ 0.707 * 10 = 7.07 V."},
-        {"q": "4. Si un motif périodique occupe 4 divisions horizontales avec une base de temps Sh = 0.5 ms/div, la période T vaut :", "opts": ["2.0 ms", "1.0 ms", "4.0 ms", "0.5 ms"], "rep": "2.0 ms", "expl": "T = Nb_div * S_h = 4 * 0.5 ms = 2.0 ms = 0.002 s."},
-        {"q": "5. La fréquence f correspondant à une période T = 2.0 ms est de :", "opts": ["500 Hz", "250 Hz", "1000 Hz", "50 Hz"], "rep": "500 Hz", "expl": "f = 1 / T = 1 / 0.002 = 500 Hz."},
-        {"q": "6. Le couplage 'AC' sur la voie d'un oscilloscope a pour fonction de :", "opts": ["Bloquer la composante continue via un condensateur série", "Mesurer la tension continue", "Relier l'entrée à la masse", "Augmenter l'amplitude"], "rep": "Bloquer la composante continue via un condensateur série", "expl": "Le mode AC filtre la composante continue pour observer uniquement les variations alternatives."},
-        {"q": "7. Le mode de couplage 'GND' permet de :", "opts": ["Vérifier et positionner la ligne de référence zéro volt à l'écran", "Mesurer la résistance de terre", "Désactiver l'oscilloscope", "Augmenter la sensibilité"], "rep": "Vérifier et positionner la ligne de référence zéro volt à l'écran", "expl": "GND relie l'amplificateur vertical à la masse interne de l'appareil."},
-        {"q": "8. Le rôle du déclenchement ('Trigger') sur un oscilloscope est de :", "opts": ["Synchroniser le balayage pour stabiliser l'affichage de l'onde à l'écran", "Amplifier le signal d'entrée", "Filtrer les bruits haute fréquence", "Calculer la FFT"], "rep": "Synchroniser le balayage pour stabiliser l'affichage de l'onde à l'écran", "expl": "Le Trigger lance le balayage lorsque le signal franchit un niveau (Threshold) avec une pente (Slope) choisie."},
-        {"q": "9. Une sonde d'oscilloscope 10X (atténuatrice par 10) présente l'avantage majeur de :", "opts": ["Augmenter l'impédance d'entrée (10 MΩ) et réduire la charge sur le circuit testé", "Multiplier le signal par 10", "Supprimer les signaux sinusoïdaux", "Inverser la phase"], "rep": "Augmenter l'impédance d'entrée (10 MΩ) et réduire la charge sur le circuit testé", "expl": "La sonde 10X divise la tension par 10 mais multiplie l'impédance d'entrée par 10 (10 MΩ vs 1 MΩ)."},
-        {"q": "10. Le déphasage Delta_phi entre deux signaux sinusoïdaux de même période T présentant un décalage temporel Delta_t est :", "opts": ["Delta_phi = 360° * (Delta_t / T)", "Delta_phi = 180° * (T / Delta_t)", "Delta_phi = Delta_t * T", "Delta_phi = 360° * (T - Delta_t)"], "rep": "Delta_phi = 360° * (Delta_t / T)", "expl": "Delta_phi = 2*pi * Delta_t / T radians = 360° * Delta_t / T degrés."}
-    ],
-    "CAN_ADC": [
-        {"q": "1. Le quantum q d'un convertisseur analogique-numérique (CAN) représente :", "opts": ["La plus petite variation de tension d'entrée détectable", "La tension maximale admissible", "Le nombre de bits du convertisseur", "Le temps d'échantillonnage"], "rep": "La plus petite variation de tension d'entrée détectable", "expl": "q = Vref / (2^n - 1) ou Vref / 2^n."},
-        {"q": "2. Pour un CAN 10 bits avec Vref = 5.0 V, quel est le nombre total de niveaux de quantification ?", "opts": ["1024", "1023", "512", "4096"], "rep": "1024", "expl": "2^10 = 1024 niveaux (de 0 à 1023)."},
-        {"q": "3. Quel est le quantum exact d'un CAN 12 bits sous Vref = 5.0 V ?", "opts": ["≈ 1.22 mV", "≈ 4.88 mV", "≈ 0.50 mV", "≈ 2.44 mV"], "rep": "≈ 1.22 mV", "expl": "q = 5.0 / (2^12 - 1) = 5.0 / 4095 ≈ 0.001221 V = 1.22 mV."},
-        {"q": "4. Pour un CAN 12 bits sous Vref = 5.0 V, quelle est la valeur numérique brute N générée pour Ve = 2.5 V ?", "opts": ["2048 (ou 2047)", "1024", "512", "4095"], "rep": "2048 (ou 2047)", "expl": "N = arrondi(2.5 / 0.001221) = 2047 ou 2048 (mi-échelle)."},
-        {"q": "5. Selon le théorème de Shannon-Nyquist, la fréquence d'échantillonnage Fe d'un signal de fréquence max Fmax doit respecter :", "opts": ["Fe >= 2 * Fmax", "Fe <= Fmax / 2", "Fe = Fmax", "Fe >= 10 * Fmax"], "rep": "Fe >= 2 * Fmax", "expl": "Fe doit être au moins le double de la composante fréquentielle la plus haute pour éviter le repliement spectral."},
-        {"q": "6. Que se passe-t-il si la condition de Shannon n'est pas respectée (Fe < 2 * Fmax) ?", "opts": ["Il se produit un repliement de spectre (aliasing) rendant le signal inexploitable", "Le signal est amplifié", "Le convertisseur s'arrête", "La résolution augmente"], "rep": "Il se produit un repliement de spectre (aliasing) rendant le signal inexploitable", "expl": "Des fréquences fantômes viennent parasiter la bande passante utile."},
-        {"q": "7. Quel filtre matériel place-t-on impérativement avant un CAN pour respecter Shannon ?", "opts": ["Un filtre passe-bas anti-repliement", "Un filtre passe-haut", "Un filtre réjecteur de bande", "Un amplificateur logarithmique"], "rep": "Un filtre passe-bas anti-repliement", "expl": "Le filtre passe-bas coupe toutes les fréquences supérieures à Fe / 2."},
-        {"q": "8. Pour numériser un signal audio vocal dont la fréquence maximale est Fmax = 3.4 kHz (téléphonie), Fe normalisée vaut :", "opts": ["8 kHz", "4 kHz", "44.1 kHz", "16 kHz"], "rep": "8 kHz", "expl": "Fe = 8 kHz > 2 * 3.4 kHz = 6.8 kHz (norme G.711)."},
-        {"q": "9. Sur un CAN 8 bits (valeurs 0 à 255), sous 5V, analogRead() renverrait pour 1.0 V une valeur brute d'environ :", "opts": ["51", "127", "20", "102"], "rep": "51", "expl": "N = 255 * (1.0 / 5.0) = 51."},
-        {"q": "10. L'erreur de quantification maximale théorique d'un CAN idéal est égale à :", "opts": ["+- q / 2", "+- q", "+- 2*q", "0"], "rep": "+- q / 2", "expl": "Tout niveau de tension est arrondi au palier le plus proche, l'écart maximal est donc un demi-quantum (+- q/2)."}
+def create_default_user_data(username="Invité BTS CIEL", role="Candidat Option A"):
+    today = datetime.now()
+    default_history = [
+        {'date': (today - timedelta(days=14)).strftime('%Y-%m-%d %H:%M'), 'quiz': 'Diagnostic Initial', 'score': 6, 'total': 10, 'details': {'Réseaux': 2, 'Cybersécurité': 1, 'Prog': 1, 'SysAdmin': 1, 'Elec': 1, 'Maths': 0, 'UML': 0}},
+        {'date': (today - timedelta(days=7)).strftime('%Y-%m-%d %H:%M'), 'quiz': 'Entraînement S1', 'score': 8, 'total': 10, 'details': {'Réseaux': 3, 'Cybersécurité': 2, 'Prog': 1, 'SysAdmin': 1, 'Elec': 1, 'Maths': 0, 'UML': 0}},
+        {'date': (today - timedelta(days=2)).strftime('%Y-%m-%d %H:%M'), 'quiz': 'Grand Quiz Examen', 'score': 9, 'total': 10, 'details': {'Réseaux': 2, 'Cybersécurité': 2, 'Prog': 2, 'SysAdmin': 1, 'Elec': 1, 'Maths': 1, 'UML': 0}}
     ]
-}
+    return {
+        'username': username,
+        'role': role,
+        'created_at': datetime.now().strftime('%Y-%m-%d %H:%M'),
+        'last_login': datetime.now().strftime('%Y-%m-%d %H:%M'),
+        'points': 75,
+        'level': 'Technicien Supérieur Confirmé ⚡',
+        'history': default_history,
+        'domain_mastery': {
+            'Réseaux & Télécoms': 70,
+            'Cybersécurité & Hardening': 65,
+            'Programmation C++ & Python': 55,
+            'Administration Système & AD': 60,
+            'Électronique & Bus': 50,
+            'Mathématiques Appliquées': 45,
+            'Modélisation SysML & E6': 40
+        },
+        'completed_activities': {
+            'w1_diag': True
+        },
+        'badges': [
+            {'id': 'first_step', 'nom': 'Pied à l\'Étrier', 'desc': 'Première session d\'évaluation complétée', 'icon': '🎯', 'date': (today - timedelta(days=14)).strftime('%Y-%m-%d')},
+            {'id': 'net_rookie', 'nom': 'Architecte Réseau', 'desc': 'Score >= 8/10 en Réseaux & Commutation', 'icon': '📶', 'date': (today - timedelta(days=7)).strftime('%Y-%m-%d')}
+        ],
+        'notes': 'Objectif : Obtenir la mention Très Bien au BTS CIEL Option A.'
+    }
 
+def init_user_session():
+    if 'current_user' not in st.session_state:
+        st.session_state.current_user = DEFAULT_USER
+    if 'user_role' not in st.session_state:
+        st.session_state.user_role = 'Candidat Option A'
+    if 'user_progress' not in st.session_state:
+        db = load_users()
+        user_data = db.get(st.session_state.current_user, create_default_user_data(st.session_state.current_user))
+        st.session_state.user_progress = user_data
+    if 'cloud_sync_status' not in st.session_state:
+        st.session_state.cloud_sync_status = 'Mode Local Synchrone'
+
+def get_active_user_data():
+    init_user_session()
+    u = st.session_state.current_user
+    db = load_users()
+    if u not in db:
+        user_data = create_default_user_data(u, st.session_state.get('user_role', 'Candidat Option A'))
+        db[u] = user_data
+        save_users(db)
+        st.session_state.user_progress = user_data
+        return user_data
+    return db[u]
+
+def update_active_user_data(user_data):
+    init_user_session()
+    u = st.session_state.current_user
+    db = load_users()
+    db[u] = user_data
+    save_users(db)
+    st.session_state.user_progress = user_data
+
+def add_user_points(points, activity_key, domain=None):
+    init_user_session()
+    user_data = get_active_user_data()
+    
+    if activity_key not in user_data['completed_activities']:
+        user_data['completed_activities'][activity_key] = True
+        user_data['points'] += points
+        
+        # Domain boost if specified
+        if domain and domain in user_data['domain_mastery']:
+            current_m = user_data['domain_mastery'][domain]
+            user_data['domain_mastery'][domain] = min(100, current_m + int(points * 0.4))
+            
+        pts = user_data['points']
+        if pts >= 600:
+            user_data['level'] = 'Major National BTS CIEL 🎓'
+        elif pts >= 400:
+            user_data['level'] = 'Expert Cybersécurité & Réseaux 🛡️'
+        elif pts >= 250:
+            user_data['level'] = 'Technicien Supérieur Confirmé ⚡'
+        elif pts >= 100:
+            user_data['level'] = 'Développeur & Intégrateur 💻'
+        else:
+            user_data['level'] = 'Apprenti Technicien 🚀'
+            
+        # Check badge unlocks
+        unlocked_ids = [b['id'] for b in user_data.get('badges', [])]
+        if pts >= 100 and 'pts_100' not in unlocked_ids:
+            user_data.setdefault('badges', []).append({
+                'id': 'pts_100', 'nom': 'Centurion CIEL', 'desc': 'Cap des 100 points XP franchi !', 'icon': '💯', 'date': datetime.now().strftime('%Y-%m-%d')
+            })
+        if pts >= 300 and 'pts_300' not in unlocked_ids:
+            user_data.setdefault('badges', []).append({
+                'id': 'pts_300', 'nom': 'Maître de l\'Atelier', 'desc': 'Cap des 300 points XP franchi !', 'icon': '🏆', 'date': datetime.now().strftime('%Y-%m-%d')
+            })
+
+        update_active_user_data(user_data)
+
+def save_score(score, total, details, quiz_name="Quiz"):
+    init_user_session()
+    user_data = get_active_user_data()
+    now_str = datetime.now().strftime('%Y-%m-%d %H:%M')
+    
+    user_data.setdefault('history', []).append({
+        'date': now_str,
+        'quiz': quiz_name,
+        'score': score,
+        'total': total,
+        'details': details
+    })
+    
+    # Update domain masteries based on details
+    for d_name, d_score in details.items():
+        # Match domain name
+        for target_d in user_data.get('domain_mastery', {}):
+            if d_name.lower() in target_d.lower():
+                gain = int((d_score / max(1, total)) * 8)
+                user_data['domain_mastery'][target_d] = min(100, user_data['domain_mastery'][target_d] + gain)
+                
+    update_active_user_data(user_data)
+
+def load_scores():
+    init_user_session()
+    user_data = get_active_user_data()
+    return user_data.get('history', [])
 
 
 def render_10_questions_quiz(category_or_module, quiz_key):
@@ -523,7 +528,8 @@ def render_10_questions_quiz(category_or_module, quiz_key):
         # Attribution XP & Bilan
         pct = (score / len(questions)) * 100
         pts_earned = score * 5
-        add_user_points(pts_earned, quiz_key)
+        add_user_points(pts_earned, quiz_key, domain=category_or_module)
+        save_score(score, len(questions), {category_or_module: score}, quiz_name=f"Quiz Certifiant {category_or_module}")
         
         if score >= 8:
             st.success(f"🏆 **Excellente Maîtrise ! Note : {score} / 10 ({pct:.0f}%)** — Vous avez gagné **+{pts_earned} XP** !")
@@ -532,6 +538,305 @@ def render_10_questions_quiz(category_or_module, quiz_key):
             st.info(f"👍 **Score Honorable : {score} / 10 ({pct:.0f}%)** — Vous avez gagné **+{pts_earned} XP**. Relisez les mémos pour viser le 10/10.")
         else:
             st.warning(f"⚠️ **Score Insuffisant : {score} / 10 ({pct:.0f}%)** — Vous avez gagné **+{pts_earned} XP**. Révisez le cours de la semaine avant de retenter.")
+
+
+
+# Module de Rendu Analyse des Scores pour BTS CIEL Studio Pro
+import streamlit as st
+import pandas as pd
+import matplotlib.pyplot as plt
+import numpy as np
+from datetime import datetime
+
+def render_page_analyse_scores():
+    init_user_session()
+    user_data = get_active_user_data()
+    u_name = user_data['username']
+    u_role = user_data['role']
+    u_pts = user_data['points']
+    u_lvl = user_data['level']
+    hist = user_data.get('history', [])
+
+    st.markdown(f"""
+    <div class='hero-container'>
+        <div style='display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 15px;'>
+            <div>
+                <span class='badge badge-blue'>ESPACE PERSONNEL CERTIFIANT</span>
+                <div class='hero-title'>📈 Bilan Analytique & Performances Individuelles</div>
+                <div class='hero-subtitle'>Profil actif : <b style='color:#38bdf8;'>{u_name}</b> ({u_role}) — Grade : <b style='color:#34d399;'>{u_lvl}</b></div>
+            </div>
+            <div style='background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 16px; padding: 14px 20px; text-align: center;'>
+                <div style='font-size: 0.8rem; color: #94a3b8; font-weight: 700; text-transform: uppercase;'>Total XP Acquis</div>
+                <div style='font-size: 2.2rem; font-weight: 800; color: #fb923c;'>{u_pts} <span style='font-size: 1.1rem; color: #cbd5e1;'>XP</span></div>
+            </div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    tab_an1, tab_an2, tab_an3, tab_an4 = st.tabs([
+        "📊 Statistiques & Évolution",
+        "🕸️ Radar de Compétences BTS CIEL",
+        "🏆 Badges & Succès Débloqués",
+        "⚙️ Gestion du Compte & Cloud Sync"
+    ])
+
+    with tab_an1:
+        st.subheader(f"1. Métriques Individuelles de {u_name}")
+        if hist:
+            df = pd.DataFrame(hist)
+            nb_tentatives = len(df)
+            moyenne = (df['score'] / df['total']).mean() * 100
+            best_score = df['score'].max()
+            last_score = df['score'].iloc[-1]
+            last_total = df['total'].iloc[-1]
+            
+            c1, c2, c3, c4 = st.columns(4)
+            with c1:
+                st.markdown(f"<div class='stat-box'><div class='stat-number'>{nb_tentatives}</div><div class='stat-label'>Évaluations Passées</div></div>", unsafe_allow_html=True)
+            with c2:
+                st.markdown(f"<div class='stat-box'><div class='stat-number'>{moyenne:.1f}%</div><div class='stat-label'>Moyenne Générale</div></div>", unsafe_allow_html=True)
+            with c3:
+                st.markdown(f"<div class='stat-box'><div class='stat-number'>{best_score}/10</div><div class='stat-label'>Meilleure Performance</div></div>", unsafe_allow_html=True)
+            with c4:
+                st.markdown(f"<div class='stat-box'><div class='stat-number'>{last_score}/{last_total}</div><div class='stat-label'>Dernière Note</div></div>", unsafe_allow_html=True)
+
+            st.markdown("<br>", unsafe_allow_html=True)
+            st.markdown("### 📈 Courbe d'Évolution des Notes dans le Temps")
+            df_chart = df.copy()
+            df_chart['Pourcentage'] = (df_chart['score'] / df_chart['total']) * 100
+            df_chart['Date_Label'] = df_chart['date'].apply(lambda d: d.split(' ')[0] if ' ' in d else d)
+            
+            fig, ax = plt.subplots(figsize=(10, 3.5), facecolor='#090e1d')
+            ax.set_facecolor('#090e1d')
+            ax.plot(df_chart['Date_Label'], df_chart['Pourcentage'], marker='o', color='#38bdf8', linewidth=2.5, markersize=8, label='Performance (%)')
+            ax.axhline(50, color='#ef4444', linestyle='--', alpha=0.6, label='Seuil Admission (50%)')
+            ax.axhline(80, color='#34d399', linestyle='--', alpha=0.6, label='Seuil Mention Bien (80%)')
+            ax.set_ylim(0, 105)
+            ax.set_ylabel('Score (%)', color='#cbd5e1', fontsize=10)
+            ax.tick_params(colors='#94a3b8', labelsize=9)
+            ax.grid(color='#1e293b', linestyle=':', alpha=0.5)
+            for spine in ax.spines.values():
+                spine.set_color('#1e293b')
+            ax.legend(facecolor='#0f172a', edgecolor='#334155', labelcolor='#e2e8f0', fontsize=9)
+            st.pyplot(fig)
+            plt.close()
+
+            st.markdown("### 📜 Historique Détaillé de vos Passages")
+            hist_display = []
+            for h in reversed(hist):
+                pct = (h['score'] / h['total']) * 100
+                mention = "🥇 Excellent" if pct >= 80 else ("🥈 Validé" if pct >= 50 else "⚠️ À Consolider")
+                hist_display.append({
+                    'Date & Heure': h['date'],
+                    'Épreuve / Quiz': h.get('quiz', 'Grand Quiz'),
+                    'Note Obtenue': f"{h['score']} / {h['total']}",
+                    'Taux de Réussite': f"{pct:.1f} %",
+                    'Statut d\'Acquisition': mention
+                })
+            st.dataframe(pd.DataFrame(hist_display), use_container_width=True)
+
+        else:
+            st.info("💡 Vous n'avez pas encore passé d'évaluation enregistrée. Lancez un test dans 'Programme Semaine par Semaine' ou le 'Grand Quiz' pour générer vos premières métriques !")
+
+    with tab_an2:
+        st.subheader("2. Radar de Maîtrise des 7 Domaines du BTS CIEL")
+        st.markdown("<p style='color: #94a3b8;'>Ce radar est calculé en temps réel d'après vos résultats aux quiz, aux laboratoires pratiques et aux 105 flashcards d'examen.</p>", unsafe_allow_html=True)
+        
+        mastery = user_data.get('domain_mastery', {
+            'Réseaux & Télécoms': 70,
+            'Cybersécurité & Hardening': 65,
+            'Programmation C++ & Python': 55,
+            'Administration Système & AD': 60,
+            'Électronique & Bus': 50,
+            'Mathématiques Appliquées': 45,
+            'Modélisation SysML & E6': 40
+        })
+
+        col_rad, col_rec = st.columns([1.2, 1])
+        with col_rad:
+            labels = list(mastery.keys())
+            values = list(mastery.values())
+            num_vars = len(labels)
+            
+            angles = np.linspace(0, 2 * np.pi, num_vars, endpoint=False).tolist()
+            values_plot = values + [values[0]]
+            angles += angles[:1]
+            
+            fig_rad, ax_rad = plt.subplots(figsize=(6, 6), subplot_kw=dict(polar=True), facecolor='#090e1d')
+            ax_rad.set_facecolor('#0d1527')
+            ax_rad.plot(angles, values_plot, color='#38bdf8', linewidth=2.5, linestyle='solid')
+            ax_rad.fill(angles, values_plot, color='#38bdf8', alpha=0.3)
+            ax_rad.set_xticks(angles[:-1])
+            ax_rad.set_xticklabels(labels, color='#f8fafc', fontsize=9, fontweight=600)
+            ax_rad.set_ylim(0, 100)
+            ax_rad.set_yticks([25, 50, 75, 100])
+            ax_rad.set_yticklabels(['25%', '50%', '75%', '100%'], color='#64748b', fontsize=8)
+            ax_rad.grid(color='#1e293b', linestyle='--')
+            ax_rad.spines['polar'].set_color('#334155')
+            st.pyplot(fig_rad)
+            plt.close()
+
+        with col_rec:
+            st.markdown("#### 🎯 Diagnostic Personnalisé de l'Assistant")
+            weakest_dom = min(mastery, key=mastery.get)
+            weakest_val = mastery[weakest_dom]
+            strongest_dom = max(mastery, key=mastery.get)
+            strongest_val = mastery[strongest_dom]
+            
+            st.markdown(f"""
+            <div class='ciel-card' style='border-left: 5px solid #34d399 !important; margin-bottom: 14px;'>
+                <h5 style='color: #34d399; margin: 0;'>🌟 Votre Point Fort Majeur</h5>
+                <p style='margin: 4px 0; color: #f8fafc;'><b>{strongest_dom}</b> : <b>{strongest_val}%</b> de maîtrise.</p>
+                <span style='font-size: 0.85rem; color: #94a3b8;'>Vos automatismes sont excellents sur ce pilier. Poursuivez les révisions réflexes.</span>
+            </div>
+            
+            <div class='ciel-card' style='border-left: 5px solid #f43f5e !important;'>
+                <h5 style='color: #f43f5e; margin: 0;'>⚠️ Votre Priorité de Travail Actuelle</h5>
+                <p style='margin: 4px 0; color: #f8fafc;'><b>{weakest_dom}</b> : <b>{weakest_val}%</b> de maîtrise.</p>
+                <span style='font-size: 0.85rem; color: #cbd5e1;'>C'est le module où vous avez le plus de points à gagner pour le BTS Blanc. Révisez les fiches associées dans le Grand Référentiel !</span>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            st.markdown("#### 📊 Taux de Maîtrise Détaillés")
+            for d, rate in mastery.items():
+                st.write(f"**{d}** : {rate}% de réussite")
+                st.progress(rate / 100)
+
+    with tab_an3:
+        st.subheader("3. Galerie des Trophées & Badges Débloqués")
+        badges = user_data.get('badges', [])
+        
+        col_b1, col_b2, col_b3 = st.columns(3)
+        all_possible_badges = [
+            {'id': 'first_step', 'nom': 'Pied à l\'Étrier', 'desc': 'Première session d\'évaluation complétée', 'icon': '🎯'},
+            {'id': 'net_rookie', 'nom': 'Architecte Réseau', 'desc': 'Score >= 8/10 en Réseaux & Commutation', 'icon': '📶'},
+            {'id': 'pts_100', 'nom': 'Centurion CIEL', 'desc': 'Cap des 100 points XP franchi !', 'icon': '💯'},
+            {'id': 'pts_300', 'nom': 'Maître de l\'Atelier', 'desc': 'Cap des 300 points XP franchi !', 'icon': '🏆'},
+            {'id': 'cyber_ninja', 'nom': 'Gardien ANSSI', 'desc': 'Tous les labs de durcissement réussis', 'icon': '🛡️'},
+            {'id': 'code_master', 'nom': 'As du C++', 'desc': 'Zéro fuite mémoire dans les sandboxes', 'icon': '💻'}
+        ]
+        
+        unlocked_ids = {b['id']: b for b in badges}
+        
+        for idx, b in enumerate(all_possible_badges):
+            target_col = [col_b1, col_b2, col_b3][idx % 3]
+            is_unlocked = b['id'] in unlocked_ids
+            b_info = unlocked_ids[b['id']] if is_unlocked else b
+            
+            with target_col:
+                if is_unlocked:
+                    st.markdown(f"""
+                    <div class='ciel-card' style='border: 1px solid #34d399 !important; background: rgba(6, 78, 59, 0.2); text-align: center; padding: 20px 14px;'>
+                        <div style='font-size: 2.5rem; margin-bottom: 6px;'>{b_info['icon']}</div>
+                        <h4 style='color: #34d399; margin: 0;'>{b_info['nom']}</h4>
+                        <p style='font-size: 0.85rem; color: #cbd5e1; margin: 6px 0;'>{b_info['desc']}</p>
+                        <span class='badge badge-emerald'>Débloqué le {b_info.get('date', 'Récemment')}</span>
+                    </div>
+                    """, unsafe_allow_html=True)
+                else:
+                    st.markdown(f"""
+                    <div class='ciel-card' style='border: 1px solid rgba(255, 255, 255, 0.08) !important; background: rgba(15, 23, 42, 0.4); text-align: center; padding: 20px 14px; opacity: 0.6;'>
+                        <div style='font-size: 2.5rem; margin-bottom: 6px; filter: grayscale(100%);'>{b['icon']}</div>
+                        <h4 style='color: #94a3b8; margin: 0;'>{b['nom']}</h4>
+                        <p style='font-size: 0.85rem; color: #64748b; margin: 6px 0;'>{b['desc']}</p>
+                        <span class='badge' style='background: rgba(100, 116, 139, 0.2); color: #94a3b8; border: 1px solid #475569;'>🔒 Verrouillé</span>
+                    </div>
+                    """, unsafe_allow_html=True)
+
+    with tab_an4:
+        st.subheader("4. Gestion Multi-Profils & Synchronisation Cloud")
+        st.markdown("<p style='color: #94a3b8;'>Passez d'un compte étudiant à un autre, sauvegardez votre progression ou restaurez vos scores depuis un autre appareil.</p>", unsafe_allow_html=True)
+        
+        c_u1, c_u2 = st.columns(2)
+        with c_u1:
+            st.markdown("#### 👥 Changer d'Utilisateur ou Créer un Compte")
+            users_db = load_users()
+            all_known = list(users_db.keys())
+            if not all_known:
+                all_known = [DEFAULT_USER]
+            if DEFAULT_USER not in all_known:
+                all_known = [DEFAULT_USER] + all_known
+                
+            cur_idx = all_known.index(u_name) if u_name in all_known else 0
+            selected_existing = st.selectbox("Basculer vers un profil existant :", all_known, index=cur_idx, key="sel_switch_user")
+            
+            if st.button("Charger ce profil", key="btn_switch_profile"):
+                if selected_existing != u_name:
+                    st.session_state.current_user = selected_existing
+                    st.session_state.user_progress = users_db.get(selected_existing, create_default_user_data(selected_existing))
+                    st.session_state.user_role = st.session_state.user_progress.get('role', 'Candidat Option A')
+                    st.success(f"Session basculée sur : {selected_existing} !")
+                    st.rerun()
+
+            st.markdown("---")
+            st.markdown("#### ➕ Créer un Nouveau Profil Étudiant")
+            new_u_name = st.text_input("Nom de l'étudiant ou Pseudo :", placeholder="ex: Thomas_R, Sarah_CIEL...", key="new_u_field")
+            new_u_role = st.selectbox("Spécialité :", ["Candidat Option A (Informatique & Réseaux)", "Candidat Option B (Électronique & Réseaux)", "Enseignant / Tuteur"], key="new_u_role_sel")
+            
+            if st.button("Créer & Activer ce Profil", key="btn_create_new_u"):
+                clean_name = new_u_name.strip()
+                if clean_name:
+                    db = load_users()
+                    if clean_name not in db:
+                        new_data = create_default_user_data(clean_name, new_u_role)
+                        db[clean_name] = new_data
+                        save_users(db)
+                    st.session_state.current_user = clean_name
+                    st.session_state.user_role = new_u_role
+                    st.session_state.user_progress = db[clean_name]
+                    st.success(f"Profil '{clean_name}' créé et activé avec succès !")
+                    st.rerun()
+                else:
+                    st.warning("Veuillez saisir un nom ou pseudo valide.")
+
+        with c_u2:
+            st.markdown("#### ☁️ Sauvegarde Cloud & Export / Import JSON")
+            st.info("Toutes vos données (scores, dates d'examens, progression des flashcards et points XP) sont conservées en local et peuvent être téléchargées sous forme de fichier JSON léger pour être transférées vers un autre PC ou smartphone.")
+            
+            export_payload = {
+                'app': 'BTS_CIEL_Studio_Pro',
+                'version': 'v37',
+                'exported_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                'user_profile': user_data
+            }
+            st.download_button(
+                label=f"📥 Télécharger ma progression ({u_name}.json)",
+                data=json.dumps(export_payload, ensure_ascii=False, indent=2),
+                file_name=f"bts_ciel_backup_{u_name}_{datetime.now().strftime('%Y%m%d')}.json",
+                mime="application/json",
+                key="btn_download_backup"
+            )
+            
+            st.markdown("---")
+            st.markdown("#### 📤 Restaurer un Profil depuis un fichier JSON")
+            uploaded_backup = st.file_uploader("Importer une sauvegarde (.json) :", type=['json'], key="upload_backup_file")
+            if uploaded_backup is not None:
+                try:
+                    data_imported = json.load(uploaded_backup)
+                    if 'user_profile' in data_imported and 'username' in data_imported['user_profile']:
+                        imported_prof = data_imported['user_profile']
+                        imp_name = imported_prof['username']
+                        db = load_users()
+                        db[imp_name] = imported_prof
+                        save_users(db)
+                        st.session_state.current_user = imp_name
+                        st.session_state.user_progress = imported_prof
+                        st.session_state.user_role = imported_prof.get('role', 'Candidat Option A')
+                        st.success(f"🎉 Profil '{imp_name}' restauré avec succès ! Score et progression actualisés.")
+                        st.rerun()
+                    else:
+                        st.error("Format de sauvegarde invalide (clé 'user_profile' absente).")
+                except Exception as e:
+                    st.error(f"Erreur lors du décodage du fichier : {e}")
+
+            st.markdown("---")
+            st.markdown("#### 🗑️ Zone de Réinitialisation")
+            if st.button("Réinitialiser l'historique de mes scores uniquement", key="btn_reset_my_scores"):
+                user_data['history'] = []
+                update_active_user_data(user_data)
+                st.success("Votre historique de scores a été remis à zéro.")
+                st.rerun()
+
 
 
 # Advanced Interactive Simulator & Practice Lab for BTS CIEL (All 5 Sections Expanded)
@@ -3245,41 +3550,7 @@ elif page == "📝 Grand Quiz d'Examen":
 
 
 elif page == '📈 Analyse des Scores':
-    st.markdown("<div class='hero-title'>📈 Tableau de Bord & Analyse des Scores</div>", unsafe_allow_html=True)
-    st.markdown("<p style='color:#64748b;'>Suivez votre progression dans le temps et vos compétences par domaine</p>", unsafe_allow_html=True)
-    hist = load_scores()
-    if hist:
-        df = pd.DataFrame(hist)
-        c1, c2, c3, c4 = st.columns(4)
-        with c1:
-            st.metric('Tentatives totales', len(df))
-        with c2:
-            st.metric('Moyenne générale', f'{(df["score"] / df["total"]).mean() * 100:.1f} %')
-        with c3:
-            st.metric('Meilleur score', f'{df["score"].max()} / 10')
-        with c4:
-            st.metric('Dernier score', f'{df["score"].iloc[-1]} / 10')
-        st.markdown('### 📈 Évolution des Notes au Fil des Jours')
-        df_plot = df[['date', 'score']].copy().set_index('date')
-        st.line_chart(df_plot)
-        totals = {'Réseaux': 0, 'Cybersécurité': 0, 'Prog': 0, 'SysAdmin': 0, 'Elec': 0, 'UML': 0}
-        for h in hist:
-            for k, v in h.get('details', {}).items():
-                if k in totals:
-                    totals[k] += v
-        max_pts = len(hist) * 2
-        rates = {k: v / max_pts * 100 if max_pts > 0 else 0 for k, v in totals.items()}
-        df_b = pd.DataFrame({'Compétence': list(rates.keys()), "Taux d'Acquisition (%)": list(rates.values())}).set_index('Compétence')
-        st.markdown('### 📊 Taux de Maîtrise par Compétence')
-        st.bar_chart(df_b)
-        weak = min(rates, key=rates.get)
-        st.markdown(f'### 🎓 Conseil Pédagogique : Priorité **{weak}**')
-        st.info(f"Votre compétence nécessitant le plus de consolidation est **{weak}** ({rates[weak]:.1f}%). Révisez les chapitres dédiés dans l'Encyclopédie et pratiquez les flashcards associées !")
-        if st.button("Réinitialiser l'historique"):
-            if os.path.exists(SCORES_FILE):
-                os.remove(SCORES_FILE)
-            st.rerun()
-
+    render_page_analyse_scores()
 
 
 elif page == '📋 Planning de Projet E6 (Gantt)':
