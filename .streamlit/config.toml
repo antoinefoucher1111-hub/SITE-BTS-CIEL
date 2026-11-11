@@ -1,0 +1,9 @@
+# Thème de base de Streamlit (boutons, cases à cocher, menus déroulants).
+# Le reste du design est dans le bloc « DESIGN DU SITE » en haut de app-v32.py.
+[theme]
+base = "dark"
+primaryColor = "#ff453a"
+backgroundColor = "#000000"
+secondaryBackgroundColor = "#131316"
+textColor = "#f5f5f7"
+font = "sans serif"
