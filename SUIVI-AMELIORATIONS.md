@@ -1,6 +1,6 @@
 # CIEL Studio : suivi des améliorations
 
-Mis à jour le 12/11/2026. Version de travail : **v38** (dans `app-v30.py`, le nom attendu par l'appli). Rien n'est commité ni déployé.
+Mis à jour le 12/11/2026. Version de travail : **v38** (dans `app-v30.py`, le nom attendu par l'appli). Commité sur la branche locale `v38-contrastes-mobile` ; non fusionné dans `main`, non poussé, non déployé.
 
 Sauvegardes de chaque étape dans `sauvegardes/` : `app-v35-origine.py`, `app-v36-etape1.py`, `app-v36-avant-etape2.py`, `app-v37-avant-etape3.py`.
 
@@ -15,11 +15,11 @@ Sauvegardes de chaque étape dans `sauvegardes/` : `app-v35-origine.py`, `app-v3
 
 | Fichier | État |
 |---|---|
-| `app-v30.py` | v37 = v36 + corrections de l'étape 2 |
+| `app-v30.py` | v38 = v36 + corrections des étapes 2 et 3 |
 | `app-v36.py` | v36 de l'étape 1 (inchangé) |
 | `docs/index.html`, `docs/sw.js` | Changements de l'étape 1 (`ciel-v3`). L'étape 2 n'a rien changé ici. |
 | `.streamlit/config.toml` | Inchangé |
-| `sauvegardes/` | `app-v35-origine.py`, `app-v36-etape1.py`, `app-v36-avant-etape2.py`, `index-v35.html`, `index-etape1.html`, `sw-v35.js`, `sw-etape1.js` |
+| `sauvegardes/` (sur ce poste, hors git) | `app-v35-origine.py`, `app-v36-etape1.py`, `app-v36-avant-etape2.py`, `app-v37-avant-etape3.py`, `index-v35.html`, `index-etape1.html`, `sw-v35.js`, `sw-etape1.js` |
 
 La v35 d'origine est aussi conservée dans git (commit `ff79253`).
 
