@@ -6,7 +6,7 @@ import os
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 from datetime import datetime, timedelta
-st.set_page_config(page_title='CIEL Studio', page_icon='🔴', layout='wide', initial_sidebar_state='expanded')
+st.set_page_config(page_title='CIEL Studio', page_icon='🔴', layout='wide', initial_sidebar_state='auto')  # auto : ouvert sur ordinateur, fermé sur téléphone
 import matplotlib
 matplotlib.use('Agg')
 # ══════════ DESIGN DU SITE : tout le style est ici ══════════
@@ -24,9 +24,9 @@ st.markdown(r'''<style>
     --text: #f5f5f7;
     --text-2: #d4d4d8;
     --muted: #8e8e96;
-    --faint: #5c5c63;
+    --faint: #7d7d84;
     --red: #ff453a;
-    --blue: #3d6bff;
+    --blue: #4974ff;
     --yellow: #ffcc33;
     --green: #30d158;
     --warn: #ffcc33;
@@ -313,6 +313,103 @@ table.board td:first-child { width: 42px; text-align: center; }
 .stApp [data-baseweb="select"] > div, .stApp [data-baseweb="input"] > div, .stApp [data-baseweb="textarea"] > div {
     background: var(--surface) !important; border-color: var(--line-strong) !important; }
 
+
+/* ───────── v36 : fiabilité des quiz et accessibilité clavier ───────── */
+/* Contour de focus : visible seulement au clavier (pas au clic), bleu du thème, 2 px, sur tout ce qui est interactif */
+:root { --focus: var(--blue); }
+.stApp button:focus-visible, .stApp a:focus-visible, .stApp summary:focus-visible,
+.stApp [role="tab"]:focus-visible, .stApp [role="slider"]:focus-visible, .stApp [role="combobox"]:focus-visible,
+.stApp [role="button"]:focus-visible, .stApp [tabindex]:not([tabindex="-1"]):focus-visible,
+[data-testid="stSidebar"] button:focus-visible {
+    outline: 2px solid var(--focus) !important; outline-offset: 2px !important; }
+/* Champs de saisie et listes : le contour entoure la boîte entière */
+.stApp div:has(> input:focus-visible), .stApp div:has(> textarea:focus-visible) {
+    outline: 2px solid var(--focus) !important; outline-offset: 1px; border-radius: 10px; }
+.stApp input:focus-visible, .stApp textarea:focus-visible { outline: none !important; }
+/* Boutons de réponse et cases à cocher : l'input est caché, on entoure l'option */
+.stApp [data-testid="stRadioOption"]:has(input:focus-visible),
+.stApp [data-testid="stCheckbox"] label:has(input:focus-visible),
+.stApp [data-testid="stToggle"] label:has(input:focus-visible) {
+    outline: 2px solid var(--focus) !important; outline-offset: 3px; border-radius: 8px; }
+
+/* Pastille de réponse : neutre (couleur du texte) au lieu du rouge, qui veut dire « erreur » ailleurs */
+.stApp [data-testid="stRadioOption"][data-selected="true"] > div > div:first-child {
+    background-color: var(--text) !important; border-color: var(--text) !important; }
+.stApp [data-testid="stRadioOption"][data-selected="true"] > div > div:first-child > div {
+    background-color: var(--bg) !important; }
+/* Pastille vide : anneau bien visible (≥ 3:1), sans fond plein (le « rond noir » du thème clair) */
+.stApp [data-testid="stRadioOption"]:not([data-selected="true"]) > div > div:first-child {
+    background-color: transparent !important; border: 1.5px solid var(--muted) !important; }
+.stApp [data-testid="stRadioOption"]:hover:not([data-selected="true"]) > div > div:first-child { border-color: var(--text) !important; }
+
+/* Réduction des animations demandée par le système : pas de ballons, pas d'animations ni de transitions */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important; animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
+    [data-testid="stBalloons"], [data-testid="stSnow"], .stBalloons, .stSnow,
+    img[src*="balloon"], img[src*="snowflake"] { display: none !important; }
+}
+/* Les onglets sont dans une barre qui coupe ce qui dépasse : contour à l'intérieur */
+.stApp [data-testid="stTab"][role="tab"][tabindex]:focus-visible { outline-offset: -3px !important; border-radius: 6px; }
+
+/* ───────── v37 : contrastes et thèmes ───────── */
+/* Listes déroulantes (Streamlit ≥ 1.50 : plus de data-baseweb, la boîte est un role="group") */
+.stApp [data-testid="stSelectbox"] [role="group"], .stApp [data-testid="stMultiSelect"] [role="group"] {
+    background: var(--surface) !important; border-color: var(--line-strong) !important; color: var(--text) !important; }
+.stApp [data-testid="stSelectbox"] input, .stApp [data-testid="stMultiSelect"] input {
+    color: var(--text) !important; -webkit-text-fill-color: var(--text) !important; background: transparent !important; }
+.stApp [data-testid="stSelectbox"] input::placeholder, .stApp [data-testid="stMultiSelect"] input::placeholder {
+    color: var(--faint) !important; -webkit-text-fill-color: var(--faint) !important; opacity: 1; }
+.stApp [data-testid="stSelectbox"] [role="group"] button, .stApp [data-testid="stSelectbox"] [role="group"] svg {
+    color: var(--text-2) !important; fill: var(--text-2) !important; background: transparent !important; }
+[role="listbox"] { background: var(--surface) !important; border: 1px solid var(--line-strong) !important; }
+[role="listbox"] [role="option"] { color: var(--text) !important; background: transparent !important; }
+[role="listbox"] [role="option"]:hover, [role="listbox"] [role="option"][data-focused="true"],
+[role="listbox"] [role="option"][aria-selected="true"] { background: var(--surface-2) !important; }
+/* Champs de date et d'heure (même changement de Streamlit : ils restaient noirs dans le thème clair) */
+.stApp [data-testid="stDateInputField"], .stApp [data-testid="stTimeInput"] [role="group"] {
+    background: var(--surface) !important; border-color: var(--line-strong) !important; color: var(--text) !important; }
+.stApp [data-testid="stDateInputField"] *, .stApp [data-testid="stTimeInput"] [role="group"] * { color: var(--text) !important; }
+/* Bouton qui ouvre / ferme le menu : icône de la couleur du texte (elle restait blanche dans le thème clair) */
+[data-testid="stExpandSidebarButton"], [data-testid="stSidebarCollapseButton"] button,
+[data-testid="stExpandSidebarButton"] [data-testid="stIconMaterial"], [data-testid="stSidebarCollapseButton"] [data-testid="stIconMaterial"],
+[data-testid="stExpandSidebarButton"] span, [data-testid="stSidebarCollapseButton"] span { color: var(--text) !important; }
+
+/* ───────── v38 : téléphone et écrans tactiles ───────── */
+/* Halo décoratif de l'accueil : ne doit jamais élargir la page */
+.home-hero { overflow-x: clip; }
+.home-hero .glow { width: min(520px, 100%); }
+/* Tableaux et formules plus larges que l'écran : ils défilent dans leur cadre, la page ne bouge pas */
+.stApp [data-testid="stMarkdownContainer"] table:not(.ciel-table) { display: block; max-width: 100%; overflow-x: auto; }
+.stApp .katex-display { max-width: 100%; overflow-x: auto; overflow-y: hidden; }
+/* Doigt ou petit écran : zones de toucher d'au moins 44 px (la souris garde la version compacte) */
+@media (max-width: 760px), (pointer: coarse) {
+    .stApp button[data-testid^="stBaseButton"]:not([data-testid="stBaseButton-elementToolbar"]),
+    .stApp a[data-testid^="stBaseLinkButton"] { min-height: 44px !important; }
+    .stApp [data-testid="stRadioOption"], .stApp [data-testid="stCheckbox"] label { min-height: 44px; align-items: center !important; }
+    .stApp [role="radiogroup"][aria-orientation="vertical"] [data-testid="stRadioOption"] { width: 100%; }
+    .stApp [data-testid="stExpander"] summary { min-height: 44px; display: flex; align-items: center; }
+    .stApp [data-testid="stTab"][role="tab"] { min-height: 44px; }
+    .stApp [data-testid="stTextInput"] [data-baseweb="input"], .stApp [data-testid="stTextInput"] input,
+    .stApp [data-testid="stNumberInput"] input, .stApp [data-testid="stNumberInputField"],
+    .stApp [data-testid="stNumberInput"] button, .stApp [data-testid="stDateInputField"],
+    .stApp [data-testid="stSelectbox"] [role="group"], .stApp [data-testid="stMultiSelect"] [role="group"] { min-height: 44px !important; }
+    .stApp [data-testid="stNumberInput"] button { min-width: 44px !important; }
+    /* Œil « afficher le mot de passe » */
+    .stApp [data-testid="stTextInputRootElement"] button { min-width: 44px !important; min-height: 44px !important; }
+}
+/* Petites étiquettes en capitales : pas sous 12 px sur téléphone */
+@media (max-width: 760px) {
+    .sec-title, .action .k, .nav-section, .nav-brand .ver, .hm-leg, .memo-leg, .mastery-sub, .crumb,
+    .badge, table.ciel-table th, .stApp [data-testid="stCaptionContainer"] code { font-size: 0.75rem !important; }
+    /* Barre du haut opaque : le contenu ne passe plus sous le bouton du menu en défilant */
+    header[data-testid="stHeader"] { background: var(--bg) !important; border-bottom: 1px solid var(--line); }
+    /* Formule dans une phrase plus large que l'écran : elle défile dans son cadre */
+    .stApp [data-testid="stMarkdownContainer"] .katex { display: inline-block; max-width: 100%; overflow-x: auto; overflow-y: hidden; vertical-align: middle; }
+    .stApp .katex-display > .katex { display: block; }
+}
+
 /* ───────── Téléphone ───────── */
 @media (max-width: 760px) {
     .block-container { padding-left: 1rem !important; padding-right: 1rem !important; padding-top: 3.2rem !important; }
@@ -321,6 +418,9 @@ table.board td:first-child { width: 42px; text-align: center; }
     .home-hero { padding: 18px 0 22px 0; }
     .mastery-row { grid-template-columns: 1fr 70px 40px; }
     .stTabs [data-baseweb="tab-list"] { gap: 14px; overflow-x: auto; }
+    /* Bouton du menu : cible de 44 px, posée sur une pastille pour être repérée */
+    [data-testid="stExpandSidebarButton"] { min-width: 44px !important; min-height: 44px !important; justify-content: center;
+        background: var(--surface) !important; border: 1px solid var(--line-strong) !important; border-radius: 12px !important; }
 }
 </style>
 ''', unsafe_allow_html=True)
@@ -854,6 +954,16 @@ def load_scores():
     return user_data.get('history', [])
 
 
+
+def avertir_sans_reponse(reponses):
+    """Affiche combien de questions sont restées sans réponse (elles comptent comme fausses)."""
+    vides = sum(1 for r in reponses if r is None)
+    if vides:
+        st.warning(f"{vides} question{'s' if vides > 1 else ''} sans réponse, "
+                   f"comptée{'s' if vides > 1 else ''} fausse{'s' if vides > 1 else ''}.")
+    return vides
+
+
 def render_10_questions_quiz(category_or_module, quiz_key):
     """
     Rendu dynamique d'un quiz certifiant de 10 questions avec calcul de score,
@@ -898,10 +1008,11 @@ def render_10_questions_quiz(category_or_module, quiz_key):
         q_num = idx + 1
         st.markdown(f"**Q{q_num} : {item['q']}**")
         opts = item.get('opts', item.get('options', []))
-        user_answers[idx] = st.radio(f"Choix pour Q{q_num} :", opts, key=f"{quiz_key}_rad_{idx}")
+        user_answers[idx] = st.radio(f"Choix pour Q{q_num} :", opts, key=f"{quiz_key}_rad_{idx}", index=None)
         st.markdown("<div style='margin-bottom: 12px;'></div>", unsafe_allow_html=True)
 
     if st.button("Valider mon questionnaire (10 questions)", type="primary", key=f"{quiz_key}_submit_btn"):
+        avertir_sans_reponse(user_answers.values())
         score = 0
         st.markdown("---")
         st.markdown("### 📊 Résultats & Corrigé Détaillé")
@@ -913,7 +1024,7 @@ def render_10_questions_quiz(category_or_module, quiz_key):
                 score += 1
                 st.success(f"✅ **Q{q_num} Exact !** ({user_ans})\n\n💡 *Explication :* {item['expl']}")
             else:
-                st.error(f"❌ **Q{q_num} Incorrect.** Vous avez répondu : *{user_ans}* | Réponse attendue : **{rep_exacte}**\n\n💡 *Explication :* {item['expl']}")
+                st.error(f"❌ **Q{q_num} {'Sans réponse' if user_ans is None else 'Incorrect'}.** Vous avez répondu : *{user_ans or 'aucune réponse'}* | Réponse attendue : **{rep_exacte}**\n\n💡 *Explication :* {item['expl']}")
 
         # Attribution XP & Bilan
         pct = (score / len(questions)) * 100
@@ -996,18 +1107,21 @@ def render_page_analyse_scores():
             df_chart['Pourcentage'] = (df_chart['score'] / df_chart['total']) * 100
             df_chart['Date_Label'] = df_chart['date'].apply(lambda d: d.split(' ')[0] if ' ' in d else d)
             
-            fig, ax = plt.subplots(figsize=(10, 3.5), facecolor='#090e1d')
-            ax.set_facecolor('#090e1d')
-            ax.plot(df_chart['Date_Label'], df_chart['Pourcentage'], marker='o', color='#38bdf8', linewidth=2.5, markersize=8, label='Performance (%)')
-            ax.axhline(50, color='#ef4444', linestyle='--', alpha=0.6, label='Seuil Admission (50%)')
-            ax.axhline(80, color='#34d399', linestyle='--', alpha=0.6, label='Seuil Mention Bien (80%)')
+            _tc = theme_color
+            fig, ax = plt.subplots(figsize=(10, 3.5))
+            fig.patch.set_alpha(0)
+            ax.set_facecolor('none')
+            ax.plot(df_chart['Date_Label'], df_chart['Pourcentage'], marker='o', color=_tc('--blue'), linewidth=2.5, markersize=8, label='Performance (%)')
+            ax.axhline(50, color=_tc('--red'), linestyle='--', alpha=0.8, label='Seuil Admission (50%)')
+            ax.axhline(80, color=_tc('--green'), linestyle='--', alpha=0.8, label='Seuil Mention Bien (80%)')
             ax.set_ylim(0, 105)
-            ax.set_ylabel('Score (%)', color='#cbd5e1', fontsize=10)
-            ax.tick_params(colors='#94a3b8', labelsize=9)
-            ax.grid(color='#1e293b', linestyle=':', alpha=0.5)
+            ax.set_ylabel('Score (%)', color=_tc('--text-2'), fontsize=10)
+            ax.tick_params(colors=_tc('--muted'), labelsize=9)
+            ax.grid(color=_tc('--muted'), linestyle=':', alpha=0.3)
             for spine in ax.spines.values():
-                spine.set_color('#1e293b')
-            ax.legend(facecolor='#0f172a', edgecolor='#334155', labelcolor='#e2e8f0', fontsize=9)
+                spine.set_color(_tc('--muted'))
+                spine.set_alpha(0.4)
+            ax.legend(facecolor=_tc('--surface'), edgecolor=_tc('--muted'), labelcolor=_tc('--text'), fontsize=9)
             st.pyplot(fig)
             plt.close()
 
@@ -1052,17 +1166,19 @@ def render_page_analyse_scores():
             values_plot = values + [values[0]]
             angles += angles[:1]
             
-            fig_rad, ax_rad = plt.subplots(figsize=(6, 6), subplot_kw=dict(polar=True), facecolor='#090e1d')
-            ax_rad.set_facecolor('#0d1527')
-            ax_rad.plot(angles, values_plot, color='#38bdf8', linewidth=2.5, linestyle='solid')
-            ax_rad.fill(angles, values_plot, color='#38bdf8', alpha=0.3)
+            _tc = theme_color
+            fig_rad, ax_rad = plt.subplots(figsize=(6, 6), subplot_kw=dict(polar=True))
+            fig_rad.patch.set_alpha(0)
+            ax_rad.set_facecolor(_tc('--surface'))
+            ax_rad.plot(angles, values_plot, color=_tc('--blue'), linewidth=2.5, linestyle='solid')
+            ax_rad.fill(angles, values_plot, color=_tc('--blue'), alpha=0.25)
             ax_rad.set_xticks(angles[:-1])
-            ax_rad.set_xticklabels(labels, color='#f8fafc', fontsize=9, fontweight=600)
+            ax_rad.set_xticklabels(labels, color=_tc('--text'), fontsize=9, fontweight=600)
             ax_rad.set_ylim(0, 100)
             ax_rad.set_yticks([25, 50, 75, 100])
-            ax_rad.set_yticklabels(['25%', '50%', '75%', '100%'], color='#64748b', fontsize=8)
-            ax_rad.grid(color='#1e293b', linestyle='--')
-            ax_rad.spines['polar'].set_color('#334155')
+            ax_rad.set_yticklabels(['25%', '50%', '75%', '100%'], color=_tc('--muted'), fontsize=8)
+            ax_rad.grid(color=_tc('--muted'), linestyle='--', alpha=0.35)
+            ax_rad.spines['polar'].set_color(_tc('--muted'))
             st.pyplot(fig_rad)
             plt.close()
 
@@ -1074,13 +1190,13 @@ def render_page_analyse_scores():
             strongest_val = mastery[strongest_dom]
             
             st.markdown(f"""
-            <div class='ciel-card' style='border-left: 5px solid #34d399 !important; margin-bottom: 14px;'>
+            <div class='ciel-card' style='border-left: 5px solid var(--green) !important; margin-bottom: 14px;'>
                 <h5 style='color: var(--green); margin: 0;'>🌟 Votre Point Fort Majeur</h5>
                 <p style='margin: 4px 0; color: var(--text);'><b>{strongest_dom}</b> : <b>{strongest_val}%</b> de maîtrise.</p>
                 <span style='font-size: 0.85rem; color: var(--muted);'>Vos automatismes sont excellents sur ce pilier. Poursuivez les révisions réflexes.</span>
             </div>
             
-            <div class='ciel-card' style='border-left: 5px solid #f43f5e !important;'>
+            <div class='ciel-card' style='border-left: 5px solid var(--red) !important;'>
                 <h5 style='color: var(--red); margin: 0;'>⚠️ Votre Priorité de Travail Actuelle</h5>
                 <p style='margin: 4px 0; color: var(--text);'><b>{weakest_dom}</b> : <b>{weakest_val}%</b> de maîtrise.</p>
                 <span style='font-size: 0.85rem; color: var(--text-2);'>C'est le module où vous avez le plus de points à gagner pour le BTS Blanc. Révisez les fiches associées dans le Grand Référentiel !</span>
@@ -1116,7 +1232,7 @@ def render_page_analyse_scores():
             with target_col:
                 if is_unlocked:
                     st.markdown(f"""
-                    <div class='ciel-card' style='border: 1px solid #34d399 !important; background: rgba(6, 78, 59, 0.2); text-align: center; padding: 20px 14px;'>
+                    <div class='ciel-card' style='border: 1px solid var(--green) !important; background: rgba(6, 78, 59, 0.2); text-align: center; padding: 20px 14px;'>
                         <div style='font-size: 2.5rem; margin-bottom: 6px;'>{b_info['icon']}</div>
                         <h4 style='color: var(--green); margin: 0;'>{b_info['nom']}</h4>
                         <p style='font-size: 0.85rem; color: var(--text-2); margin: 6px 0;'>{b_info['desc']}</p>
@@ -1129,7 +1245,7 @@ def render_page_analyse_scores():
                         <div style='font-size: 2.5rem; margin-bottom: 6px; filter: grayscale(100%);'>{b['icon']}</div>
                         <h4 style='color: var(--muted); margin: 0;'>{b['nom']}</h4>
                         <p style='font-size: 0.85rem; color: var(--muted); margin: 6px 0;'>{b['desc']}</p>
-                        <span class='badge' style='background: rgba(100, 116, 139, 0.2); color: var(--muted); border: 1px solid #475569;'>🔒 Verrouillé</span>
+                        <span class='badge' style='background: rgba(100, 116, 139, 0.2); color: var(--muted); border: 1px solid var(--line-strong);'>🔒 Verrouillé</span>
                     </div>
                     """, unsafe_allow_html=True)
 
@@ -2877,7 +2993,7 @@ import hashlib as _hashlib
 import unicodedata as _ud
 from datetime import date as _date
 
-APP_VERSION = 'v35'
+APP_VERSION = 'v38'
 DATE_BTS_BLANC_DEFAUT = '2026-12-09'
 LEITNER_JOURS = {1: 1, 2: 2, 3: 4, 4: 8, 5: 16}   # boîte -> nombre de jours avant de revoir
 NOUVELLES_CARTES_PAR_JOUR = 15
@@ -3285,7 +3401,7 @@ def render_today_panel():
         j_txt = "Passé"
     a_faire = due + min(new, NOUVELLES_CARTES_PAR_JOUR)
     st.markdown(f"""
-    <div class='ciel-card' style='border-left: 5px solid #fb923c !important;'>
+    <div class='ciel-card' style='border-left: 5px solid var(--warn) !important;'>
         <h3 style='color:var(--warn); margin-top:0; font-size:1.25rem;'>📌 Ta séance d'aujourd'hui</h3>
         <div style='display:flex; flex-wrap:wrap; gap:14px;'>
             <div class='stat-box' style='flex:1; min-width:140px;'><div class='stat-number'>{j_txt}</div><div class='stat-label'>Avant l'échéance ({d['exam_date']})</div></div>
@@ -3358,7 +3474,7 @@ def render_page_revision_du_jour():
         return
     st.progress(st.session_state.v31_srs_done / max(1, st.session_state.v31_srs_done + len(queue)))
     st.caption(f"Carte en cours — il en reste **{len(queue)}** dans la séance · `{card['module']}` · *{card['chap']}*")
-    st.markdown(f"<div class='ciel-card' style='border-left: 6px solid #38bdf8 !important;'><h3 style='color:var(--blue); margin-top:0;'>❓ Question</h3><p style='font-size:1.15rem; color:var(--text);'>{card['q']}</p></div>", unsafe_allow_html=True)
+    st.markdown(f"<div class='ciel-card' style='border-left: 6px solid var(--blue) !important;'><h3 style='color:var(--blue); margin-top:0;'>❓ Question</h3><p style='font-size:1.15rem; color:var(--text);'>{card['q']}</p></div>", unsafe_allow_html=True)
     st.text_area("✍️ Écris ta réponse (ou dis-la à voix haute) avant de regarder :", key=f"v31_srs_txt_{card['id']}_{st.session_state.v31_srs_done}", height=80)
 
     if not st.session_state.v31_srs_show:
@@ -3367,7 +3483,7 @@ def render_page_revision_du_jour():
             st.rerun()
         return
 
-    st.markdown(f"<div class='ciel-card' style='border-left: 6px solid #34d399 !important;'><h3 style='color:var(--green); margin-top:0;'>✅ Réponse attendue</h3><p style='font-size:1.05rem; color:var(--text);'>{card['a']}</p></div>", unsafe_allow_html=True)
+    st.markdown(f"<div class='ciel-card' style='border-left: 6px solid var(--green) !important;'><h3 style='color:var(--green); margin-top:0;'>✅ Réponse attendue</h3><p style='font-size:1.05rem; color:var(--text);'>{card['a']}</p></div>", unsafe_allow_html=True)
     if card.get('note'):
         st.markdown(card['note'])
     if card.get('v_id'):
@@ -3576,15 +3692,15 @@ def render_page_carnet_erreurs():
 def _countdown_html(fin_ts):
     reste = max(0, int(fin_ts - _time.time()))
     return f"""
-    <div id='v31cd' style='font-family: monospace; font-size: 1.5rem; font-weight: 700; color: var(--warn); background: var(--surface);
-         border: 1px solid rgba(251,146,60,0.4); border-radius: 12px; padding: 10px 16px; text-align: center;'>⏱️ --:--</div>
+    <div id='v31cd' style='font-family: monospace; font-size: 1.5rem; font-weight: 700; color: {theme_color('--warn')}; background: {theme_color('--surface')};
+         border: 1px solid {theme_color('--warn')}; border-radius: 12px; padding: 10px 16px; text-align: center;'>⏱️ --:--</div>
     <script>
       var r = {reste};
       function tick() {{
         var m = Math.floor(r / 60), s = r % 60;
         var el = document.getElementById('v31cd');
         el.textContent = (r > 0 ? '⏱️ Temps restant : ' : '⏰ Temps écoulé — valide ta copie ') + (r > 0 ? (m + ':' + (s < 10 ? '0' : '') + s) : '');
-        if (r <= 60) {{ el.style.color = '#f87171'; }}
+        if (r <= 60) {{ el.style.color = '{theme_color('--red')}'; el.style.borderColor = '{theme_color('--red')}'; }}
         if (r > 0) {{ r -= 1; setTimeout(tick, 1000); }}
       }}
       tick();
@@ -3631,8 +3747,12 @@ def render_page_examen_blanc():
     qs = [POOL_BY_ID[i] for i in ex['ids'] if i in POOL_BY_ID]
     if not ex['done']:
         try:
-            import streamlit.components.v1 as _components
-            _components.html(_countdown_html(ex['start'] + ex['dur']), height=70)
+            _cd = _countdown_html(ex['start'] + ex['dur'])
+            if hasattr(st, 'iframe'):          # Streamlit récent : st.iframe remplace components.html (retiré)
+                st.iframe(_cd, height=70)
+            else:                              # Streamlit plus ancien
+                import streamlit.components.v1 as _components
+                _components.html(_cd, height=70)
         except Exception:
             reste = max(0, int(ex['start'] + ex['dur'] - _time.time()))
             st.warning(f"⏱️ Temps restant : {reste // 60} min {reste % 60:02d} s")
@@ -3821,7 +3941,7 @@ def render_page_vocabulaire():
                     st.session_state.v31_vc_show = True
                     st.rerun()
             else:
-                st.markdown(f"<div class='ciel-card' style='text-align:center; border-left:6px solid #34d399 !important;'><div style='font-size:1.5rem; font-weight:700; color:var(--green);'>{verso}</div></div>", unsafe_allow_html=True)
+                st.markdown(f"<div class='ciel-card' style='text-align:center; border-left:6px solid var(--green) !important;'><div style='font-size:1.5rem; font-weight:700; color:var(--green);'>{verso}</div></div>", unsafe_allow_html=True)
                 if VOCAB_NOTES.get(w['en']):
                     st.warning(f"⚠️ {VOCAB_NOTES[w['en']]}")
                 k1, k2 = st.columns(2)
@@ -4565,33 +4685,33 @@ def render_home():
     st.markdown("<div class='sec-title'>Ta séance d'aujourd'hui · dans cet ordre</div>", unsafe_allow_html=True)
     c1, c2, c3 = st.columns(3)
     with c1:
-        _action_card('seance', 'Étape 1 · 10 min', '#ff453a', 'Séance du jour',
+        _action_card('seance', 'Étape 1 · 10 min', 'var(--red)', 'Séance du jour',
                      f"{a_faire} flashcards à revoir. Celles que tu sais reviennent plus tard, les autres tout de suite.", 'Commencer →')
     with c2:
-        _action_card('erreurs', 'Étape 2 · 10 min', '#3d6bff', "Carnet d'erreurs",
+        _action_card('erreurs', 'Étape 2 · 10 min', 'var(--blue)', "Carnet d'erreurs",
                      (f"{n_err} question(s) ratée(s) à refaire. Réussie 2 fois de suite = elle sort du carnet." if n_err else
                       "Vide pour l'instant. Fais un quiz : tes erreurs viendront s'y ranger."), 'Ouvrir →')
     with c3:
-        _action_card('vocabulaire', 'Étape 3 · 10 min', '#ffcc33', 'Vocabulaire anglais',
+        _action_card('vocabulaire', 'Étape 3 · 10 min', 'var(--warn)', 'Vocabulaire anglais',
                      f"{voc_known} / {VOCAB_TOTAL} mots acquis. Liste, cartes, QCM ou mot à écrire.", 'Réviser →')
 
     st.markdown("<div class='sec-title'>Pour aller plus loin</div>", unsafe_allow_html=True)
     c4, c5, c6 = st.columns(3)
     with c4:
-        _action_card('examen', "Conditions d'examen", '#8e8e96', 'Examen blanc', "20, 40 ou 60 questions chronométrées. Note sur 20 et détail par matière.", "S'entraîner →")
+        _action_card('examen', "Conditions d'examen", 'var(--muted)', 'Examen blanc', "20, 40 ou 60 questions chronométrées. Note sur 20 et détail par matière.", "S'entraîner →")
     with c5:
-        _action_card('quiz', 'Par matière', '#8e8e96', 'Grand quiz', f"{len(QUESTION_POOL)} questions, filtrées par matière ou par chapitre.", 'Choisir →')
+        _action_card('quiz', 'Par matière', 'var(--muted)', 'Grand quiz', f"{len(QUESTION_POOL)} questions, filtrées par matière ou par chapitre.", 'Choisir →')
     with c6:
-        _action_card('enonces', 'Méthode', '#8e8e96', 'Comprendre les énoncés', "Ce que veut dire « justifier », « en déduire », « relever »… en mots simples.", 'Lire →')
+        _action_card('enonces', 'Méthode', 'var(--muted)', 'Comprendre les énoncés', "Ce que veut dire « justifier », « en déduire », « relever »… en mots simples.", 'Lire →')
 
     st.markdown("<div class='sec-title'>Première fois ici ?</div>", unsafe_allow_html=True)
     g1, g2, g3 = st.columns(3)
     with g1:
-        _action_card('installer', 'Guide', '#8e8e96', "L'appli sur ton téléphone", "Une icône sur ton écran d'accueil, plus besoin de chercher le lien.", 'Installer →')
+        _action_card('installer', 'Guide', 'var(--muted)', "L'appli sur ton téléphone", "Une icône sur ton écran d'accueil, plus besoin de chercher le lien.", 'Installer →')
     with g2:
-        _action_card('methode', 'Guide', '#8e8e96', 'Trouver ta méthode', "4 questions pour une méthode adaptée à ton temps et à ta façon d'apprendre.", 'Commencer →')
+        _action_card('methode', 'Guide', 'var(--muted)', 'Trouver ta méthode', "4 questions pour une méthode adaptée à ton temps et à ta façon d'apprendre.", 'Commencer →')
     with g3:
-        _action_card('methodes', 'Guide', '#8e8e96', 'Méthodes par matière', "Pour chaque matière, des façons de réviser du plus facile au plus exigeant.", 'Voir →')
+        _action_card('methodes', 'Guide', 'var(--muted)', 'Méthodes par matière', "Pour chaque matière, des façons de réviser du plus facile au plus exigeant.", 'Voir →')
 
     st.markdown("<div class='sec-title'>Ta maîtrise par matière</div>", unsafe_allow_html=True)
     mastery = d.get('domain_mastery', {})
@@ -4628,14 +4748,33 @@ THEMES = {
     'gris': {'label': '🌗 Gris', 'vars': {
         '--bg': '#1c1c1f', '--sidebar': '#18181b', '--surface': '#242428', '--surface-2': '#2e2e33',
         '--line': 'rgba(255,255,255,0.09)', '--line-strong': 'rgba(255,255,255,0.18)',
-        '--text': '#f2f2f4', '--text-2': '#d4d4d8', '--muted': '#a1a1aa', '--faint': '#76767f'}},
+        '--text': '#f2f2f4', '--text-2': '#d4d4d8', '--muted': '#a1a1aa', '--faint': '#95959c',
+        '--blue': '#7092ff', '--red': '#ff645b', '--violet': '#c973f4'}},
     'clair': {'label': '☀️ Clair', 'vars': {
         '--bg': '#f6f6f7', '--sidebar': '#ffffff', '--surface': '#ffffff', '--surface-2': '#eeeef0',
         '--line': 'rgba(0,0,0,0.08)', '--line-strong': 'rgba(0,0,0,0.16)',
-        '--text': '#0b0b0d', '--text-2': '#3f3f46', '--muted': '#62626b', '--faint': '#8b8b94',
-        '--red': '#e0352b', '--blue': '#2f5bea', '--green': '#1a8d43', '--warn': '#a16207', '--violet': '#6d28d9',
+        '--text': '#0b0b0d', '--text-2': '#3f3f46', '--muted': '#585860', '--faint': '#6b6b72',
+        '--red': '#cc281e', '--blue': '#2f5bea', '--green': '#177a3a', '--warn': '#995d07', '--violet': '#6d28d9',
         '--yellow': '#ffcc33'}},
 }
+
+
+# Valeurs du thème sombre (copie du bloc :root du DESIGN). Sert aux graphiques et aux cadres isolés
+# (minuteur), qui ne voient pas les variables CSS de la page. À garder identique au bloc :root.
+_BASE_VARS = {'--bg': '#000000', '--sidebar': '#050506', '--surface': '#0b0b0d', '--surface-2': '#131316',
+              '--text': '#f5f5f7', '--text-2': '#d4d4d8', '--muted': '#8e8e96', '--faint': '#7d7d84',
+              '--red': '#ff453a', '--blue': '#4974ff', '--yellow': '#ffcc33', '--green': '#30d158',
+              '--warn': '#ffcc33', '--violet': '#bf5af2'}
+
+
+def theme_color(var, name=None):
+    """Couleur hexadécimale d'une variable dans le thème courant (ou celui demandé)."""
+    if name is None:
+        try:
+            name = current_theme()
+        except Exception:
+            name = 'sombre'
+    return THEMES.get(name, THEMES['sombre'])['vars'].get(var) or _BASE_VARS.get(var, '#8e8e96')
 
 _CLAIR_EXTRA = """
 /* Le thème clair doit aussi repeindre les composants internes de Streamlit (thème de base sombre) */
@@ -4701,8 +4840,8 @@ def apply_theme():
         st.markdown(f"<style>{css}</style>", unsafe_allow_html=True)
     try:                                   # graphiques matplotlib des anciennes pages
         import matplotlib as _mpl
-        fg = THEMES[name]['vars'].get('--text', '#f5f5f7')
-        mu = THEMES[name]['vars'].get('--muted', '#8e8e96')
+        fg = theme_color('--text', name)
+        mu = theme_color('--muted', name)
         _mpl.rcParams.update({'figure.facecolor': 'none', 'axes.facecolor': 'none', 'savefig.facecolor': 'none',
                               'savefig.transparent': True, 'text.color': fg, 'axes.labelcolor': fg, 'axes.edgecolor': mu,
                               'xtick.color': mu, 'ytick.color': mu, 'axes.titlecolor': fg, 'grid.color': mu, 'grid.alpha': 0.25,
@@ -4980,8 +5119,8 @@ def _svg_courbe(valeurs, labels):
     dots = ''.join(f"<circle cx='{x:.1f}' cy='{y:.1f}' r='4' style='fill:var(--bg);stroke:var(--text);stroke-width:2;'><title>{lab} : {v:.1f}/20</title></circle>"
                    for x, y, v, lab in zip(xs, ys, valeurs, labels))
     return (f"<svg viewBox='0 0 {w} {h}' style='width:100%;height:auto;display:block;'>"
-            "<defs><linearGradient id='cg' x1='0' x2='1'><stop offset='0' stop-color='#ff453a'/><stop offset='1' stop-color='#3d6bff'/></linearGradient>"
-            "<linearGradient id='ca' x1='0' x2='0' y1='0' y2='1'><stop offset='0' stop-color='#3d6bff' stop-opacity='0.22'/><stop offset='1' stop-color='#3d6bff' stop-opacity='0'/></linearGradient></defs>"
+            "<defs><linearGradient id='cg' x1='0' x2='1'><stop offset='0' style='stop-color:var(--red)'/><stop offset='1' style='stop-color:var(--blue)'/></linearGradient>"
+            "<linearGradient id='ca' x1='0' x2='0' y1='0' y2='1'><stop offset='0' style='stop-color:var(--blue);stop-opacity:0.22'/><stop offset='1' style='stop-color:var(--blue);stop-opacity:0'/></linearGradient></defs>"
             f"{grid}<polygon points='{aire}' fill='url(#ca)'/><polyline points='{pts}' fill='none' stroke='url(#cg)' stroke-width='3' stroke-linejoin='round' stroke-linecap='round'/>{dots}</svg>")
 
 
@@ -5075,12 +5214,12 @@ def render_page_stats():
             vboxes[d['vocab'].get(w['id'], [0])[0]] += 1
 
         def _stack(b, total):
-            segs = [(b[0], 'var(--surface-2)'), (sum(b[1:4]), '#3d6bff'), (b[4] + b[5], '#30d158')]
+            segs = [(b[0], 'var(--surface-2)'), (sum(b[1:4]), 'var(--blue)'), (b[4] + b[5], 'var(--green)')]
             return "<div class='stack'>" + ''.join(f"<i style='width:{100 * n / max(1, total):.1f}%;background:{c};'></i>" for n, c in segs if n) + "</div>"
         st.markdown(f"""
         <div class='memo'><div class='memo-t'>Flashcards <span>{boxes[4] + boxes[5]} / {len(FLASHCARDS_DATA)} acquises</span></div>{_stack(boxes, len(FLASHCARDS_DATA))}</div>
         <div class='memo'><div class='memo-t'>Vocabulaire anglais <span>{vboxes[4] + vboxes[5]} / {VOCAB_TOTAL} acquis</span></div>{_stack(vboxes, VOCAB_TOTAL)}</div>
-        <div class='memo-leg'><i style='background:var(--surface-2)'></i> jamais vu &nbsp; <i style='background:#3d6bff'></i> en cours &nbsp; <i style='background:#30d158'></i> acquis</div>
+        <div class='memo-leg'><i style='background:var(--surface-2)'></i> jamais vu &nbsp; <i style='background:var(--blue)'></i> en cours &nbsp; <i style='background:var(--green)'></i> acquis</div>
         <div class='memo'><div class='memo-t'>Carnet d'erreurs <span>{len(d['errors'])} question(s) à corriger</span></div></div>
         """, unsafe_allow_html=True)
 
@@ -5606,13 +5745,13 @@ elif page == '📊 Mathématiques : Suites Arithmétiques & Géométriques':
             st.markdown("\n            **Énoncé** : Soit la suite $(u_n)$ définie pour tout entier $n \\ge 0$ par $u_n = \\frac{4n + 2}{n + 3}$. Étudier le sens de variation de la suite $(u_n)$.\n\n            **Rédaction type recommandée pour le BTS Blanc** :\n            1. Soit $f$ la fonction définie sur $[0 ; +\\infty[$ par $f(x) = \\frac{4x + 2}{x + 3}$. On a $u_n = f(n)$.\n            2. Calculons la dérivée $f'(x)$ avec la formule $\\left(\\frac{u}{v}\\right)' = \\frac{u'v - uv'}{v^2}$ :\n               - $u(x) = 4x + 2 \\Rightarrow u'(x) = 4$\n               - $v(x) = x + 3 \\Rightarrow v'(x) = 1$\n               - $f'(x) = \\frac{4(x + 3) - (4x + 2) \\times 1}{(x + 3)^2} = \\frac{4x + 12 - 4x - 2}{(x + 3)^2} = \\mathbf{\\frac{10}{(x + 3)^2}}$\n            3. Étude du signe :\n               - Le numérateur $10 > 0$.\n               - Le dénominateur $(x + 3)^2 > 0$ (carré d'un réel strictement positif pour $x \\ge 0$).\n               - Donc $f'(x) > 0$ sur $[0 ; +\\infty[$.\n            4. Conclusion : La fonction $f$ est strictement croissante sur $[0 ; +\\infty[$. On en déduit que la suite $(u_n)$ est **strictement croissante**.")
         st.markdown('---')
         st.subheader('⚡ Mini-Quiz Mathématiques : Testez vos connaissances')
-        q_m1 = st.radio('Q1 : Une fibre optique subit une perte de 5% de sa puissance par kilomètre. Quelle est la raison $q$ de la suite géométrique associée ?', ['q = 0.05', 'q = 0.95', 'q = 1.05', 'q = -0.05'], key='qm1')
+        q_m1 = st.radio('Q1 : Une fibre optique subit une perte de 5% de sa puissance par kilomètre. Quelle est la raison $q$ de la suite géométrique associée ?', ['q = 0.05', 'q = 0.95', 'q = 1.05', 'q = -0.05'], key='qm1', index=None)
         if st.button('Valider Q1', key='btn_qm1'):
             if q_m1 == 'q = 0.95':
                 st.success('✅ **Exact !** Une diminution de 5% correspond au coefficient multiplicateur $q = 1 - \\frac{5}{100} = 0,95$.')
             else:
                 st.error('❌ Mauvaise réponse. Réduction de 5% = $1 - 0,05 = 0,95$.')
-        q_m2 = st.radio('Q2 : Quelle est la somme des 10 premiers termes ($u_0$ à $u_9$) de la suite arithmétique de premier terme $u_0 = 5$ et de raison $r = 2$ ?', ['S = 140', 'S = 130', 'S = 100', 'S = 150'], key='qm2')
+        q_m2 = st.radio('Q2 : Quelle est la somme des 10 premiers termes ($u_0$ à $u_9$) de la suite arithmétique de premier terme $u_0 = 5$ et de raison $r = 2$ ?', ['S = 140', 'S = 130', 'S = 100', 'S = 150'], key='qm2', index=None)
         if st.button('Valider Q2', key='btn_qm2'):
             if q_m2 == 'S = 140':
                 st.success('✅ **Exact !** $u_9 = 5 + 9 \\times 2 = 23$. La somme de $u_0$ à $u_9$ (10 termes) vaut $10 \\times \\frac{5 + 23}{2} = 140$.')
@@ -5627,11 +5766,12 @@ elif page == '📊 Mathématiques : Suites Arithmétiques & Géométriques':
     score_suites = 0
     for idx_s, q_s in enumerate(QUIZZES_BANK_10["Suites"]):
         st.markdown(f"**{q_s['q']}**")
-        rep_s = st.radio(f"Votre choix (Q{idx_s + 1}) :", q_s["opts"], key=f"rad_suites_10_{idx_s}")
+        rep_s = st.radio(f"Votre choix (Q{idx_s + 1}) :", q_s["opts"], key=f"rad_suites_10_{idx_s}", index=None)
         if rep_s == q_s["rep"]:
             score_suites += 1
             
     if st.button("Valider le Test des 10 Questions (Suites)", type="primary", key="btn_val_suites_10"):
+        avertir_sans_reponse(st.session_state.get(f"rad_suites_10_{i}") for i in range(len(QUIZZES_BANK_10["Suites"])))
         add_user_points(score_suites * 10, "quiz_suites_10")
         if score_suites >= 8:
             st.success(f"🏆 **Excellente performance : {score_suites} / 10 !** Vous avez remporté {score_suites * 10} points d'expérience !")
@@ -5648,7 +5788,7 @@ elif page == '🛠️ Fiches Réussite Épreuve E5 (TP & Pratique)':
     tab_e5_1, tab_e5_2, tab_e5_3, tab_e5_4, tab_e5_5, tab_e5_6, tab_e5_7, tab_e5_8 = st.tabs(['📶 E5-01 : Cisco IOS (Switch & Routeur)', '🖥️ E5-02 : Linux Debian & SysAdmin', '🏢 E5-03 : Active Directory, DNS, DHCP & GPO', '🛡️ E5-04 : Pare-Feu pfSense, DMZ & Flux', '🔍 E5-05 : Wireshark & Trames', '⚡ E5-06 : Électronique & Bus', '📋 E5-07 : Check-List Diagnostic E5', '✍️ Auto-Évaluation Pratique E5'])
     with tab_e5_1:
         st.subheader('📶 Fiche E5-01 : Commutateurs & Routeurs Cisco (Configuration & Dépannage)')
-        st.markdown("\n        <div class='ciel-card' style='border-left: 6px solid #2563eb !important;'>\n            <h4 style='color:var(--blue); margin-top:0;'>🎯 Objectifs de l'Épreuve E5 sur Cisco :</h4>\n            <p style='color:var(--text-2); margin-bottom:0;'>Être capable d'initialiser, sécuriser, segmentez en VLANs (802.1Q), configurer le routage inter-VLAN et appliquer le Port Security sur les équipements Cisco de l'atelier.</p>\n        </div>\n        ", unsafe_allow_html=True)
+        st.markdown("\n        <div class='ciel-card' style='border-left: 6px solid var(--blue) !important;'>\n            <h4 style='color:var(--blue); margin-top:0;'>🎯 Objectifs de l'Épreuve E5 sur Cisco :</h4>\n            <p style='color:var(--text-2); margin-bottom:0;'>Être capable d'initialiser, sécuriser, segmentez en VLANs (802.1Q), configurer le routage inter-VLAN et appliquer le Port Security sur les équipements Cisco de l'atelier.</p>\n        </div>\n        ", unsafe_allow_html=True)
         with st.expander('1️⃣ Configuration Initiale & Sécurisation de Base (Switch/Routeur)', expanded=True):
             st.markdown("\n            ```cisco\n            enable\n            configure terminal\n            hostname SW-L2-CIEL\n            enable secret CiscoPass123!\n            \n            ! Sécurisation de l'accès Console\n            line console 0\n              password ConsolePass!\n              login\n              logging synchronous\n              exit\n              \n            ! Sécurisation des lignes VTY (SSH / Telnet)\n            line vty 0 15\n              password VtyPass!\n              login\n              transport input ssh\n              exit\n              \n            ! Chiffrement des mots de passe en clair dans le fichier de config\n            service password-encryption\n            \n            ! Bannière d'avertissement légal\n            banner motd # ACCES RESTREINT - BTS CIEL E5 - UTILISATEURS AUTORISES SEULEMENT #\n            ```\n            ")
         with st.expander("2️⃣ Configuration des VLANs & Assignation des Ports d'Accès", expanded=False):
@@ -5663,7 +5803,7 @@ elif page == '🛠️ Fiches Réussite Épreuve E5 (TP & Pratique)':
             st.markdown("\n            | Commande Cisco IOS | Objectif de Vérification E5 |\n            | :--- | :--- |\n            | `show vlan brief` | Vérifier que tous les VLANs existent et que les bons ports sont attribués. |\n            | `show interfaces trunk` | Vérifier que le lien Trunk est actif, en 802.1Q, et que les VLANs passent. |\n            | `show ip interface brief` | Vérifier l'état physique (`Status`) et logique (`Protocol`) des interfaces (`up/up`). |\n            | `show ip route` | Inspecter la table de routage IP du routeur ou switch L3. |\n            | `show port-security interface f0/5` | Vérifier si un port est bloqué suite à une violation d'adresse MAC (`err-disabled`). |\n            | `show running-config` | Consulter la configuration active en mémoire vive (RAM). |\n            ")
     with tab_e5_2:
         st.subheader('🖥️ Fiche E5-02 : Linux Debian Server & Administration Système')
-        st.markdown("\n        <div class='ciel-card' style='border-left: 6px solid #10b981 !important;'>\n            <h4 style='color:var(--green); margin-top:0;'>🎯 Objectifs de l'Épreuve E5 sur Linux :</h4>\n            <p style='color:var(--text-2); margin-bottom:0;'>Savoir configurer le réseau fixe, gérer les utilisateurs/groupes, appliquer les permissions fines (`chmod`, SUID, SGID, Sticky, ACLs), éditer `sudoers`, écrire des scripts Bash et gérer les services systemd.</p>\n        </div>\n        ", unsafe_allow_html=True)
+        st.markdown("\n        <div class='ciel-card' style='border-left: 6px solid var(--green) !important;'>\n            <h4 style='color:var(--green); margin-top:0;'>🎯 Objectifs de l'Épreuve E5 sur Linux :</h4>\n            <p style='color:var(--text-2); margin-bottom:0;'>Savoir configurer le réseau fixe, gérer les utilisateurs/groupes, appliquer les permissions fines (`chmod`, SUID, SGID, Sticky, ACLs), éditer `sudoers`, écrire des scripts Bash et gérer les services systemd.</p>\n        </div>\n        ", unsafe_allow_html=True)
         with st.expander('1️⃣ Configuration Réseau Fixe (`/etc/network/interfaces`)', expanded=True):
             st.markdown("\n            ```bash\n            # Éditer le fichier de configuration réseau\n            nano /etc/network/interfaces\n\n            # Configuration statique de l'interface eth0\n            auto eth0\n            iface eth0 inet static\n                address 192.168.1.100/24\n                gateway 192.168.1.254\n                dns-nameservers 192.168.1.200 8.8.8.8\n\n            # Appliquer les modifications\n            systemctl restart networking\n            # Ou avec la commande ip :\n            ip addr add 192.168.1.100/24 dev eth0\n            ip route add default via 192.168.1.254\n            ```\n            ")
         with st.expander('2️⃣ Gestion des Utilisateurs, Groupes & Privilèges Sudo', expanded=False):
@@ -5676,7 +5816,7 @@ elif page == '🛠️ Fiches Réussite Épreuve E5 (TP & Pratique)':
             st.markdown("\n            | Commande Linux | Rôle Diagnostic E5 |\n            | :--- | :--- |\n            | `ip a` / `ip route` | Vérifier les adresses IP configurées et la passerelle par défaut. |\n            | `ss -tulpn` / `netstat -an` | Lister tous les ports TCP/UDP en écoute et leurs PID. |\n            | `systemctl status <service>` | Inspecter l'état d'un service (active, dead, failed). |\n            | `journalctl -u <service> -n 30` | Consulter les 30 dernières lignes de journal systemd d'un service. |\n            | `tail -f /var/log/auth.log` | Suivre en temps réel les tentatives de connexion et d'authentification. |\n            | `df -h` / `free -m` | Vérifier l'occupation de l'espace disque et la mémoire RAM disponible. |\n            ")
     with tab_e5_3:
         st.subheader('🏢 Fiche E5-03 : Active Directory, DNS, DHCP & GPO (Windows Server)')
-        st.markdown("\n        <div class='ciel-card' style='border-left: 6px solid #8b5cf6 !important;'>\n            <h4 style='color:var(--violet); margin-top:0;'>🎯 Objectifs de l'Épreuve E5 sur Active Directory :</h4>\n            <p style='color:var(--text-2); margin-bottom:0;'>Maîtriser la gestion de domaine ADDS, la création d'OU, d'utilisateurs/groupes, le déploiement de GPO (LSDOU), et les services d'infrastructure DNS / DHCP.</p>\n        </div>\n        ", unsafe_allow_html=True)
+        st.markdown("\n        <div class='ciel-card' style='border-left: 6px solid var(--violet) !important;'>\n            <h4 style='color:var(--violet); margin-top:0;'>🎯 Objectifs de l'Épreuve E5 sur Active Directory :</h4>\n            <p style='color:var(--text-2); margin-bottom:0;'>Maîtriser la gestion de domaine ADDS, la création d'OU, d'utilisateurs/groupes, le déploiement de GPO (LSDOU), et les services d'infrastructure DNS / DHCP.</p>\n        </div>\n        ", unsafe_allow_html=True)
         with st.expander("1️⃣ Arborescence ADDS & Commandes PowerShell d'Administration", expanded=True):
             st.markdown('\n            ```powershell\n            # 1. Créer la structure d\'Unités d\'Organisation (OU)\n            New-ADOrganizationalUnit -Name "Direction" -Path "DC=ciel,DC=local"\n            New-ADOrganizationalUnit -Name "Ingénieurs" -Path "DC=ciel,DC=local"\n            New-ADOrganizationalUnit -Name "Techniciens" -Path "DC=ciel,DC=local"\n\n            # 2. Créer un utilisateur dans une OU\n            New-ADUser -Name "Alice Martin" `\n                       -GivenName "Alice" `\n                       -Surname "Martin" `\n                       -UserPrincipalName "amartin@ciel.local" `\n                       -SamAccountName "amartin" `\n                       -Path "OU=Ingénieurs,DC=ciel,DC=local" `\n                       -AccountPassword (Read-Host -AsSecureString "Password123!") `\n                       -Enabled $true `\n                       -ChangePasswordAtLogon $false\n\n            # 3. Créer un groupe de sécurité et ajouter le membre\n            New-ADGroup -Name "G_Ingenieurs" -GroupScope Global -GroupCategory Security `\n                        -Path "OU=Ingénieurs,DC=ciel,DC=local"\n            Add-ADGroupMember -Identity "G_Ingenieurs" -Members "amartin"\n            ```\n            ')
         with st.expander("2️⃣ Stratégies de Groupe (GPO) & Ordre d'Application LSDOU", expanded=False):
@@ -5689,18 +5829,18 @@ elif page == '🛠️ Fiches Réussite Épreuve E5 (TP & Pratique)':
             st.markdown("\n            | Commande PowerShell / CMD | Rôle Diagnostic E5 |\n            | :--- | :--- |\n            | `dcdiag` | Diagnostic complet de santé du Contrôleur de Domaine Active Directory. |\n            | `nslookup srv-web.ciel.local` | Tester la résolution de nom DNS directe et inverse. |\n            | `Test-NetConnection -ComputerName srv-ad -Port 389` | Tester l'ouverture du port LDAP (389) ou LDAPS (636). |\n            | `nltest /dsgetdc:ciel.local` | Vérifier quel contrôleur de domaine a authentifié la machine. |\n            | `ipconfig /all` & `ipconfig /flushdns` | Afficher la config IP et vider le cache DNS client. |\n            ")
     with tab_e5_4:
         st.subheader('🛡️ Fiche E5-04 : Pare-Feu pfSense, DMZ & Matrice des Flux')
-        st.markdown("\n        <div class='ciel-card' style='border-left: 6px solid #ef4444 !important;'>\n            <h4 style='color:var(--red); margin-top:0;'>🎯 Objectifs de l'Épreuve E5 sur pfSense :</h4>\n            <p style='color:var(--text-2); margin-bottom:0;'>Configurer les zones WAN, LAN et DMZ, appliquer la règle d'isolation stricte DMZ $\\rightarrow$ LAN, mettre en place les règles de filtrage et le NAT/PAT Port Forwarding.</p>\n        </div>\n        ", unsafe_allow_html=True)
+        st.markdown("\n        <div class='ciel-card' style='border-left: 6px solid var(--red) !important;'>\n            <h4 style='color:var(--red); margin-top:0;'>🎯 Objectifs de l'Épreuve E5 sur pfSense :</h4>\n            <p style='color:var(--text-2); margin-bottom:0;'>Configurer les zones WAN, LAN et DMZ, appliquer la règle d'isolation stricte DMZ $\\rightarrow$ LAN, mettre en place les règles de filtrage et le NAT/PAT Port Forwarding.</p>\n        </div>\n        ", unsafe_allow_html=True)
         with st.expander('1️⃣ Architecture Réseau à 3 Interfaces & Adressage', expanded=True):
             st.markdown("\n            * **WAN (Wide Area Network)** : Interface d'accès externe (`10.0.0.2/24` ou IP Publique).\n            * **LAN (Local Area Network)** : Zone réseau interne sécurisée (`192.168.1.254/24`).\n            * **DMZ (Demilitarized Zone)** : Zone réseau isolée hébergeant les services ouverts à l'extérieur (`172.16.0.254/24`).\n            ")
         with st.expander("2️⃣ Règle d'Or d'Isolation de la DMZ (Inviolable)", expanded=False):
-            st.markdown("\n            <div class='ciel-card' style='background:rgba(255,69,58,0.06) !important; border-left: 5px solid #dc2626 !important;'>\n                <b style='color:var(--red);'>⚠️ Règle de Sécurité Numéro 1 en E5 :</b><br>\n                Une machine située en <b>DMZ ne doit JAMAIS pouvoir initier de connexion vers le réseau LAN interne</b>.<br>\n                Si le serveur Web DMZ est compromis par un pirate, celui-ci ne pourra pas attaquer les postes du réseau LAN.\n            </div>\n            ", unsafe_allow_html=True)
+            st.markdown("\n            <div class='ciel-card' style='background:rgba(255,69,58,0.06) !important; border-left: 5px solid var(--red) !important;'>\n                <b style='color:var(--red);'>⚠️ Règle de Sécurité Numéro 1 en E5 :</b><br>\n                Une machine située en <b>DMZ ne doit JAMAIS pouvoir initier de connexion vers le réseau LAN interne</b>.<br>\n                Si le serveur Web DMZ est compromis par un pirate, celui-ci ne pourra pas attaquer les postes du réseau LAN.\n            </div>\n            ", unsafe_allow_html=True)
         with st.expander('3️⃣ Matrice des Ports & Flux Réseaux de Référence (À Apprendre par Cœur)', expanded=False):
             st.markdown("\n            | Service | Protocole | Port | Sens Recommandé | Rôle & Explication |\n            | :--- | :--- | :--- | :--- | :--- |\n            | **DNS** | UDP / TCP | `53` | LAN -> DMZ / WAN | Résolution de noms de domaine. |\n            | **HTTP / HTTPS** | TCP | `80` / `443` | WAN -> DMZ (NAT) | Accès aux serveurs Web publics. |\n            | **SSH** | TCP | `22` | LAN -> DMZ | Administration à distance sécurisée. |\n            | **LDAP / LDAPS** | TCP | `389` / `636` | LAN -> DC | Annuaire d'entreprise ADDS. |\n            | **Kerberos AD** | TCP / UDP | `88` | LAN -> DC | Jetons d'authentification AD. |\n            | **SMB / CIFS** | TCP | `445` | LAN -> FileSRV | Partage de fichiers Windows. |\n            | **MQTTS** | TCP | `8883` | DMZ -> IoT Broker | Transport IoT chiffré TLS. |\n            ")
         with st.expander('4️⃣ Procédure de Configuration NAT / PAT (Port Forwarding pfSense)', expanded=False):
             st.markdown('\n            1. Aller dans **Firewall $\\rightarrow$ NAT $\\rightarrow$ Port Forward**.\n            2. Cliquer sur **Add (Top)** :\n               - **Interface** : `WAN`\n               - **Protocol** : `TCP`\n               - **Destination** : `WAN Address`\n               - **Destination Port Range** : `HTTP (80)`\n               - **Redirect Target IP** : `172.16.0.10` (IP du serveur Web DMZ)\n               - **Redirect Target Port** : `HTTP (80)`\n               - **Filter Rule Association** : `Pass` (Génère la règle de pare-feu automatiquement)\n            3. Cliquer sur **Save** puis **Apply Changes**.\n            ')
     with tab_e5_5:
         st.subheader('🔍 Fiche E5-05 : Wireshark & Diagnostics de Trames Réseaux')
-        st.markdown("\n        <div class='ciel-card' style='border-left: 6px solid #0284c7 !important;'>\n            <h4 style='color:var(--blue); margin-top:0;'>🎯 Objectifs de l'Épreuve E5 sur Wireshark :</h4>\n            <p style='color:var(--text-2); margin-bottom:0;'>Capturer, filtrer et décoder des paquets réseaux pour identifier un dysfonctionnement, réconcilier une connexion TCP ou analyser un protocole applicatif.</p>\n        </div>\n        ", unsafe_allow_html=True)
+        st.markdown("\n        <div class='ciel-card' style='border-left: 6px solid var(--blue) !important;'>\n            <h4 style='color:var(--blue); margin-top:0;'>🎯 Objectifs de l'Épreuve E5 sur Wireshark :</h4>\n            <p style='color:var(--text-2); margin-bottom:0;'>Capturer, filtrer et décoder des paquets réseaux pour identifier un dysfonctionnement, réconcilier une connexion TCP ou analyser un protocole applicatif.</p>\n        </div>\n        ", unsafe_allow_html=True)
         with st.expander("1️⃣ Filtres d'Affichage Wireshark Essentiels pour l'Examen", expanded=True):
             st.markdown('\n            | Filtre d\'Affichage Wireshark | Rôle Diagnostic E5 |\n            | :--- | :--- |\n            | `ip.addr == 192.168.1.50` | Filtrer tout le trafic concernant une adresse IP spécifique. |\n            | `tcp.port == 443` | Isoler le trafic Web sécurisé HTTPS. |\n            | `tcp.flags.syn == 1 and tcp.flags.ack == 0` | Identifier les demandes de connexion TCP (Handshake SYN). |\n            | `dns.qname contains "ciel"` | Filtrer les requêtes DNS portant sur le domaine d\'examen. |\n            | `dhcp.option.dhcp == 3` | Filtrer les paquets DHCP Request lors d\'un bail d\'adresse. |\n            | `arp.opcode == 2` | Filtrer les réponses ARP (Utile pour détecter un ARP Spoofing). |\n            | `http.request.method == "POST"` | Inspecter les envois de formulaires et identifiants en clair. |\n            ')
         with st.expander("2️⃣ Méthodologie d'Analyse d'une Séquence TCP 3-Way Handshake", expanded=False):
@@ -5709,7 +5849,7 @@ elif page == '🛠️ Fiches Réussite Épreuve E5 (TP & Pratique)':
             st.markdown("\n            * **Follow TCP Stream** : Clic droit sur un paquet TCP $\\rightarrow$ *Follow $\\rightarrow$ TCP Stream*. Permet de reconstituer l'intégralité du dialogue applicatif (HTTP, SMTP, FTP, Modbus) en texte clair.\n            * **Exportation d'Objets HTTP** : Menu *File $\\rightarrow$ Export Objects $\\rightarrow$ HTTP*. Permet d'extraire un fichier (image, PDF, binaire) téléchargé pendant la capture.\n            ")
     with tab_e5_6:
         st.subheader('⚡ Fiche E5-06 : Électronique, Oscilloscope & Bus Industriels')
-        st.markdown("\n        <div class='ciel-card' style='border-left: 6px solid #eab308 !important;'>\n            <h4 style='color:var(--warn); margin-top:0;'>🎯 Objectifs de l'Épreuve E5 sur l'Atelier Électronique :</h4>\n            <p style='color:var(--text-2); margin-bottom:0;'>Régler les calibres de l'oscilloscope, effectuer des mesures de tension/période/fréquence, calculer des quantums CAN, et contrôler le signal sur les bus I2C, SPI, CAN ou Modbus.</p>\n        </div>\n        ", unsafe_allow_html=True)
+        st.markdown("\n        <div class='ciel-card' style='border-left: 6px solid var(--warn) !important;'>\n            <h4 style='color:var(--warn); margin-top:0;'>🎯 Objectifs de l'Épreuve E5 sur l'Atelier Électronique :</h4>\n            <p style='color:var(--text-2); margin-bottom:0;'>Régler les calibres de l'oscilloscope, effectuer des mesures de tension/période/fréquence, calculer des quantums CAN, et contrôler le signal sur les bus I2C, SPI, CAN ou Modbus.</p>\n        </div>\n        ", unsafe_allow_html=True)
         with st.expander("1️⃣ Mesures Physiques à l'Oscilloscope Numérique", expanded=True):
             st.markdown('\n            * **Tension Crête-à-Crête $V_{pp}$** : $V_{pp} = N_{\\text{div\\_vert}} \\times S_v$\n            * **Tension Maximale $V_{max}$** : $V_{max} = \\frac{V_{pp}}{2}$\n            * **Tension Efficace $V_{\\text{eff}}$** : $V_{\\text{eff}} = \\frac{V_{max}}{\\sqrt{2}} \\approx 0,707 \\times V_{max}$ (Signal sinusoïdal)\n            * **Période $T$** : $T = N_{\\text{div\\_horiz}} \\times S_h$\n            * **Fréquence $f$** : $f = \\frac{1}{T}$\n            * **Déphasage $\\Delta \\phi$** : $\\Delta \\phi = 360^\\circ \\times \\frac{\\Delta t}{T}$\n            ')
         with st.expander('2️⃣ Convertisseurs CAN / CNA (ADC / DAC)', expanded=False):
@@ -5718,7 +5858,7 @@ elif page == '🛠️ Fiches Réussite Épreuve E5 (TP & Pratique)':
             st.markdown('\n            | Bus de Terrain | Lignes Physiques | Type de Signal | Spécificités & Points de Contrôle E5 |\n            | :--- | :--- | :--- | :--- |\n            | **I2C** | 2 fils (`SDA`, `SCL`) | Synchrone | Résistances de tirage Pull-Up ($4,7\\text{ k}\\Omega$). Adressage 7 bits. |\n            | **SPI** | 4 fils (`MOSI`, `MISO`, `SCLK`, `CS`) | Synchrone Full-Duplex | Liaison maître-esclave très rapide (plusieurs MHz). |\n            | **Bus CAN** | 2 fils (`CAN_H`, `CAN_L`) | Différentiel | Résistances de terminaison de $120\\ \\Omega$. Bit dominant 0 / récessif 1. |\n            | **Modbus RTU** | 2 fils (`A`, `B` / RS-485) | Différentiel Asynchrone | Code Fonction `03` (Read Holding Registers), contrôle CRC-16. |\n            ')
     with tab_e5_7:
         st.subheader("📋 Fiche E5-07 : Check-List Diagnostic & Grille d'Intervention E5")
-        st.markdown("\n        <div class='ciel-card' style='border-top: 5px solid #2563eb !important;'>\n            <h4 style='color:var(--blue); margin-top:0;'>🧭 Guide Méthodologique de Résolution de Panne en 5 Étapes :</h4>\n            <p style='color:var(--text-2);'>Suivez rigoureusement ce protocole lors de vos évaluations pratiques E5 pour ne négliger aucun point du barème :</p>\n            \n            ```\n            [Étape 1 : Vérification Couche 1 Physique]\n              └── Câble RJ45 / Fibre correctement encliqueté ? Voyants Link/Act allumés ? Équipement alimenté ?\n            \n            [Étape 2 : Vérification Couche 2 Liaison]\n              └── Adresse MAC détectée ? Port du switch dans le bon VLAN ? (`show vlan brief` / `ip link`)\n            \n            [Étape 3 : Vérification Couche 3 Réseau]\n              └── IP, Masque et Passerelle configurés ? PING passerelle OK ? PING DNS OK ? (`ping 192.168.1.254`)\n            \n            [Étape 4 : Vérification Couche 4/7 Transport & Application]\n              └── Port ouvert sur la cible ? Service démarré ? (`ss -tulpn` / `nc -zvw3 IP PORT` / `curl -Iv`)\n            \n            [Étape 5 : Documentation & Compte-Rendu d'Intervention]\n              └── Rédiger la fiche de synthèse d'examen avec les symptômes, la cause racine et la solution appliquée.\n            ```\n        </div>\n        ", unsafe_allow_html=True)
+        st.markdown("\n        <div class='ciel-card' style='border-top: 5px solid var(--blue) !important;'>\n            <h4 style='color:var(--blue); margin-top:0;'>🧭 Guide Méthodologique de Résolution de Panne en 5 Étapes :</h4>\n            <p style='color:var(--text-2);'>Suivez rigoureusement ce protocole lors de vos évaluations pratiques E5 pour ne négliger aucun point du barème :</p>\n            \n            ```\n            [Étape 1 : Vérification Couche 1 Physique]\n              └── Câble RJ45 / Fibre correctement encliqueté ? Voyants Link/Act allumés ? Équipement alimenté ?\n            \n            [Étape 2 : Vérification Couche 2 Liaison]\n              └── Adresse MAC détectée ? Port du switch dans le bon VLAN ? (`show vlan brief` / `ip link`)\n            \n            [Étape 3 : Vérification Couche 3 Réseau]\n              └── IP, Masque et Passerelle configurés ? PING passerelle OK ? PING DNS OK ? (`ping 192.168.1.254`)\n            \n            [Étape 4 : Vérification Couche 4/7 Transport & Application]\n              └── Port ouvert sur la cible ? Service démarré ? (`ss -tulpn` / `nc -zvw3 IP PORT` / `curl -Iv`)\n            \n            [Étape 5 : Documentation & Compte-Rendu d'Intervention]\n              └── Rédiger la fiche de synthèse d'examen avec les symptômes, la cause racine et la solution appliquée.\n            ```\n        </div>\n        ", unsafe_allow_html=True)
     with tab_e5_8:
         st.subheader('✍️ Auto-Évaluation Pratique E5 (QCM de Validation)')
         st.markdown("Testez vos réflexes d'intervention pratique avant de passer devant les examinateurs :")
@@ -5726,10 +5866,11 @@ elif page == '🛠️ Fiches Réussite Épreuve E5 (TP & Pratique)':
         score_e5 = 0
         for idx_e5, qe5 in enumerate(q_e5_list):
             st.markdown(f'**{qe5["q"]}**')
-            ans_e5 = st.radio(f'Choix Q{idx_e5 + 1} E5 :', qe5["opts"], key=f'q_e5_tab_{idx_e5}')
+            ans_e5 = st.radio(f'Choix Q{idx_e5 + 1} E5 :', qe5["opts"], key=f'q_e5_tab_{idx_e5}', index=None)
             if ans_e5 == qe5['rep']:
                 score_e5 += 1
         if st.button('Soumettre mon évaluation E5', type='primary', key='btn_submit_e5_page'):
+            avertir_sans_reponse(st.session_state.get(f'q_e5_tab_{i}') for i in range(len(q_e5_list)))
             st.session_state['score_e5_eval'] = score_e5
             st.success(f"🏆 **Score obtenu sur l'Épreuve E5** : **{score_e5} / {len(q_e5_list)}** ({score_e5 / len(q_e5_list) * 100:.1f}%)")
             if score_e5 == len(q_e5_list):
@@ -5782,16 +5923,17 @@ elif page == '📄 Fiches Savoir & Fiches Montage':
     with tab_fs5:
         st.subheader('✍️ Auto-Évaluation Fiches Savoir & Montages')
         st.markdown("Testez vos connaissances sur l'ensemble des fiches savoir :")
-        q_fs1 = st.radio("1. Fiche N°1 : Quel risque majeur survient si les 4 interrupteurs d'un pont en H sont fermés en même temps ?", ['Le moteur tourne 2x plus vite', "Court-circuit direct de l'alimentation (destruction du pont)", 'Inversion automatique du sens', 'Aucun risque'], key='qfs1')
-        q_fs2 = st.radio('2. Fiche N°6 : Dans une boucle 4-20 mA, que signifie une mesure de 0 mA ?', ['Valeur minimale du capteur', 'Pleine échelle du capteur', 'Déconnexion ou rupture de câble', 'Surcharge'], key='qfs2')
-        q_fs3 = st.radio('3. Fiche N°9 : Quelle est la relation entre Débit (bps) et Bauds pour un signal 16-QAM ?', ['D = R', 'D = 2 * R', 'D = 4 * R', 'D = 16 * R'], key='qfs3')
+        q_fs1 = st.radio("1. Fiche N°1 : Quel risque majeur survient si les 4 interrupteurs d'un pont en H sont fermés en même temps ?", ['Le moteur tourne 2x plus vite', "Court-circuit direct de l'alimentation (destruction du pont)", 'Inversion automatique du sens', 'Aucun risque'], key='qfs1', index=None)
+        q_fs2 = st.radio('2. Fiche N°6 : Dans une boucle 4-20 mA, que signifie une mesure de 0 mA ?', ['Valeur minimale du capteur', 'Pleine échelle du capteur', 'Déconnexion ou rupture de câble', 'Surcharge'], key='qfs2', index=None)
+        q_fs3 = st.radio('3. Fiche N°9 : Quelle est la relation entre Débit (bps) et Bauds pour un signal 16-QAM ?', ['D = R', 'D = 2 * R', 'D = 4 * R', 'D = 16 * R'], key='qfs3', index=None)
         if st.button('Valider mes réponses Fiches Savoir', type='primary'):
+            avertir_sans_reponse([q_fs1, q_fs2, q_fs3])
             score_fs = 0
-            if 'Court-circuit' in q_fs1:
+            if 'Court-circuit' in (q_fs1 or ''):
                 score_fs += 1
-            if 'Déconnexion' in q_fs2:
+            if 'Déconnexion' in (q_fs2 or ''):
                 score_fs += 1
-            if 'D = 4 * R' in q_fs3:
+            if 'D = 4 * R' in (q_fs3 or ''):
                 score_fs += 1
             st.success(f'🏆 Score Fiches Savoir : **{score_fs} / 3**')
             if score_fs == 3:
@@ -6046,16 +6188,16 @@ elif page == '🛡️ TP Cybersécurité, Gouvernance & pfSense':
             *Symptôme constaté* : Les logs de pfSense indiquent `IKE SA established successfully`, mais aucun ping ne passe entre les postes du LAN Siège (`192.168.10.0/24`) et du LAN Usine (`192.168.20.0/24`). Les compteurs de paquets IPsec SA restent à 0.
             """)
             st.write("1. Quelle phase du tunnel IPsec est à l'origine du dysfonctionnement ?")
-            q_vpn_p = st.radio("Phase en cause :", ["Phase 1 (IKE SA)", "Phase 2 (IPsec SA)", "Panne physique du câble WAN", "Erreur DNS"], key="rad_vpn_p")
+            q_vpn_p = st.radio("Phase en cause :", ["Phase 1 (IKE SA)", "Phase 2 (IPsec SA)", "Panne physique du câble WAN", "Erreur DNS"], key="rad_vpn_p", index=None)
             st.write("2. Quelle est la cause la plus probable de cet incident ?")
             q_vpn_c = st.radio("Cause racine identifiée :", [
                 "Erreur de clé pré-partagée (Pre-Shared Key)",
                 "Désaccord sur la déclaration des réseaux locaux/distants (Phase 2 Proposals) ou règle manquante sur l'onglet IPsec",
                 "Le groupe Diffie-Hellman est mal configuré en Phase 1",
                 "Le port UDP 500 est bloqué sur le WAN"
-            ], key="rad_vpn_c")
+            ], key="rad_vpn_c", index=None)
             if st.button("Valider le diagnostic IPsec", key="btn_diag_ipsec"):
-                if "Phase 2" in q_vpn_p and "Désaccord sur la déclaration" in q_vpn_c:
+                if "Phase 2" in (q_vpn_p or '') and "Désaccord sur la déclaration" in (q_vpn_c or ''):
                     st.success("🏆 **Diagnostic Parfait !** Si la Phase 1 est établie, l'authentification est réussie. Le blocage vient obligatoirement d'une discordance sur les réseaux Phase 2 ou de l'absence de règle autorisant le trafic dans Rules > IPsec (+25 XP).")
                     add_user_points(25, "lab_ipsec_diag")
                 else:
@@ -6067,16 +6209,16 @@ elif page == '🛡️ TP Cybersécurité, Gouvernance & pfSense':
             Un nouveau serveur d'inventaire **GLPI** vient d'être déployé en DMZ (`192.168.90.10`). Les utilisateurs du LAN (`192.168.80.0/24`) doivent y accéder en interface web sécurisée HTTPS.
             """)
             st.write("Sur quelle interface de pfSense devez-vous créer la règle de filtrage pour autoriser ce trafic ?")
-            q_pf_int = st.radio("Interface cible :", ["Interface LAN", "Interface DMZ", "Interface WAN", "Onglet Floating Rules"], key="rad_pf_int")
+            q_pf_int = st.radio("Interface cible :", ["Interface LAN", "Interface DMZ", "Interface WAN", "Onglet Floating Rules"], key="rad_pf_int", index=None)
             st.write("Quelle doit être la règle de filtrage exacte ?")
             q_pf_r = st.radio("Configuration de la règle :", [
                 "Action: Pass | Source: DMZ net | Dest: LAN net | Port: 443",
                 "Action: Pass | Source: LAN net | Dest: 192.168.90.10 | Port: TCP 443 (HTTPS)",
                 "Action: Pass | Source: ANY | Dest: ANY | Port: ALL",
                 "Action: Block | Source: 192.168.90.10 | Dest: LAN net"
-            ], key="rad_pf_r")
+            ], key="rad_pf_r", index=None)
             if st.button("Valider la règle pfSense", key="btn_val_pfsense"):
-                if "Interface LAN" in q_pf_int and "Source: LAN net | Dest: 192.168.90.10" in q_pf_r:
+                if "Interface LAN" in (q_pf_int or '') and "Source: LAN net | Dest: 192.168.90.10" in (q_pf_r or ''):
                     st.success("✅ **Règle pfSense Exacte !** pfSense filtre toujours le trafic sur son **interface d'entrée** (LAN pour les paquets venant des utilisateurs). La règle autorise explicitement le port HTTPS vers l'IP cible (+20 XP).")
                     add_user_points(20, "lab_pfsense_rule")
                 else:
@@ -6093,16 +6235,16 @@ elif page == '🛡️ TP Cybersécurité, Gouvernance & pfSense':
                 "La clé privée du serveur et son mot de passe",
                 "La liste de révocation CRL complète",
                 "Le certificat racine de la CA"
-            ], key="rad_csr1")
+            ], key="rad_csr1", index=None)
             st.write("2. Si la clé privée du serveur vient à être dérobée par un attaquant, quelle action d'urgence neutralise la menace ?")
             q_csr2 = st.radio("Action d'urgence :", [
                 "Supprimer le fichier temporaire sur le serveur",
                 "Révoquer le certificat auprès de l'Autorité de Certification et publier la mise à jour sur le point de distribution CRL (CDP)",
                 "Changer simplement l'adresse IP du serveur",
                 "Redémarrer le service Apache"
-            ], key="rad_csr2")
+            ], key="rad_csr2", index=None)
             if st.button("Valider l'analyse PKI", key="btn_val_pki"):
-                if "clé publique" in q_csr1 and "Révoquer le certificat" in q_csr2:
+                if "clé publique" in (q_csr1 or '') and "Révoquer le certificat" in (q_csr2 or ''):
                     st.success("✅ **Parfait !** La CSR ne contient que la clé publique. En cas de vol de clé privée, la révocation immédiate via la CRL/CDP est la seule parade efficace (+20 XP).")
                     add_user_points(20, "lab_pki_csr")
                 else:
@@ -6205,12 +6347,13 @@ elif page == '🛡️ TP Cybersécurité, Gouvernance & pfSense':
             user_exam_ans = {}
             for idx_e, qitem in enumerate(CYBER_EXAM_20):
                 st.markdown(f"**Q{idx_e + 1} : {qitem['q']}**")
-                user_exam_ans[idx_e] = st.radio(f"Choix Q{idx_e + 1} :", qitem["opts"], key=f"rad_exam_c_{idx_e}")
+                user_exam_ans[idx_e] = st.radio(f"Choix Q{idx_e + 1} :", qitem["opts"], key=f"rad_exam_c_{idx_e}", index=None)
                 st.markdown("<div style='margin-bottom: 8px;'></div>", unsafe_allow_html=True)
             
             sub_exam = st.form_submit_button("Valider mon Examen Blanc Cybersécurité (20 Questions)", type="primary")
 
         if sub_exam:
+            avertir_sans_reponse(user_exam_ans.values())
             score_e = 0
             st.markdown("---")
             st.markdown("### 📊 Résultats Officiels de l'Examen Blanc")
@@ -6220,7 +6363,7 @@ elif page == '🛡️ TP Cybersécurité, Gouvernance & pfSense':
                     score_e += 1
                     st.success(f"✅ **Q{idx_e + 1} Exact !** ({u_a})\n\n💡 *Explication :* {qitem['expl']}")
                 else:
-                    st.error(f"❌ **Q{idx_e + 1} Erreur.** Vous avez répondu : *{u_a}* | Attendu : **{qitem['rep']}**\n\n💡 *Explication :* {qitem['expl']}")
+                    st.error(f"❌ **Q{idx_e + 1} {'Sans réponse' if u_a is None else 'Erreur'}.** Vous avez répondu : *{u_a or 'aucune réponse'}* | Attendu : **{qitem['rep']}**\n\n💡 *Explication :* {qitem['expl']}")
 
             pct_e = (score_e / len(CYBER_EXAM_20)) * 100
             xp_gagnes = score_e * 5
@@ -6250,7 +6393,7 @@ elif page == '📖 Culture Générale & Expression (CGE)':
     with tab_cge1:
         st.subheader("1. Modalités Officielles & Structure de l'Épreuve E1")
         st.markdown("""
-<div class='ciel-card' style='border-left: 6px solid #2563eb !important;'>
+<div class='ciel-card' style='border-left: 6px solid var(--blue) !important;'>
     <h4 style='color: var(--blue); margin-top: 0;'>📋 Cadre Réglementaire de l'Épreuve Écrite E1</h4>
     <ul style='color: var(--text-2); line-height: 1.8;'>
         <li><b>Coefficient officiel</b> : <b>2</b> (Épreuve écrite nationale de <b>3 heures</b>, réformée depuis l'arrêté de juillet 2023).</li>
@@ -6296,7 +6439,7 @@ elif page == '📖 Culture Générale & Expression (CGE)':
     with tab_cge2:
         st.subheader("2. Thème de 2e Année (Session 2026) : « Les animaux et nous : imaginer, connaître, comprendre l'animal »")
         st.markdown("""
-<div class='ciel-card' style='border-left: 6px solid #10b981 !important; background: rgba(48,209,88,0.06);'>
+<div class='ciel-card' style='border-left: 6px solid var(--green) !important; background: rgba(48,209,88,0.06);'>
     <h4 style='color: var(--green); margin-top: 0;'>📖 Problématique Officielle du Bulletin Officiel (BO n°17)</h4>
     <p style='color: var(--green);'>L'homme n'a cessé de rêver les animaux comme autant de miroirs, d'emblèmes voire de repoussoirs de lui-même. Objets de fascination, de délectation ou d'effroi, les animaux suscitent une multiplicité de représentations artistiques et philosophiques. Ce thème invite à interroger la frontière poreuse entre l'humain et l'animal, la hiérarchie des espèces et les responsabilités éthiques contemporaines.</p>
 </div>
@@ -6337,7 +6480,7 @@ elif page == '📖 Culture Générale & Expression (CGE)':
     with tab_cge3:
         st.subheader("3. Thème Précédent (Session 2025) : « À table ! : formes et enjeux du repas »")
         st.markdown("""
-<div class='ciel-card' style='border-left: 6px solid #f59e0b !important;'>
+<div class='ciel-card' style='border-left: 6px solid var(--warn) !important;'>
     <h4 style='color: var(--warn); margin-top: 0;'>🍽️ Enjeux Sociologiques, Anthropologiques & Écologiques du Repas</h4>
     <p>Le repas n'est pas un simple besoin biologique de nutrition : c'est un <b>fait social total</b>, un rituel de commensalité, d'intégration sociale et un miroir des inégalités.</p>
     <ul>
@@ -6894,7 +7037,7 @@ Le langage **SysML (Systems Modeling Language)** modélise les systèmes cyber-p
         with w5_sub3:
             st.markdown("#### ✍️ Exercices Pratiques de Conception SysML / E6")
             st.write("Dans un diagramme des exigences SysML, quelle relation normalisée relie un cas de test ou une procédure de qualification du PVL à l'exigence fonctionnelle qu'elle contrôle ?")
-            rel_sysml = st.radio("Relation SysML :", ["<<satisfy>>", "<<verify>>", "<<deriveReqt>>", "<<refine>>"], key="w5_rel_sysml")
+            rel_sysml = st.radio("Relation SysML :", ["<<satisfy>>", "<<verify>>", "<<deriveReqt>>", "<<refine>>"], key="w5_rel_sysml", index=None)
             if st.button("Vérifier la relation SysML", key="w5_btn_sysml"):
                 if rel_sysml == "<<verify>>":
                     st.success("✅ **Exact !** La relation `<<verify>>` établit la traçabilité entre la campagne de test et l'exigence du CdCf.")
@@ -6961,7 +7104,7 @@ L'atténuation en espace libre calculée pour la distance de liaison est $A_{\te
 elif page == '🎯 Révision Totale BTS Blanc (9-11 Déc)':
     st.markdown("<div class='hero-title'>🎯 Hub de Révision Totale - BTS Blanc (9, 10 & 11 Décembre)</div>", unsafe_allow_html=True)
     st.markdown("<p style='color:var(--muted);'>Centrale de préparation intensive regroupant l'intégralité des cours, TP, annales et fiches de synthèse du notebook</p>", unsafe_allow_html=True)
-    st.markdown("\n    <div class='ciel-card' style='border-left: 6px solid #f59e0b !important; background: rgba(255,204,51,0.05);'>\n        <h3 style='color: var(--warn); margin-top: 0;'>🚨 Objectif Échéance : Examens du 9, 10 et 11 Décembre 2026</h3>\n        <p style='color: var(--warn);'>Ce hub rassemble <b>l'ensemble des 61 sources et TPs</b> déposés dans votre notebook pour une révision transversale sans aucune impasse.</p>\n    </div>", unsafe_allow_html=True)
+    st.markdown("\n    <div class='ciel-card' style='border-left: 6px solid var(--warn) !important; background: rgba(255,204,51,0.05);'>\n        <h3 style='color: var(--warn); margin-top: 0;'>🚨 Objectif Échéance : Examens du 9, 10 et 11 Décembre 2026</h3>\n        <p style='color: var(--warn);'>Ce hub rassemble <b>l'ensemble des 61 sources et TPs</b> déposés dans votre notebook pour une révision transversale sans aucune impasse.</p>\n    </div>", unsafe_allow_html=True)
     tab_tot1, tab_tot2, tab_tot3 = st.tabs(['📚 Synthèse Exhaustive des 6 Piliers', '🛠️ Récapitulatif des TP de Réseau & SysAdmin', "📝 Générateur d'Examen Blanc Multi-Matières"])
     with tab_tot1:
         st.subheader('Synthèse Globale du Programme Officiel')
@@ -6977,13 +7120,14 @@ elif page == '🎯 Révision Totale BTS Blanc (9-11 Déc)':
         if st.session_state.get('bts_blanc_active', False):
             st.success('Exam Blanc en cours. Répondez aux questions ci-dessous :')
             st.markdown('---')
-            q_b1 = st.radio("1. Réseaux : Quelle est la taille du tag inséré dans l'en-tête Ethernet par le protocole IEEE 802.1Q ?", ['2 octets', '4 octets', '8 octets', '12 bits'], key='qb1')
-            q_b2 = st.radio('2. Cybersécurité : Quelle méthode prémunit définitivement contre les injections SQL ?', ["Filtrage d'expressions régulières", 'Requêtes préparées (paramétrées)', 'Chiffrement AES de la BDD', 'Désactivation du port 3306'], key='qb2')
-            q_b3 = st.radio('3. C++ : Quel opérateur doit être utilisé pour libérer la mémoire de `int* tab = new int[100];` ?', ['delete tab;', 'free(tab);', 'delete[] tab;', 'clear(tab);'], key='qb3')
-            q_b4 = st.radio('4. SysAdmin : Quelle est la valeur octale chmod pour rwx (User), r-x (Group), --- (Others) ?', ['755', '750', '644', '777'], key='qb4')
-            q_b5 = st.radio("5. Électronique : Quel est le quantum d'un CAN 12 bits sous Vref = 5.0 V ?", ['1.22 mV', '4.88 mV', '0.50 mV', '2.44 mV'], key='qb5')
-            q_b6 = st.radio('6. Mathématiques : Si un signal Wi-Fi perd 15% de puissance par mètre, quelle est la raison $q$ de la suite géométrique ?', ['q = 0.15', 'q = 0.85', 'q = 1.15', 'q = -0.15'], key='qb6')
+            q_b1 = st.radio("1. Réseaux : Quelle est la taille du tag inséré dans l'en-tête Ethernet par le protocole IEEE 802.1Q ?", ['2 octets', '4 octets', '8 octets', '12 bits'], key='qb1', index=None)
+            q_b2 = st.radio('2. Cybersécurité : Quelle méthode prémunit définitivement contre les injections SQL ?', ["Filtrage d'expressions régulières", 'Requêtes préparées (paramétrées)', 'Chiffrement AES de la BDD', 'Désactivation du port 3306'], key='qb2', index=None)
+            q_b3 = st.radio('3. C++ : Quel opérateur doit être utilisé pour libérer la mémoire de `int* tab = new int[100];` ?', ['delete tab;', 'free(tab);', 'delete[] tab;', 'clear(tab);'], key='qb3', index=None)
+            q_b4 = st.radio('4. SysAdmin : Quelle est la valeur octale chmod pour rwx (User), r-x (Group), --- (Others) ?', ['755', '750', '644', '777'], key='qb4', index=None)
+            q_b5 = st.radio("5. Électronique : Quel est le quantum d'un CAN 12 bits sous Vref = 5.0 V ?", ['1.22 mV', '4.88 mV', '0.50 mV', '2.44 mV'], key='qb5', index=None)
+            q_b6 = st.radio('6. Mathématiques : Si un signal Wi-Fi perd 15% de puissance par mètre, quelle est la raison $q$ de la suite géométrique ?', ['q = 0.15', 'q = 0.85', 'q = 1.15', 'q = -0.15'], key='qb6', index=None)
             if st.button('Soumettre mon Sujet Blanc', key='btn_sub_bts_blanc'):
+                avertir_sans_reponse([q_b1, q_b2, q_b3, q_b4, q_b5, q_b6])
                 score_b = 0
                 if q_b1 == '4 octets':
                     score_b += 1
@@ -7050,13 +7194,13 @@ elif page == '📈 Mathématiques : Fonctions, Exponentielle & Logarithme':
             u_charge = val_E * (1 - np.exp(-t / tau_ms))
             u_decharge = val_E * np.exp(-t / tau_ms)
             fig, ax = plt.subplots(figsize=(8, 4))
-            ax.plot(t, u_charge, label='Charge : $u_C(t) = E(1 - e^{-t/\\tau})$', color='#2563eb', linewidth=2.5)
-            ax.plot(t, u_decharge, label='Décharge : $u_C(t) = E e^{-t/\\tau}$', color='#dc2626', linestyle='--', linewidth=2)
-            ax.axvline(x=tau_ms, color='#10b981', linestyle=':', label=f'tau = {tau_ms:.1f} ms')
-            ax.axhline(y=0.632 * val_E, color='#10b981', linestyle=':', alpha=0.7)
-            ax.scatter([tau_ms], [0.632 * val_E], color='#10b981', s=60, zorder=5)
-            ax.annotate(f'63.2% ({0.632 * val_E:.2f}V)', (tau_ms, 0.632 * val_E), textcoords='offset points', xytext=(10, -10), fontweight='bold', color='#047857')
-            ax.set_title(f'Charge et Décharge RC (E = {val_E}V, tau = {tau_ms:.2f} ms)', fontsize=12, fontweight='bold', color='#1e293b')
+            ax.plot(t, u_charge, label='Charge : $u_C(t) = E(1 - e^{-t/\\tau})$', color=theme_color('--blue'), linewidth=2.5)
+            ax.plot(t, u_decharge, label='Décharge : $u_C(t) = E e^{-t/\\tau}$', color=theme_color('--red'), linestyle='--', linewidth=2)
+            ax.axvline(x=tau_ms, color=theme_color('--green'), linestyle=':', label=f'tau = {tau_ms:.1f} ms')
+            ax.axhline(y=0.632 * val_E, color=theme_color('--green'), linestyle=':', alpha=0.7)
+            ax.scatter([tau_ms], [0.632 * val_E], color=theme_color('--green'), s=60, zorder=5)
+            ax.annotate(f'63.2% ({0.632 * val_E:.2f}V)', (tau_ms, 0.632 * val_E), textcoords='offset points', xytext=(10, -10), fontweight='bold', color=theme_color('--green'))
+            ax.set_title(f'Charge et Décharge RC (E = {val_E}V, tau = {tau_ms:.2f} ms)', fontsize=12, fontweight='bold', color=theme_color('--text'))
             ax.set_xlabel('Temps t (ms)', fontsize=10)
             ax.set_ylabel('Tension uC (V)', fontsize=10)
             ax.grid(True, linestyle='--', alpha=0.5)
@@ -7126,7 +7270,7 @@ elif page == '📈 Mathématiques : Fonctions, Exponentielle & Logarithme':
         quiz_exp_q = [{'q': '1. Quelle est la valeur exacte de ln(e^3) ?', 'opts': ['0', '1', '3', 'e^3'], 'rep': '3', 'expl': "Par propriété d'inversion, ln(e^x) = x pour tout x réel. Donc ln(e^3) = 3."}, {'q': '2. Que vaut la dérivée de la fonction f(x) = e^(-2x) ?', 'opts': ["f'(x) = e^(-2x)", "f'(x) = -2 e^(-2x)", "f'(x) = -2 e^x", "f'(x) = 2 e^(-2x)"], 'rep': "f'(x) = -2 e^(-2x)", 'expl': "La dérivée de e^(u(x)) est u'(x) * e^(u(x)). Ici u(x) = -2x donc u'(x) = -2."}, {'q': '3. Quelle est la limite de e^x quand x tend vers -infini ?', 'opts': ['-infini', '0', '1', '+infini'], 'rep': '0', 'expl': "La fonction exponentielle possède une asymptote horizontale d'équation y = 0 en -infini : lim_{x -> -inf} e^x = 0."}, {'q': "4. Si la puissance d'un signal optique est divisée par 2, quelle est l'atténuation en dB (approx) ?", 'opts': ['-1 dB', '-3 dB', '-6 dB', '-10 dB'], 'rep': '-3 dB', 'expl': '10 * log10(0.5) = 10 * (-0.3010) = -3.01 dB. Une perte de 50% de puissance équivaut à une atténuation de 3 dB.'}]
         for q_idx, q_item in enumerate(quiz_exp_q):
             st.markdown(f'**{q_item["q"]}**')
-            ans = st.radio(f'Choix Q{q_idx + 1} :', q_item["opts"], key=f'q_exp_{q_idx}')
+            ans = st.radio(f'Choix Q{q_idx + 1} :', q_item["opts"], key=f'q_exp_{q_idx}', index=None)
             if st.button(f'Valider Q{q_idx + 1}', key=f'btn_exp_{q_idx}'):
                 if ans == q_item['rep']:
                     st.success(f'🎉 **Exact !** {q_item["expl"]}')
@@ -7142,11 +7286,12 @@ elif page == '📈 Mathématiques : Fonctions, Exponentielle & Logarithme':
     score_fct = 0
     for idx_f, q_f in enumerate(QUIZZES_BANK_10["Fonctions"]):
         st.markdown(f"**{q_f['q']}**")
-        rep_f = st.radio(f"Votre choix (Q{idx_f + 1}) :", q_f["opts"], key=f"rad_fct_10_{idx_f}")
+        rep_f = st.radio(f"Votre choix (Q{idx_f + 1}) :", q_f["opts"], key=f"rad_fct_10_{idx_f}", index=None)
         if rep_f == q_f["rep"]:
             score_fct += 1
             
     if st.button("Valider le Test des 10 Questions (Fonctions)", type="primary", key="btn_val_fct_10"):
+        avertir_sans_reponse(st.session_state.get(f"rad_fct_10_{i}") for i in range(len(QUIZZES_BANK_10["Fonctions"])))
         add_user_points(score_fct * 10, "quiz_fct_10")
         if score_fct >= 8:
             st.success(f"🏆 **Score remarquable : {score_fct} / 10 !** (+{score_fct * 10} points d'XP)")
@@ -7160,7 +7305,7 @@ elif page == '📈 Mathématiques : Fonctions, Exponentielle & Logarithme':
 elif page == '🗓️ Planning Révisions BTS Blanc (9-11 Déc)':
     st.markdown("<div class='hero-title'>🗓️ Planning de Révision Intensif - BTS Blanc (9, 10 & 11 Déc 2026)</div>", unsafe_allow_html=True)
     st.markdown("<p style='color:var(--muted);'>Programme d'entraînement structuré semaine par semaine pour réussir les épreuves écrites et pratiques</p>", unsafe_allow_html=True)
-    st.markdown("\n    <div class='ciel-card' style='border-left: 6px solid #f59e0b !important;'>\n        <h3 style='color: var(--warn); margin-top:0;'>⚠️ Objectif Examen : Épreuves du 9, 10 et 11 Décembre 2026</h3>\n        <p>Il vous reste <b>6 semaines intensives</b> pour maîtriser la totalité du programme du BTS CIEL Option A. Suivez cette feuille de route hebdomadaire :</p>\n    </div>", unsafe_allow_html=True)
+    st.markdown("\n    <div class='ciel-card' style='border-left: 6px solid var(--warn) !important;'>\n        <h3 style='color: var(--warn); margin-top:0;'>⚠️ Objectif Examen : Épreuves du 9, 10 et 11 Décembre 2026</h3>\n        <p>Il vous reste <b>6 semaines intensives</b> pour maîtriser la totalité du programme du BTS CIEL Option A. Suivez cette feuille de route hebdomadaire :</p>\n    </div>", unsafe_allow_html=True)
     col_w1, col_w2 = st.columns(2)
     with col_w1:
         st.markdown("\n        <div class='ciel-card'>\n            <h4 style='color:var(--blue); margin-top:0;'>📅 Semaine 1 : Réseaux, Adressage & Commutation</h4>\n            <ul>\n                <li><b>Révisez</b> : Modèle OSI (7 couches), Adressage IPv4/IPv6, Masques VLSM.</li>\n                <li><b>Pratiquez</b> : Le <i>Générateur de Subnetting</i> et la configuration des VLANs 802.1Q dans la sandbox <i>Cisco IOS</i>.</li>\n                <li><b>Exercice clé</b> : Décodage de trames brutes dans le <i>Lab Wireshark</i>.</li>\n            </ul>\n        </div>\n        \n        <div class='ciel-card'>\n            <h4 style='color:var(--blue); margin-top:0;'>📅 Semaine 2 : Cybersécurité & Administration Système</h4>\n            <ul>\n                <li><b>Révisez</b> : Cryptographie (AES/RSA/SHA), Top 10 OWASP, Active Directory (OUs, GPO LSDOU) et droits Linux (chmod).</li>\n                <li><b>Pratiquez</b> : Configuration de règles UFW/IPtables et sécurisation de bases SQL via des requêtes préparées.</li>\n                <li><b>Exercice clé</b> : Sandbox <i>Linux Bash</i> (chmod octal) et analyse des tickets Kerberos.</li>\n            </ul>\n        </div>\n        \n        <div class='ciel-card'>\n            <h4 style='color:var(--blue); margin-top:0;'>📅 Semaine 3 : Développement C++ & Python Réseau</h4>\n            <ul>\n                <li><b>Révisez</b> : Gestion de la mémoire (Tas vs Pile), pointeurs `*`, références `&`, `new[]`/`delete[]`, POO (héritage, classes abstraites).</li>\n                <li><b>Pratiquez</b> : Debugger C++ (correction de fuites mémoire) et programmation de Sockets TCP/UDP Python.</li>\n                <li><b>Exercice clé</b> : Analyse des destructeurs virtuels et des conteneurs STL (`std::vector`).</li>\n            </ul>\n        </div>", unsafe_allow_html=True)
@@ -7222,11 +7367,12 @@ elif page == '⚡ Lab Kirchhoff, Ohm & Circuits':
     score_kir = 0
     for idx_k, q_k in enumerate(QUIZZES_BANK_10["Kirchhoff"]):
         st.markdown(f"**{q_k['q']}**")
-        rep_k = st.radio(f"Votre choix (Q{idx_k + 1}) :", q_k["opts"], key=f"rad_kir_10_{idx_k}")
+        rep_k = st.radio(f"Votre choix (Q{idx_k + 1}) :", q_k["opts"], key=f"rad_kir_10_{idx_k}", index=None)
         if rep_k == q_k["rep"]:
             score_kir += 1
             
     if st.button("Valider le Test des 10 Questions (Électricité)", type="primary", key="btn_val_kir_10"):
+        avertir_sans_reponse(st.session_state.get(f"rad_kir_10_{i}") for i in range(len(QUIZZES_BANK_10["Kirchhoff"])))
         add_user_points(score_kir * 10, "quiz_kir_10")
         if score_kir >= 8:
             st.success(f"🏆 **Excellente maîtrise en électronique : {score_kir} / 10 !** (+{score_kir * 10} points)")
@@ -7291,11 +7437,12 @@ elif page == '📺 Lab Oscilloscope & Mesures Physiques':
     score_osc = 0
     for idx_o, q_o in enumerate(QUIZZES_BANK_10["Oscilloscope"]):
         st.markdown(f"**{q_o['q']}**")
-        rep_o = st.radio(f"Votre choix (Q{idx_o + 1}) :", q_o["opts"], key=f"rad_osc_10_{idx_o}")
+        rep_o = st.radio(f"Votre choix (Q{idx_o + 1}) :", q_o["opts"], key=f"rad_osc_10_{idx_o}", index=None)
         if rep_o == q_o["rep"]:
             score_osc += 1
             
     if st.button("Valider le Test des 10 Questions (Oscilloscope)", type="primary", key="btn_val_osc_10"):
+        avertir_sans_reponse(st.session_state.get(f"rad_osc_10_{i}") for i in range(len(QUIZZES_BANK_10["Oscilloscope"])))
         add_user_points(score_osc * 10, "quiz_osc_10")
         if score_osc >= 8:
             st.success(f"🏆 **Expertise mesure validée : {score_osc} / 10 !** (+{score_osc * 10} points)")
@@ -7415,11 +7562,12 @@ elif page == '🧮 Laboratoire de Calculs (Subnetting & Élec)':
     score_can = 0
     for idx_c, q_c in enumerate(QUIZZES_BANK_10["CAN_ADC"]):
         st.markdown(f"**{q_c['q']}**")
-        rep_c = st.radio(f"Votre choix (Q{idx_c + 1}) :", q_c["opts"], key=f"rad_can_10_{idx_c}")
+        rep_c = st.radio(f"Votre choix (Q{idx_c + 1}) :", q_c["opts"], key=f"rad_can_10_{idx_c}", index=None)
         if rep_c == q_c["rep"]:
             score_can += 1
             
     if st.button("Valider le Test des 10 Questions (CAN / ADC)", type="primary", key="btn_val_can_10"):
+        avertir_sans_reponse(st.session_state.get(f"rad_can_10_{i}") for i in range(len(QUIZZES_BANK_10["CAN_ADC"])))
         add_user_points(score_can * 10, "quiz_can_10")
         if score_can >= 8:
             st.success(f"🏆 **Maîtrise du traitement du signal : {score_can} / 10 !** (+{score_can * 10} points)")
@@ -7444,7 +7592,7 @@ elif page == '📐 Laboratoire UML & SysML':
             st.markdown('#### Internal Block Diagram (IBD)')
             st.code('\n+-----------------------------------------------------------------+\n|             ibd [Block] StationSurveillance                     |\n+-----------------------------------------------------------------+\n|                                                                 |\n|  +--------------------+                   +------------------+  |\n|  |  capteurCO2:       |                   |  cibleAcquis:    |  |\n|  |  CapteurSondeNDIR  |                   |  STM32           |  |\n|  |                    |                   |                  |  |\n|  |           [p_spi]  |=== Bus SPI (4 fils) ===[p_spi]       |  |\n|  |                    |   (MOSI, MISO,    |                  |  |\n|  |                    |    SCLK, CS)      |                  |  |\n|  |                    |                   |          [p_uart]|  |\n|  +--------------------+                   +-------------||---+  |\n|                                                         ||      |\n|                                                Liaison Série TX |\n|                                                         ||      |\n|  +--------------------+                                 ||      |\n|  |  moduleCom:        |                                 ||      |\n|  |  TransmetteurLoRa  |                                 ||      |\n|  |                    |                                 ||      |\n|  |           [p_uart] |=================================++      |\n|  +--------------------+                                         |\n+-----------------------------------------------------------------+', language='text')
         st.markdown("#### ✍️ Exercice d'Analyse SysML :")
-        q_sysml = st.radio("En observant l'IBD ci-dessus, quel bus physique assure le transfert des mesures brutes entre le capteur de CO2 et le microcontrôleur ?", ['Liaison série asynchrone UART', 'Bus synchrone 4 fils SPI', 'Bus I2C sur 2 fils', 'Bus CAN différentiel'], key='q_sysml_radio')
+        q_sysml = st.radio("En observant l'IBD ci-dessus, quel bus physique assure le transfert des mesures brutes entre le capteur de CO2 et le microcontrôleur ?", ['Liaison série asynchrone UART', 'Bus synchrone 4 fils SPI', 'Bus I2C sur 2 fils', 'Bus CAN différentiel'], key='q_sysml_radio', index=None)
         if st.button("Valider l'analyse SysML"):
             if q_sysml == 'Bus synchrone 4 fils SPI':
                 st.success('✅ **Exact !** Le port `[p_spi]` relie le capteur au microcontrôleur via le bus SPI (MOSI, MISO, SCLK, CS).')
@@ -7487,7 +7635,7 @@ elif page == '🎯 Annales BTS (2024 & 2025)':
     if "2026" in tab_an_sel:
         st.subheader("💳 Session 2026 : Système Monétique 'CISS Cashless Online' (Métropole & NC)")
         st.markdown("""
-<div class='ciel-card' style='border-left: 6px solid #2563eb !important;'>
+<div class='ciel-card' style='border-left: 6px solid var(--blue) !important;'>
     <h4 style='color: var(--blue); margin-top:0;'>📌 Contexte Industriel du Sujet E4 (2026)</h4>
     <p>Le système <b>CISS Cashless Online</b> assure la gestion dématérialisée des paiements sans contact (NFC/RFID) lors de grands événements (festivals, stades, salons). L'architecture comprend des terminaux de paiement embarqués communicants, des concentrateurs locaux et des serveurs de paiement transactionnels sécurisés.</p>
 </div>
@@ -7522,9 +7670,9 @@ elif page == '🎯 Annales BTS (2024 & 2025)':
             "ISO/IEC 14443 à 13,56 MHz",
             "Bluetooth SIG v5.3 à 2,4 GHz",
             "LoRaWAN EU868"
-        ], key="q26_radio")
+        ], key="q26_radio", index=None)
         if st.button("Vérifier Q1 (2026)", key="btn_q26_1"):
-            if "ISO/IEC 14443" in q_26_ans:
+            if "ISO/IEC 14443" in (q_26_ans or ''):
                 st.success("🎉 **Exact !** Les puces monétiques NFC sans contact opèrent sous la norme ISO/IEC 14443 à 13,56 MHz.")
             else:
                 st.error("❌ Incorrect. La norme internationale NFC sans contact est ISO/IEC 14443 à 13,56 MHz.")
@@ -7532,7 +7680,7 @@ elif page == '🎯 Annales BTS (2024 & 2025)':
     elif "2025" in tab_an_sel:
         st.subheader("🚗 Session 2025 : Parking Multi-Niveaux 'Seven-Park' (Métropole)")
         st.markdown("""
-<div class='ciel-card' style='border-left: 6px solid #10b981 !important;'>
+<div class='ciel-card' style='border-left: 6px solid var(--green) !important;'>
     <h4 style='color: var(--green); margin-top:0;'>📌 Contexte Industriel du Sujet E4 (2025)</h4>
     <p>Le parking <b>Seven-Park</b> comprend 5 niveaux équipés de capteurs ultrasoniques de présence par place, de barrières automatiques, de panneaux d'affichage LED à chaque étage et d'un serveur central de supervision SCADA connecté en fibre optique.</p>
 </div>
@@ -7561,7 +7709,7 @@ elif page == '🎯 Annales BTS (2024 & 2025)':
     elif "2024" in tab_an_sel:
         st.subheader("💧 Session 2024 : Surveillance de la Qualité de l'Eau en Rivière (Option A)")
         st.markdown("""
-<div class='ciel-card' style='border-left: 6px solid #06b6d4 !important;'>
+<div class='ciel-card' style='border-left: 6px solid var(--blue) !important;'>
     <h4 style='color: var(--blue); margin-top:0;'>📌 Contexte Industriel du Sujet E4 (2024)</h4>
     <p>Une station autonome immergée mesure en continu la température, la turbidité, le pH et la saturation en oxygène de l'eau, puis transmet les données agrégées vers une passerelle LoRaWAN The Things Network (TTN).</p>
 </div>
@@ -7588,13 +7736,13 @@ elif page == '🎯 Annales BTS (2024 & 2025)':
 <div class='ciel-card'>
     <h4>Répartition Officielle des Points à l'Épreuve E4 (Coefficient 4, Durée 6h) :</h4>
     <table style='width: 100%; border-collapse: collapse;'>
-        <tr style='background: var(--surface-2); border-bottom: 2px solid #cbd5e1;'>
+        <tr style='background: var(--surface-2); border-bottom: 2px solid var(--line-strong);'>
             <th style='padding: 10px; text-align: left;'>Partie d'Épreuve</th>
             <th style='padding: 10px;'>Durée Recommandée</th>
             <th style='padding: 10px;'>Points Barème</th>
             <th style='padding: 10px;'>Thématiques Clés Évaluées</th>
         </tr>
-        <tr style='border-bottom: 1px solid #e2e8f0;'>
+        <tr style='border-bottom: 1px solid var(--line);'>
             <td style='padding: 10px;'><b>Partie 1 : Informatique & Réseaux</b></td>
             <td style='padding: 10px; text-align: center;'>4h30</td>
             <td style='padding: 10px; text-align: center;'><b>70 / 100 pts</b></td>
@@ -7649,7 +7797,7 @@ elif page == '🗂️ Flashcards Actives':
             st.success('✅ Carte enregistrée comme **Maîtrisée**')
         else:
             st.info("⏳ Carte en cours d'apprentissage")
-        st.markdown(f"\n        <div class='ciel-card' style='border-left: 6px solid #2563eb !important; background: var(--surface);'>\n            <h3 style='color: var(--text); margin-top: 0;'>❓ Question :</h3>\n            <p style='font-size: 1.15rem; font-weight: 600; color: var(--text);'>{cur_fc['q']}</p>\n        </div>\n        ", unsafe_allow_html=True)
+        st.markdown(f"\n        <div class='ciel-card' style='border-left: 6px solid var(--blue) !important; background: var(--surface);'>\n            <h3 style='color: var(--text); margin-top: 0;'>❓ Question :</h3>\n            <p style='font-size: 1.15rem; font-weight: 600; color: var(--text);'>{cur_fc['q']}</p>\n        </div>\n        ", unsafe_allow_html=True)
         user_fc_ans = st.text_area('✍️ Rédigez votre réponse réflexe avant de vérifier :', key=f'fc_txt_{cur_fc["id"]}')
         rev = st.checkbox('👁️ Afficher la Solution & Conseils Examen', key=f'rev_{cur_fc["id"]}')
         if rev:
@@ -7782,15 +7930,15 @@ elif page == '📋 Planning de Projet E6 (Gantt)':
                 e_d = datetime.strptime(tk['fin'], '%Y-%m-%d')
                 dur = (e_d - s_d).days
                 pct_v = tk['avancement']
-                ax.barh(i, dur, left=s_d, color='#e2e8f0', edgecolor='#94a3b8', height=0.5)
-                bar_c = '#10b981' if pct_v == 100 else '#3b82f6'
+                ax.barh(i, dur, left=s_d, color=theme_color('--surface-2'), edgecolor=theme_color('--muted'), height=0.5)
+                bar_c = theme_color('--green') if pct_v == 100 else theme_color('--blue')
                 ax.barh(i, dur * (pct_v / 100.0), left=s_d, color=bar_c, height=0.5)
                 y_pos.append(i)
                 y_labels.append(f'{tk["nom"]}\\n({tk["resp"]} - {pct_v}%)')
             ax.set_yticks(y_pos)
             ax.set_yticklabels(y_labels, fontsize=8)
             ax.xaxis.set_major_formatter(mdates.DateFormatter('%d/%m'))
-            plt.title('Planning de Gantt du Projet E6', fontsize=12, fontweight='bold', color='#1e3a8a')
+            plt.title('Planning de Gantt du Projet E6', fontsize=12, fontweight='bold', color=theme_color('--text'))
             plt.grid(axis='x', linestyle='--', alpha=0.5)
             plt.tight_layout()
             import io as _io
@@ -7820,9 +7968,10 @@ elif page == '📄 Datasheets & Fiches Techniques (Composants)':
         st.markdown('\n        #### 🔹 MAX6675 (Thermocouple K-Type to Digital Converter)\n        * **Interface** : SPI Read-Only (3-wire: `SO`, `CS`, `SCK`).\n        * **Resolution** : 12-bit ADC with 0.25°C resolution over 0°C to +1024°C range.\n        * **Open Thermocouple Detection** : Bit D2 goes HIGH when the thermocouple wire is broken.\n\n        #### 🔹 Boucle de Courant Industrielle 4-20 mA\n        * **Datasheet Specification** : Output current $I_{\\text{out}}$ varies linearly from $4\\text{ mA}$ (minimum scale) to $20\\text{ mA}$ (maximum scale).\n        * **Conversion Formula** :\n          $$I = 4 + \\frac{T - T_{\\text{min}}}{T_{\\text{max}} - T_{\\text{min}}} \\times 16 \\quad [\\text{mA}]$$\n        ')
     with tab_ds5:
         st.subheader('✍️ Quiz Datasheets & Anglais Technique Composants')
-        q1 = st.radio('1. What is the value of UBRR0 for 9600 Baud under a 16 MHz clock on an ATmega328P?', ['103', '207', '51', '128'], key='ds_q1')
-        q2 = st.radio('2. On a MAX485 transceiver, what pin state enables Transmit mode?', ['DE = 1, RE = 1', 'DE = 0, RE = 0', 'DE = 1, RE = 0', 'DE = 0, RE = 1'], key='ds_q2')
+        q1 = st.radio('1. What is the value of UBRR0 for 9600 Baud under a 16 MHz clock on an ATmega328P?', ['103', '207', '51', '128'], key='ds_q1', index=None)
+        q2 = st.radio('2. On a MAX485 transceiver, what pin state enables Transmit mode?', ['DE = 1, RE = 1', 'DE = 0, RE = 0', 'DE = 1, RE = 0', 'DE = 0, RE = 1'], key='ds_q2', index=None)
         if st.button('Check Datasheets Quiz', type='primary', key='btn_ds_quiz'):
+            avertir_sans_reponse([q1, q2])
             score = 0
             if q1 == '103':
                 score += 1
@@ -7851,7 +8000,7 @@ elif page == '🔍 Captures de Trames & Analyses Wireshark PCAP':
     with tab_pc5:
         st.subheader("✍️ Simulateur d'Analyse de Trame Hexadécimale")
         st.markdown('**Trame à Analyser** : `00 0c 29 1f 8a 12 00 50 56 a1 02 bb 08 00 45 00`')
-        q_p1 = st.radio('Quel est le protocole de Couche 3 indiqué par `EtherType = 0x0800` ?', ['IPv6', 'IPv4', 'ARP', 'VLAN 802.1Q'], key='pcap_q1')
+        q_p1 = st.radio('Quel est le protocole de Couche 3 indiqué par `EtherType = 0x0800` ?', ['IPv6', 'IPv4', 'ARP', 'VLAN 802.1Q'], key='pcap_q1', index=None)
         if st.button('Valider Analyse Hex', type='primary', key='btn_pcap'):
             if q_p1 == 'IPv4':
                 st.success('🎉 **Exact !** EtherType `0x0800` désigne le protocole IPv4 (`0x0806` pour ARP, `0x86DD` pour IPv6, `0x8100` pour VLAN 802.1Q).')
@@ -7878,9 +8027,9 @@ elif page == '📁 Modèles de Livrables & PVL Épreuve E6':
         st.markdown('\n        #### 🔹 Procès-Verbal (PV) de Recette Finale\n        * **Date de Qualification** : 15 Juin 2026\n        * **Membres de la Commission** : Chef de Projet DSI, Expert Cybersécurité, Ingénieur Intégrateur.\n        * **Décision de Recette** :\n          - [x] **Prononcée Sans Réserve** : Le système répond entièrement aux spécifications.\n          - [ ] Prononcée Avec Réserves Mineures.\n          - [ ] Refusée pour Non-Conformité Majeure.\n        ')
     with tab_e6_5:
         st.subheader('✍️ Auto-Évaluation Livrables E6')
-        q_e6_1 = st.radio("Quel outil de test Python standard est préconisé pour automatiser le PVL de l'épreuve E6 ?", ['unittest / pytest', 'Postman', 'Wireshark', 'OpenSSL'], key='e6_q1')
+        q_e6_1 = st.radio("Quel outil de test Python standard est préconisé pour automatiser le PVL de l'épreuve E6 ?", ['unittest / pytest', 'Postman', 'Wireshark', 'OpenSSL'], key='e6_q1', index=None)
         if st.button('Valider Quiz E6', type='primary', key='btn_e6_q'):
-            if 'pytest' in q_e6_1:
+            if 'pytest' in (q_e6_1 or ''):
                 st.success("🎉 **Exact !** `pytest` permet d'exécuter des assertions automatisées et de générer un rapport de qualification E6.")
             else:
                 st.error('❌ Incorrect. `pytest` est le framework de test automatisé recommandé.')
@@ -7905,9 +8054,9 @@ elif page == '🛡️ Guides de Durcissement (Hardening) ANSSI':
         st.markdown("\n        #### 🔹 Les 4 Piliers DICP de la PSSI :\n        1. **Disponibilité (D)** : Garantir la continuité de service (Redondance, RAID, Onduleurs).\n        2. **Intégrité (I)** : Garantir l'absence de modification non autorisée (Hachage SHA-256, signatures).\n        3. **Confidentialité (C)** : Garantir que seules les personnes autorisées ont accès aux données (Chiffrement AES-256, ACLs).\n        4. **Preuve / Traçabilité (P)** : Conserver les journaux d'événements horodatés (Syslog centralisé, SIEM).\n        ")
     with tab_an5:
         st.subheader('✍️ Quiz Hardening & Sécurité Système')
-        q_ans_1 = st.radio('Dans le modèle de Tiering ANSSI Active Directory, un administrateur Tier 0 a-t-il le droit de se connecter sur un poste de travail Tier 2 ?', ["Non, c'est strictement interdit (risque d'usurpation de jeton)", "Oui, c'est autorisé pour le dépannage"], key='ans_q1')
+        q_ans_1 = st.radio('Dans le modèle de Tiering ANSSI Active Directory, un administrateur Tier 0 a-t-il le droit de se connecter sur un poste de travail Tier 2 ?', ["Non, c'est strictement interdit (risque d'usurpation de jeton)", "Oui, c'est autorisé pour le dépannage"], key='ans_q1', index=None)
         if st.button('Valider Quiz Hardening', type='primary', key='btn_ans'):
-            if 'Non' in q_ans_1:
+            if 'Non' in (q_ans_1 or ''):
                 st.success('🎉 **Exact !** Les administrateurs Tier 0 ne doivent jamais se connecter sur un Tier 1 ou Tier 2 pour éviter le vol de leurs identifiants par une attaque Pass-the-Hash.')
             else:
                 st.error("❌ Incorrect. L'isolation stricte des Tiers empêche la compromission du domaine.")
@@ -8007,7 +8156,7 @@ Dans les rapports d'incidents et manuels techniques, l'action importe plus que l
     with tab_en3:
         st.subheader("3. Project 3 : Critical IT Incident in a Company (Étude de Cas d'Examen)")
         st.markdown("""
-<div class='ciel-card' style='border-left: 6px solid #ef4444 !important; background: rgba(255,69,58,0.06);'>
+<div class='ciel-card' style='border-left: 6px solid var(--red) !important; background: rgba(255,69,58,0.06);'>
     <h4 style='color: var(--red); margin-top:0;'>🚨 Mission Statement (Oral Exam Scenario)</h4>
     <p>You are an IT technical team (BTS CIEL) called urgently by a medium-sized company (around 45 employees). A major IT incident is seriously disrupting the company's activity. Your mission is to analyse the situation, propose technical solutions, and communicate professionally with managers and employees.</p>
 </div>
@@ -8094,9 +8243,10 @@ elif page == '📶 Réseaux & Télécoms':
                 ans_map = {}
                 for idx_q, qitem in enumerate(q_list):
                     st.markdown(f"<b>Q{idx_q+1} : {qitem['q']}</b>", unsafe_allow_html=True)
-                    ans_map[idx_q] = st.radio(f"Choix Q{idx_q+1}:", qitem['options'], key=f"r_net_{chap_net}_{idx_q}", label_visibility='collapsed')
+                    ans_map[idx_q] = st.radio(f"Choix Q{idx_q+1}:", qitem['options'], key=f"r_net_{chap_net}_{idx_q}", label_visibility='collapsed', index=None)
                 submit_net = st.form_submit_button("Valider mes 10 réponses", type="primary")
             if submit_net:
+                avertir_sans_reponse(ans_map.get(i) for i in range(len(q_list)))
                 sc = sum(1 for idx_q, qitem in enumerate(q_list) if ans_map.get(idx_q) == qitem['rep'])
                 earned = sc * 15
                 add_user_points(earned, f"quiz_{chap_net}")
@@ -8105,7 +8255,7 @@ elif page == '📶 Réseaux & Télécoms':
                     if ans_map.get(idx_q) == qitem['rep']:
                         st.write(f"✅ Q{idx_q+1} : {qitem['expl']}")
                     else:
-                        st.write(f"❌ Q{idx_q+1} : Votre choix '{ans_map.get(idx_q)}' | Bonne réponse : **{qitem['rep']}** ({qitem['expl']})")
+                        st.write(f"❌ Q{idx_q+1} : Votre choix : {ans_map.get(idx_q) or 'aucune réponse'} | Bonne réponse : **{qitem['rep']}** ({qitem['expl']})")
     with sub_c2:
         st.subheader("Fiche Réflexe d'Intervention Cisco IOS")
         st.markdown("""
@@ -8142,9 +8292,10 @@ elif page == '🔒 Cybersécurité & Gouvernance':
             ans_map = {}
             for idx_q, qitem in enumerate(q_list):
                 st.markdown(f"<b>Q{idx_q+1} : {qitem['q']}</b>", unsafe_allow_html=True)
-                ans_map[idx_q] = st.radio(f"Choix Q{idx_q+1}:", qitem['options'], key=f"r_sec_{chap_sec}_{idx_q}", label_visibility='collapsed')
+                ans_map[idx_q] = st.radio(f"Choix Q{idx_q+1}:", qitem['options'], key=f"r_sec_{chap_sec}_{idx_q}", label_visibility='collapsed', index=None)
             submit_sec = st.form_submit_button("Valider mes 10 réponses", type="primary")
         if submit_sec:
+            avertir_sans_reponse(ans_map.get(i) for i in range(len(q_list)))
             sc = sum(1 for idx_q, qitem in enumerate(q_list) if ans_map.get(idx_q) == qitem['rep'])
             earned = sc * 15
             add_user_points(earned, f"quiz_{chap_sec}")
@@ -8172,9 +8323,10 @@ elif page == '💻 Programmation C++ & Python':
             ans_map = {}
             for idx_q, qitem in enumerate(q_list):
                 st.markdown(f"<b>Q{idx_q+1} : {qitem['q']}</b>", unsafe_allow_html=True)
-                ans_map[idx_q] = st.radio(f"Choix Q{idx_q+1}:", qitem['options'], key=f"r_dev_{chap_dev}_{idx_q}", label_visibility='collapsed')
+                ans_map[idx_q] = st.radio(f"Choix Q{idx_q+1}:", qitem['options'], key=f"r_dev_{chap_dev}_{idx_q}", label_visibility='collapsed', index=None)
             submit_dev = st.form_submit_button("Valider mes 10 réponses", type="primary")
         if submit_dev:
+            avertir_sans_reponse(ans_map.get(i) for i in range(len(q_list)))
             sc = sum(1 for idx_q, qitem in enumerate(q_list) if ans_map.get(idx_q) == qitem['rep'])
             earned = sc * 15
             add_user_points(earned, f"quiz_{chap_dev}")
@@ -8202,9 +8354,10 @@ elif page == '🖥️ Système Linux & Windows Server':
             ans_map = {}
             for idx_q, qitem in enumerate(q_list):
                 st.markdown(f"<b>Q{idx_q+1} : {qitem['q']}</b>", unsafe_allow_html=True)
-                ans_map[idx_q] = st.radio(f"Choix Q{idx_q+1}:", qitem['options'], key=f"r_sys_{chap_sys}_{idx_q}", label_visibility='collapsed')
+                ans_map[idx_q] = st.radio(f"Choix Q{idx_q+1}:", qitem['options'], key=f"r_sys_{chap_sys}_{idx_q}", label_visibility='collapsed', index=None)
             submit_sys = st.form_submit_button("Valider mes 10 réponses", type="primary")
         if submit_sys:
+            avertir_sans_reponse(ans_map.get(i) for i in range(len(q_list)))
             sc = sum(1 for idx_q, qitem in enumerate(q_list) if ans_map.get(idx_q) == qitem['rep'])
             earned = sc * 15
             add_user_points(earned, f"quiz_{chap_sys}")
@@ -8234,9 +8387,10 @@ elif page == '🔌 Électronique & Bus Industriels':
             ans_map = {}
             for idx_q, qitem in enumerate(q_list):
                 st.markdown(f"<b>Q{idx_q+1} : {qitem['q']}</b>", unsafe_allow_html=True)
-                ans_map[idx_q] = st.radio(f"Choix Q{idx_q+1}:", qitem['options'], key=f"r_el_{chap_el}_{idx_q}", label_visibility='collapsed')
+                ans_map[idx_q] = st.radio(f"Choix Q{idx_q+1}:", qitem['options'], key=f"r_el_{chap_el}_{idx_q}", label_visibility='collapsed', index=None)
             submit_el = st.form_submit_button("Valider mes 10 réponses", type="primary")
         if submit_el:
+            avertir_sans_reponse(ans_map.get(i) for i in range(len(q_list)))
             sc = sum(1 for idx_q, qitem in enumerate(q_list) if ans_map.get(idx_q) == qitem['rep'])
             earned = sc * 15
             add_user_points(earned, f"quiz_{chap_el}")
@@ -8308,7 +8462,7 @@ elif page == '🎯 Remédiation & Lacunes Ciblées (BTS Blanc)':
     st.markdown("<p style='color:var(--muted);'>Programme personnalisé de renforcement technique basé sur votre évaluation d'entrée pour le BTS Blanc</p>", unsafe_allow_html=True)
 
     st.markdown("""
-    <div class='ciel-card' style='border-left: 6px solid #ef4444 !important; background: rgba(255,69,58,0.06);'>
+    <div class='ciel-card' style='border-left: 6px solid var(--red) !important; background: rgba(255,69,58,0.06);'>
         <h3 style='color: var(--red); margin-top: 0;'>📋 Bilan de Session d'Évaluation & Diagnostic Technique</h3>
         <p style='color: var(--red);'>Votre évaluation met en évidence un <b>socle solide déjà validé</b> sur plusieurs piliers fondamentaux, mais révèle <b>6 lacunes conceptuelles prioritaires</b> à verrouiller impérativement avant le BTS Blanc des 9-11 décembre.</p>
         <div style='display: flex; gap: 15px; flex-wrap: wrap; margin-top: 10px;'>
@@ -8337,7 +8491,7 @@ elif page == '🎯 Remédiation & Lacunes Ciblées (BTS Blanc)':
         col_ok, col_ko = st.columns(2)
         with col_ok:
             st.markdown("""
-            <div class='ciel-card' style='border-top: 4px solid #10b981 !important;'>
+            <div class='ciel-card' style='border-top: 4px solid var(--green) !important;'>
                 <h4 style='color: var(--green); margin-top: 0;'>✅ Concepts Validés (À réviser ponctuellement)</h4>
                 <ul style='color: var(--text-2); line-height: 1.8;'>
                     <li><b>🛡️ Permissions Linux (chmod)</b> : Calcul des masques octaux (750, 644, 755), symbolique (u/g/o/a) et commande <code>chmod</code> acquis.</li>
@@ -8346,7 +8500,7 @@ elif page == '🎯 Remédiation & Lacunes Ciblées (BTS Blanc)':
                     <li><b>📶 Fondamentaux du Réseau</b> : Modèle en couches, notion d'adresse IP et distinction entre domaines de diffusion.</li>
                     <li><b>💻 Distinction Classe vs Instance</b> : Compréhension de la classe comme moule/modèle et de l'instance comme objet physique en mémoire.</li>
                 </ul>
-                <div style='background: rgba(48,209,88,0.08); padding: 10px; border-radius: 8px; border: 1px solid #a7f3d0; margin-top: 10px;'>
+                <div style='background: rgba(48,209,88,0.08); padding: 10px; border-radius: 8px; border: 1px solid var(--green); margin-top: 10px;'>
                     <span style='color: var(--green); font-weight: 600;'>📌 Statut Planning</span> : Allégement du temps d'étude sur ces modules. Maintien d'un entraînement réflexe via les flashcards (10 min/semaine).
                 </div>
             </div>
@@ -8354,7 +8508,7 @@ elif page == '🎯 Remédiation & Lacunes Ciblées (BTS Blanc)':
 
         with col_ko:
             st.markdown("""
-            <div class='ciel-card' style='border-top: 4px solid #ef4444 !important;'>
+            <div class='ciel-card' style='border-top: 4px solid var(--red) !important;'>
                 <h4 style='color: var(--red); margin-top: 0;'>🚨 Axes Prioritaires de Remédiation (Lacunes Ciblées)</h4>
                 <ul style='color: var(--text-2); line-height: 1.8;'>
                     <li><b>🔴 Rôle des Protocoles Couche 4 (TCP vs UDP)</b> : Confusion sur la connexion, les accusés ACK, le Three-Way Handshake et les en-têtes.</li>
@@ -8364,7 +8518,7 @@ elif page == '🎯 Remédiation & Lacunes Ciblées (BTS Blanc)':
                     <li><b>🔴 Virtualisation (Hyperviseurs Type 1 vs Type 2)</b> : Confusion entre exécution Bare-Metal et hyperviseur hébergé sur un OS.</li>
                     <li><b>🔴 Encapsulation en POO (C++)</b> : Principe de masquage des données via <code>private</code>/<code>public</code> et rôle des accesseurs getters/setters.</li>
                 </ul>
-                <div style='background: rgba(255,69,58,0.06); padding: 10px; border-radius: 8px; border: 1px solid #fecaca; margin-top: 10px;'>
+                <div style='background: rgba(255,69,58,0.06); padding: 10px; border-radius: 8px; border: 1px solid var(--red); margin-top: 10px;'>
                     <span style='color: var(--red); font-weight: 600;'>🎯 Objectif Remédiation</span> : Révision active des 6 fiches ci-jointes + vidéos ciblées + validation sur le mini-quiz.
                 </div>
             </div>
@@ -8756,11 +8910,12 @@ int main() {
         score_rem = 0
         for idx, item in enumerate(rem_q):
             st.markdown(f"**{item['q']}**")
-            ans = st.radio(f"Votre choix (Q{idx+1}) :", item['opts'], key=f"rad_rem_{idx}")
+            ans = st.radio(f"Votre choix (Q{idx+1}) :", item['opts'], key=f"rad_rem_{idx}", index=None)
             if ans == item['rep']:
                 score_rem += 1
 
         if st.button('Valider mes réponses de Remédiation', type='primary', key='btn_val_rem'):
+            avertir_sans_reponse(st.session_state.get(f'rad_rem_{i}') for i in range(len(rem_q)))
             if score_rem == 6:
                 st.success(f"🏆 **Félicitations ! Score parfait : {score_rem} / 6 !** Vos 6 lacunes sont parfaitement maîtrisées.")
                 st.balloons()
