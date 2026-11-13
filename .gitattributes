@@ -1,0 +1,2 @@
+# Scripts shell toujours en LF, même extraits sous Windows (core.autocrlf=true) : bash échoue sur les fins de ligne CRLF.
+*.sh text eol=lf
