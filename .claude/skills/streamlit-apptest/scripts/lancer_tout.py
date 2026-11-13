@@ -22,7 +22,7 @@ for _flux in (sys.stdout, sys.stderr):              # accents lisibles dans la c
 
 ICI = Path(__file__).resolve().parent
 PROJET = ICI.parents[3]          # .claude/skills/streamlit-apptest/scripts -> racine du projet
-SERIES = ['pages', 'comptes', 'examen', 'accueil', 'alias', 'clarify', 'labs']
+SERIES = ['pages', 'comptes', 'examen', 'accueil', 'alias', 'clarify', 'labs', 'securite']
 
 
 def lancer(nom, app, sortie):
@@ -70,6 +70,10 @@ def main():
     copie = sortie / 'app' / 'app-v30.py'   # on teste une copie, jamais le fichier du projet
     copie.parent.mkdir(exist_ok=True)
     shutil.copy2(a.app, copie)
+    paquet = Path(a.app).resolve().parent / 'ciel'          # v44 : modules importés par l'appli
+    if paquet.is_dir():
+        shutil.copytree(paquet, copie.parent / 'ciel', dirs_exist_ok=True,
+                        ignore=shutil.ignore_patterns('__pycache__'))
 
     print(f'Appli testée : {a.app}\nCopie : {copie}\nJournaux : {sortie}\nSéries : {", ".join(series)}\n', flush=True)
     # « pages » est la plus longue : elle tourne en parallèle des autres, lancées l'une après l'autre

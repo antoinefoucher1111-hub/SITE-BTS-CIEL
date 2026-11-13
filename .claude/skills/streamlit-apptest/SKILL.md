@@ -47,10 +47,13 @@ Ce Skill contient les 7 séries de tests qui ont validé les versions v36 à v43
 | `NAV`, `NAV_ALIAS`, pages regroupées, adresses `?p=` | `alias` |
 | Messages de résultat et d'XP, `xp_txt`, historique vide | `clarify` |
 | Exercices de terminal (`render_extended_lab`, ateliers Cyber A/B/C) | `labs` |
+| Connexion, limite d'essais, code admin, import de sauvegarde, planning E6, `ciel/securite.py` | `securite` + `python -m pytest tests` |
 | `add_user_points`, système d'XP | `comptes`, `examen`, `clarify`, `labs` |
 | Avant un commit, un tag ou une fusion | toutes |
 
-Résultats de référence (v43) : pages 132, comptes 32, examen 24, accueil 8, alias 28, clarify 8, labs 52. Soit 284 réussis, 0 échoué.
+Résultats de référence (v44, étape 0) : pages 132, comptes 32, examen 24, accueil 8, alias 28, clarify 8, labs 52, securite 19. Soit 303 réussis, 0 échoué. Tests unitaires (`python -m pytest tests`, outil listé dans `requirements-dev.txt`) : 20 réussis.
+
+Depuis la v44, l'appli importe le paquet `ciel/` : `lancer_tout.py` le copie à côté de la copie testée. Pour lancer un harnais à la main, copier aussi `ciel/` à côté de l'appli.
 
 ## Ce qu'AppTest ne voit pas
 

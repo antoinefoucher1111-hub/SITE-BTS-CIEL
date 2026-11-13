@@ -29,6 +29,7 @@ e6_tasks_v7.json
 
 # Python, environnements virtuels et fichiers temporaires
 __pycache__/
+.pytest_cache/
 *.py[cod]
 .venv/
 venv/

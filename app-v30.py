@@ -560,6 +560,17 @@ DEFAULT_USER = 'Invité BTS CIEL'
 import re as _re_s
 import hmac as _hmac
 import secrets as _secrets_mod
+import sys as _sys_s
+_DOSSIER_APP = os.path.dirname(os.path.abspath(__file__))
+if _DOSSIER_APP not in _sys_s.path:
+    _sys_s.path.insert(0, _DOSSIER_APP)
+from ciel import securite as _sec      # v44 : limite d'essais, échappement HTML, validation des sauvegardes
+
+
+@st.cache_resource(show_spinner=False)
+def _limiteur():
+    """Un seul compteur d'échecs pour tout le serveur : recharger la page ne le remet pas à zéro."""
+    return _sec.LimiteurEssais()
 
 
 def _user_id(name):
@@ -723,20 +734,31 @@ def _emettre_code_secours(data):
     return code
 
 
-def _trop_d_essais():
+def _trop_d_essais(cle=None):
     ss = st.session_state
     now = _time.time()
     if ss.get('_login_block', 0) > now:
         return f"Trop d'essais. Attends {int(ss._login_block - now)} secondes."
+    if cle:                                     # v44 : compteur du serveur, par compte (survit au rechargement)
+        attente = _limiteur().attente(cle)
+        if attente:
+            return _sec.message_attente(attente)
     return None
 
 
-def _compter_echec():
+def _compter_echec(cle=None):
     ss = st.session_state
     ss['_login_fail'] = ss.get('_login_fail', 0) + 1
     if ss['_login_fail'] >= 5:
         ss['_login_block'] = _time.time() + 30
         ss['_login_fail'] = 0
+    if cle:
+        _limiteur().echec(cle)
+
+
+def _essai_reussi(cle):
+    st.session_state['_login_fail'] = 0
+    _limiteur().succes(cle)
 
 
 def get_current_user_name():
@@ -874,8 +896,8 @@ def account_create(name, pwd, pwd2, garder_invite=True):
         return False, "Le pseudo doit faire 3 à 20 caractères (lettres, chiffres, espace, - _ .)."
     if _user_id(name) == _user_id(DEFAULT_USER) or _user_id(name) in ('invité', 'invite', 'admin'):
         return False, "Ce pseudo est réservé."
-    if len(pwd) < 6:
-        return False, "Le mot de passe doit faire au moins 6 caractères."
+    if not _sec.mot_de_passe_valide(pwd):
+        return False, f"Le mot de passe doit faire au moins {_sec.LONGUEUR_MIN_MDP} caractères."
     if pwd != pwd2:
         return False, "Les deux mots de passe ne sont pas identiques."
     ok, existing = _store_call(get_store().get, _user_id(name))
@@ -883,9 +905,10 @@ def account_create(name, pwd, pwd2, garder_invite=True):
         return False, "Impossible de joindre la base de données. Réessaie dans un instant."
     if existing and (existing.get('_pwd') or (existing.get('progress') or {}).get('_pwd')):
         return False, "Ce pseudo est déjà pris."
-    if existing:                                    # ancien profil sans mot de passe : on le récupère
-        data = _repair_user_data(existing, name)
-    elif garder_invite and is_guest() and st.session_state.get('_profile'):
+    if existing:                                    # v44 : ancien profil sans mot de passe -> via l'administrateur
+        return False, ("Ce pseudo appartient à un ancien profil sans mot de passe. Pour le récupérer, "
+                       "demande un mot de passe temporaire à l'administrateur du site.")
+    if garder_invite and is_guest() and st.session_state.get('_profile'):
         data = st.session_state._profile           # on garde ce qui a été fait en invité
         data['username'] = name
         data['created_at'] = datetime.now().strftime('%Y-%m-%d %H:%M')
@@ -903,23 +926,21 @@ def account_create(name, pwd, pwd2, garder_invite=True):
 
 
 def account_login(name, pwd):
-    ss = st.session_state
-    now = _time.time()
-    if ss.get('_login_block', 0) > now:
-        return False, f"Trop d'essais. Attends {int(ss._login_block - now)} secondes."
+    cle = 'login:' + _user_id(name)
+    bloque = _trop_d_essais(cle)
+    if bloque:
+        return False, bloque
     ok, data = _store_call(get_store().get, _user_id(name))
     if not ok:
         return False, "Impossible de joindre la base de données. Réessaie dans un instant."
     stored = (data or {}).get('_pwd') or ((data or {}).get('progress') or {}).get('_pwd')
     if not data or not stored or not _check_pwd(pwd, stored):
-        ss['_login_fail'] = ss.get('_login_fail', 0) + 1
-        if ss['_login_fail'] >= 5:
-            ss['_login_block'] = now + 30
-            ss['_login_fail'] = 0
+        _compter_echec(cle)
         if data and not stored:
-            return False, "Ce profil date d'une ancienne version et n'a pas de mot de passe : utilise « Créer un compte » avec le même pseudo pour le récupérer."
+            return False, ("Ce profil date d'une ancienne version et n'a pas de mot de passe : "
+                           "demande un mot de passe temporaire à l'administrateur du site pour le récupérer.")
         return False, "Pseudo ou mot de passe incorrect."
-    ss['_login_fail'] = 0
+    _essai_reussi(cle)
     data = _repair_user_data(data, data.get('username') or name.strip())
     data['last_login'] = datetime.now().strftime('%Y-%m-%d %H:%M')
     _activate_profile(data)
@@ -928,18 +949,19 @@ def account_login(name, pwd):
 
 
 def account_reset_with_code(name, code, pwd, pwd2):
-    bloque = _trop_d_essais()
+    cle = 'secours:' + _user_id(name)
+    bloque = _trop_d_essais(cle)
     if bloque:
         return False, bloque
-    if len(pwd) < 6 or pwd != pwd2:
-        return False, "Le nouveau mot de passe doit faire 6 caractères minimum et être tapé deux fois pareil."
+    if not _sec.mot_de_passe_valide(pwd) or pwd != pwd2:
+        return False, f"Le nouveau mot de passe doit faire {_sec.LONGUEUR_MIN_MDP} caractères minimum et être tapé deux fois pareil."
     ok, data = _store_call(get_store().get, _user_id(name))
     if not ok:
         return False, "Impossible de joindre la base de données. Réessaie dans un instant."
     if not data or not data.get('_recovery') or not _check_pwd(_norm_code(code), data['_recovery']):
-        _compter_echec()
+        _compter_echec(cle)
         return False, "Pseudo ou code de secours incorrect."
-    st.session_state['_login_fail'] = 0
+    _essai_reussi(cle)
     data = _repair_user_data(data, data.get('username') or name.strip())
     data['_pwd'] = _hash_pwd(pwd)
     _emettre_code_secours(data)                      # l'ancien code ne marche plus
@@ -958,15 +980,16 @@ def _code_admin():
 
 
 def admin_verifier(code):
-    bloque = _trop_d_essais()
+    bloque = _trop_d_essais('admin')
     if bloque:
         return False, bloque
     attendu = _code_admin()
     if not attendu:
         return False, "Aucun code administrateur n'est configuré dans les Secrets de Streamlit."
     if not _hmac.compare_digest(code.strip().encode(), attendu.encode()):
-        _compter_echec()
+        _compter_echec('admin')
         return False, "Code administrateur incorrect."
+    _essai_reussi('admin')
     st.session_state['_admin_ok'] = True
     return True, "Mode administrateur activé pour cette session."
 
@@ -1371,10 +1394,10 @@ def render_page_analyse_scores(embarque=False):
                 if is_unlocked:
                     st.markdown(f"""
                     <div class='ciel-card' style='border: 1px solid var(--green) !important; background: color-mix(in srgb, var(--green) 10%, transparent); text-align: center; padding: 20px 14px;'>
-                        <div style='font-size: 2.5rem; margin-bottom: 6px;'>{b_info['icon']}</div>
-                        <h4 style='color: var(--green); margin: 0;'>{b_info['nom']}</h4>
-                        <p style='font-size: var(--fs-sm); color: var(--text-2); margin: 6px 0;'>{b_info['desc']}</p>
-                        <span class='badge badge-emerald'>Débloqué le {b_info.get('date', 'Récemment')}</span>
+                        <div style='font-size: 2.5rem; margin-bottom: 6px;'>{_sec.echapper(b_info['icon'])}</div>
+                        <h4 style='color: var(--green); margin: 0;'>{_sec.echapper(b_info['nom'])}</h4>
+                        <p style='font-size: var(--fs-sm); color: var(--text-2); margin: 6px 0;'>{_sec.echapper(b_info['desc'])}</p>
+                        <span class='badge badge-emerald'>Débloqué le {_sec.echapper(b_info.get('date', 'Récemment'))}</span>
                     </div>
                     """, unsafe_allow_html=True)
                 else:
@@ -3155,7 +3178,7 @@ import hashlib as _hashlib
 import unicodedata as _ud
 from datetime import date as _date
 
-APP_VERSION = 'v43'
+APP_VERSION = 'v44'
 DATE_BTS_BLANC_DEFAUT = '2026-12-09'
 LEITNER_JOURS = {1: 1, 2: 2, 3: 4, 4: 8, 5: 16}   # boîte -> nombre de jours avant de revoir
 NOUVELLES_CARTES_PAR_JOUR = 15
@@ -3243,7 +3266,7 @@ def build_question_pool():
     def add(q, mod, chap):
         opts = q.get('options') or q.get('opts') or []
         txt = clean_q(q.get('q', ''))
-        qid = _qid(txt)
+        qid = q.get('id') or _qid(txt)      # v44 : un « id » explicite garde le lien si le texte est corrigé
         if not txt or qid in seen or q.get('rep') not in opts:
             return
         seen.add(qid)
@@ -3287,6 +3310,7 @@ def _ud_get():
     d.setdefault('activity', {})
     d.setdefault('cstats', {})
     d.setdefault('prefs', {})
+    d.setdefault('schema_version', 1)   # v44 : version du format de profil
     return d
 
 
@@ -5052,7 +5076,7 @@ def render_page_compte():
         with t_new:
             with st.form('v33_create'):
                 n = st.text_input("Choisis un pseudo (3 à 20 caractères)", key='v33_new_name')
-                p1 = st.text_input("Mot de passe (6 caractères minimum)", type='password', key='v33_new_pwd')
+                p1 = st.text_input(f"Mot de passe ({_sec.LONGUEUR_MIN_MDP} caractères minimum)", type='password', key='v33_new_pwd')
                 p2 = st.text_input("Retape le mot de passe", type='password', key='v33_new_pwd2')
                 keep = st.checkbox("Garder ce que j'ai déjà fait en invité", value=True, key='v33_keep_guest')
                 go = st.form_submit_button("Créer mon compte", type='primary', use_container_width=True)
@@ -5089,7 +5113,7 @@ def render_page_compte():
         return
 
     d = _ud_get()
-    st.markdown(f"<p class='texte-attenue'>Connecté en tant que <b>{d['username']}</b> · compte créé le {str(d.get('created_at', ''))[:10]}</p>", unsafe_allow_html=True)
+    st.markdown(f"<p class='texte-attenue'>Connecté en tant que <b>{_sec.echapper(d['username'])}</b> · compte créé le {_sec.echapper(str(d.get('created_at', ''))[:10])}</p>", unsafe_allow_html=True)
     t1, t2, t3, t4 = st.tabs(["Réglages", "Mot de passe", "Sauvegarde", "Zone sensible"])
 
     with t1:
@@ -5127,8 +5151,8 @@ def render_page_compte():
         if go:
             if not _check_pwd(old, d.get('_pwd', '')):
                 st.error("Le mot de passe actuel est incorrect.")
-            elif len(n1) < 6 or n1 != n2:
-                st.error("Le nouveau mot de passe doit faire 6 caractères minimum et être tapé deux fois pareil.")
+            elif not _sec.mot_de_passe_valide(n1) or n1 != n2:
+                st.error(f"Le nouveau mot de passe doit faire {_sec.LONGUEUR_MIN_MDP} caractères minimum et être tapé deux fois pareil.")
             else:
                 d['_pwd'] = _hash_pwd(n1)
                 update_active_user_data(d)
@@ -5152,10 +5176,11 @@ def render_page_compte():
         up = st.file_uploader("Réimporter une sauvegarde (.json)", type=['json'], key='v33_up')
         if up is not None and st.button("Remplacer ma progression par ce fichier", key='v33_up_go', type='primary'):
             try:
-                raw = json.load(up)
-                prof = raw.get('user_profile') if isinstance(raw, dict) else None
-                if not isinstance(prof, dict) or 'points' not in prof:
-                    raise ValueError("ce fichier n'est pas une sauvegarde CIEL Studio")
+                if (getattr(up, 'size', 0) or 0) > _sec.TAILLE_MAX_SAUVEGARDE:
+                    raise ValueError("fichier trop gros")
+                ok_s, prof = _sec.valider_sauvegarde(json.load(up), getattr(up, 'size', None))   # v44 : liste blanche, types, tailles
+                if not ok_s:
+                    raise ValueError(prof)
                 prof['username'] = d['username']
                 prof['_pwd'] = d['_pwd']
                 if d.get('_recovery'):
@@ -5259,7 +5284,7 @@ def _svg_courbe(valeurs, labels):
                    f"style='stroke:var(--line);stroke-width:1;{'stroke-dasharray:4 4;' if g == 10 else ''}'/>"
                    f"<text x='4' y='{h - pad - (h - 2 * pad) * g / 20 + 4:.1f}' style='fill:var(--faint);font-size:11px;'>{g}</text>"
                    for g in (0, 10, 20))
-    dots = ''.join(f"<circle cx='{x:.1f}' cy='{y:.1f}' r='4' style='fill:var(--bg);stroke:var(--text);stroke-width:2;'><title>{lab} : {v:.1f}/20</title></circle>"
+    dots = ''.join(f"<circle cx='{x:.1f}' cy='{y:.1f}' r='4' style='fill:var(--bg);stroke:var(--text);stroke-width:2;'><title>{_sec.echapper(lab)} : {v:.1f}/20</title></circle>"
                    for x, y, v, lab in zip(xs, ys, valeurs, labels))
     return (f"<svg viewBox='0 0 {w} {h}' style='width:100%;height:auto;display:block;'>"
             "<defs><linearGradient id='cg' x1='0' x2='1'><stop offset='0' style='stop-color:var(--red)'/><stop offset='1' style='stop-color:var(--blue)'/></linearGradient>"
@@ -8081,18 +8106,20 @@ elif page == "📝 Grand Quiz d'Examen":
 elif page == '📋 Planning de Projet E6 (Gantt)':
     page_header('E6 : planning Gantt', 'Planning de projet E6 & diagramme de Gantt')
     st.markdown("<p class='texte-attenue'>Ajoute les étapes de ton projet et obtiens ton planning pour la soutenance</p>", unsafe_allow_html=True)
-    PROJ_FILE = 'e6_tasks_v7.json'
-    if os.path.exists(PROJ_FILE):
-        try:
-            with open(PROJ_FILE, 'r') as f:
-                t_data = json.load(f)
-        except:
-            t_data = []
-    else:
+    # v44 : les tâches sont rangées dans le profil de l'élève (ou dans la session pour un invité),
+    # et non plus dans un fichier commun à tous les élèves sur le serveur.
+    _gd = _ud_get()
+    t_data = _gd.get('e6_tasks')
+    if not isinstance(t_data, list) or not t_data:
         td = datetime.now().date()
         t_data = [{'nom': '1. Cahier des charges & CdCf', 'debut': (td - timedelta(days=25)).strftime('%Y-%m-%d'), 'fin': (td - timedelta(days=15)).strftime('%Y-%m-%d'), 'avancement': 100, 'resp': 'Équipe'}, {'nom': '2. Modélisation SysML & UML', 'debut': (td - timedelta(days=15)).strftime('%Y-%m-%d'), 'fin': (td - timedelta(days=5)).strftime('%Y-%m-%d'), 'avancement': 100, 'resp': 'Étudiant A'}, {'nom': '3. Développement C++ & Pilotes SPI', 'debut': (td - timedelta(days=5)).strftime('%Y-%m-%d'), 'fin': (td + timedelta(days=10)).strftime('%Y-%m-%d'), 'avancement': 60, 'resp': 'Étudiant A'}, {'nom': '4. Passerelle Python & Base de Données', 'debut': td.strftime('%Y-%m-%d'), 'fin': (td + timedelta(days=15)).strftime('%Y-%m-%d'), 'avancement': 30, 'resp': 'Étudiant B'}, {'nom': '5. Sécurisation TLS & Durcissement Linux', 'debut': (td + timedelta(days=10)).strftime('%Y-%m-%d'), 'fin': (td + timedelta(days=22)).strftime('%Y-%m-%d'), 'avancement': 0, 'resp': 'Étudiant B'}, {'nom': '6. Plan de Validation Logicielle (PVL)', 'debut': (td + timedelta(days=20)).strftime('%Y-%m-%d'), 'fin': (td + timedelta(days=30)).strftime('%Y-%m-%d'), 'avancement': 0, 'resp': 'Équipe'}]
-        with open(PROJ_FILE, 'w') as f:
-            json.dump(t_data, f)
+    def _tache_ok(tk):
+        try:
+            datetime.strptime(tk['debut'], '%Y-%m-%d'); datetime.strptime(tk['fin'], '%Y-%m-%d')
+            return isinstance(tk['nom'], str) and isinstance(tk['resp'], str) and 0 <= float(tk['avancement']) <= 100
+        except Exception:
+            return False
+    t_data = [tk for tk in t_data if isinstance(tk, dict) and _tache_ok(tk)]
     c_g1, c_g2 = st.columns([1, 2])
     with c_g1:
         st.subheader('Ajouter une tâche de projet :')
@@ -8103,9 +8130,9 @@ elif page == '📋 Planning de Projet E6 (Gantt)':
             t_pct = st.slider('Avancement (%) :', 0, 100, 0)
             t_r = st.text_input('Responsable :', 'Mon Nom')
             if st.form_submit_button('Ajouter au planning'):
-                t_data.append({'nom': t_nom, 'debut': t_deb.strftime('%Y-%m-%d'), 'fin': t_fin.strftime('%Y-%m-%d'), 'avancement': t_pct, 'resp': t_r})
-                with open(PROJ_FILE, 'w') as f:
-                    json.dump(t_data, f)
+                t_data.append({'nom': t_nom[:120], 'debut': t_deb.strftime('%Y-%m-%d'), 'fin': t_fin.strftime('%Y-%m-%d'), 'avancement': t_pct, 'resp': t_r[:60]})
+                _gd['e6_tasks'] = t_data[-50:]
+                update_active_user_data(_gd)
                 st.rerun()
     with c_g2:
         st.subheader('Planning de Gantt dynamique')
