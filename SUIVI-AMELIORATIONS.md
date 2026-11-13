@@ -1,8 +1,8 @@
 # CIEL Studio : suivi des améliorations
 
-Mis à jour le 13/11/2026. Version stable : **v43** (dans `app-v30.py`, le nom attendu par l'appli), commitée dans `6cf0557` sur la branche locale `v43-stable`, avec le tag local annoté `v43`. Les v39 à v42 n'ont pas de commit propre : elles sont regroupées dans ce commit v43 et restent disponibles dans `sauvegardes/`. La v38 reste commitée sur la branche locale `v38-contrastes-mobile`. **Rien n'est poussé sur GitHub, fusionné dans `main` ou déployé.** Détail plus bas, section « Stabilisation de la v43 dans Git ».
+Mis à jour le 13/11/2026. Version stable en ligne : **v43** (fusionnée dans `main`, tag local `v43` sur `6cf0557`). Version en cours : **v44, étape 0 terminée** sur la branche locale `v44-dev`, **non commitée**. Rien de la v44 n'est poussé, fusionné ni déployé. Détail plus bas, section « v44 — étape 0 ».
 
-Sauvegardes de chaque étape dans `sauvegardes/` : `app-v35-origine.py`, `app-v36-etape1.py`, `app-v36-avant-etape2.py`, `app-v37-avant-etape3.py`, `app-v38-avant-etape4.py`, `app-v39-polish.py` (v39 validée, empreinte SHA-256 `cf0ef305…0514c`), `app-v40-distill.py` (v40, empreinte `8605e916…`), `app-v40-avant-etape6.py`, `app-v41-typeset-layout.py` (v41, empreinte `f6fcb563…`), `app-v41-avant-etape7.py`, `app-v42-clarify.py` (v42, empreinte `e5f2f1a9…`), `app-v42-avant-etape8.py`, `app-v43-polish-final.py` (v43 finale, empreinte `7b3ce69b…18471`).
+Sauvegardes de chaque étape dans `sauvegardes/` : `app-v35-origine.py`, `app-v36-etape1.py`, `app-v36-avant-etape2.py`, `app-v37-avant-etape3.py`, `app-v38-avant-etape4.py`, `app-v39-polish.py` (v39 validée, empreinte SHA-256 `cf0ef305…0514c`), `app-v40-distill.py` (v40, empreinte `8605e916…`), `app-v40-avant-etape6.py`, `app-v41-typeset-layout.py` (v41, empreinte `f6fcb563…`), `app-v41-avant-etape7.py`, `app-v42-clarify.py` (v42, empreinte `e5f2f1a9…`), `app-v42-avant-etape8.py`, `app-v43-polish-final.py` (v43 finale, empreinte `7b3ce69b…18471`), `app-v43-avant-v44.py`, `app-v44-etape0.py` (empreinte `c4feac5e…`).
 
 | Étape | Problèmes détectés | Corrigés | Restants | Tests exécutés | Réussis | Échoués |
 |---|---|---|---|---|---|---|
@@ -15,12 +15,15 @@ Sauvegardes de chaque étape dans `sauvegardes/` : `app-v35-origine.py`, `app-v3
 | 6. TYPESET + LAYOUT | 15 | 15 | 0 | 259 | 259 | 0 |
 | 7. CLARIFY (textes et libellés) | 22 | 22 | 0 | 286 | 286 | 0 |
 | 8. POLISH FINAL (audit complet) | 5 | 5 | 0 | 466 | 466 | 0 |
+| v44 — 0. Sécurité et socle | 5 | 5 | 0 | 334 | 334 | 0 |
 
 ## Fichiers et sauvegardes
 
 | Fichier | État |
 |---|---|
-| `app-v30.py` | v43 = v36 + corrections des étapes 2 à 8 |
+| `app-v30.py` | v44 (étape 0) = v43 + renforcements de sécurité et socle |
+| `ciel/` | Nouveau (v44) : modules sans Streamlit, testables (`ciel/securite.py`) |
+| `tests/`, `requirements-dev.txt` | Nouveaux (v44) : tests unitaires pytest et outil de développement |
 | `app-v36.py` | v36 de l'étape 1 (inchangé) |
 | `docs/index.html`, `docs/sw.js` | Changements de l'étape 1 (`ciel-v3`). L'étape 2 n'a rien changé ici. |
 | `.streamlit/config.toml` | Inchangé |
@@ -690,6 +693,58 @@ Deux points relevés pendant la vérification, sans lien avec l'appli :
 - Ce n'est pas un vrai changement. Il n'est pas commité, et aucune restauration n'a été faite. On pourra le faire disparaître plus tard, si on le souhaite :
   - `git add docs/manifest.webmanifest` met seulement à jour la taille mémorisée et ne produit aucun commit, puisque le contenu est identique ;
   - ou réextraire le fichier depuis Git, ce qui le remet en CRLF.
+
+## v44 — étape 0 : sécurité et socle (13/11)
+
+Accord : « Oui, lance l'étape 0 ». Sauvegarde avant modification : `sauvegardes/app-v43-avant-v44.py`. Sauvegarde finale : `sauvegardes/app-v44-etape0.py` (SHA-256 `c4feac5ed22bebf819e6010e8c750dada412b7eb6186cc5a67a3fceeb5afbfd6`) et `sauvegardes/ciel-v44-etape0/`.
+
+Le détail technique de l'audit de sécurité n'est volontairement pas recopié ici : le dépôt est public et la v43 en ligne n'a pas encore ces renforcements.
+
+### Renforcements de sécurité (5)
+
+| # | Gravité | Domaine | Renforcement |
+|---|---|---|---|
+| S1 | Haute | Connexion, code de secours, code administrateur | Limite d'essais commune à tout le serveur, par compte, avec attente croissante (30 s à 5 min) |
+| S2 | Moyenne | Anciens profils sans mot de passe | Récupération uniquement par l'administrateur (mot de passe temporaire) |
+| S3 | Basse | Import de sauvegarde, affichage du profil | Validation complète du fichier (liste blanche, types, tailles, badges officiels) et échappement des textes du profil |
+| S4 | Basse | Mots de passe | 8 caractères minimum pour tout nouveau mot de passe ; les comptes existants ne sont pas touchés |
+| S5 | Moyenne | Planning E6 (Gantt) | Les tâches sont rangées dans le profil de chaque élève (ou dans la session d'un invité), et non plus dans un fichier commun du serveur |
+
+### Socle
+
+- **B1 Identifiants de questions stables** : un champ `id` explicite l'emporte sur l'identifiant calculé à partir du texte. Les 421 identifiants de la v43 sont figés dans `tests/ids_v43.json`. Aucun identifiant n'a changé.
+- **B2 `schema_version`** : ajouté au profil (valeur 1).
+- **B3 Tests unitaires** : `tests/test_securite.py` (17), `tests/test_ids.py` (3), `requirements-dev.txt` (pytest, jamais installé en production).
+- Mise en cache des banques de questions : non faite, reportée à une étape séparée.
+
+Préservés : logique d'XP (`add_user_points` identique, 51 appels), 213 clés de widgets sans doublon, 3 thèmes, 44 pages, police Inter, aucune donnée ni table Supabase modifiée.
+
+### Tests de la v44 étape 0 (334 réussis, 0 échoué)
+
+| Test | Résultat |
+|---|---|
+| Non-régression : pages 132, comptes 32, examen 24, accueil 8, anciennes adresses 28, messages 8, exercices 52 | 284 réussis |
+| Nouvelle série `securite` (AppTest, stockage local) | 19 réussis |
+| Tests unitaires pytest | 20 réussis |
+| Navigateur : Mon compte, Mes stats, Gantt × 3 thèmes à 1280 px, Mon compte et Gantt à 375 px (contrastes, débordements) | 11 réussis |
+
+### Incidents de travail
+
+- Série `securite` : deux contrôles du test étaient faux (date affichée tronquée à 10 caractères ; renvoi vers l'accueil après connexion). L'appli était correcte ; les contrôles ont été corrigés et renforcés.
+- Navigateur : un « 0 » de curseur sur la page Gantt mesuré à 2,30:1. Faux positif de la mesure (la valeur est au-dessus du curseur, sur le fond de la page) ; élément non modifié.
+
+### Limites connues
+
+- Le compteur d'essais repart à zéro si le serveur redémarre.
+- Un élève peut retarder la connexion d'un camarade de 5 minutes au plus (prix d'un compteur par compte).
+- Les plannings E6 de l'ancien fichier commun ne sont pas repris.
+
+### Vérifications restantes (non faites ici)
+
+- Dans le tableau de bord Supabase : règles d'accès de la table `profiles`, type de clé utilisée, présence d'anciens profils sans mot de passe.
+- Longueur du code administrateur (au moins 16 caractères conseillés).
+- Audit des dépendances Python (aucun outil d'audit lancé).
+- Comportement en ligne après déploiement (vrai Supabase, téléphone).
 
 ## Points laissés en attente à l'étape 2 : soldés à l'étape 4
 

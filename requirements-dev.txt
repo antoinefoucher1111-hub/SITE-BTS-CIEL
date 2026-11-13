@@ -1,0 +1,4 @@
+# Outils de développement uniquement (jamais installés sur Streamlit Cloud, qui lit requirements.txt).
+# Installation : python -m pip install -r requirements.txt -r requirements-dev.txt
+# Tests unitaires : python -m pytest tests
+pytest>=8,<9
