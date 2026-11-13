@@ -1,8 +1,8 @@
 # CIEL Studio : suivi des améliorations
 
-Mis à jour le 12/11/2026. Version de travail : **v38** (dans `app-v30.py`, le nom attendu par l'appli). Commité sur la branche locale `v38-contrastes-mobile` ; non fusionné dans `main`, non poussé, non déployé.
+Mis à jour le 13/11/2026. Version de travail : **v43** (dans `app-v30.py`, le nom attendu par l'appli). La v38 est commitée sur la branche locale `v38-contrastes-mobile`. Les v39 à v43 (étapes 4 à 8) ne sont pas encore commitées. Rien n'est fusionné dans `main`, poussé ou déployé.
 
-Sauvegardes de chaque étape dans `sauvegardes/` : `app-v35-origine.py`, `app-v36-etape1.py`, `app-v36-avant-etape2.py`, `app-v37-avant-etape3.py`.
+Sauvegardes de chaque étape dans `sauvegardes/` : `app-v35-origine.py`, `app-v36-etape1.py`, `app-v36-avant-etape2.py`, `app-v37-avant-etape3.py`, `app-v38-avant-etape4.py`, `app-v39-polish.py` (v39 validée, empreinte SHA-256 `cf0ef305…0514c`), `app-v40-distill.py` (v40, empreinte `8605e916…`), `app-v40-avant-etape6.py`, `app-v41-typeset-layout.py` (v41, empreinte `f6fcb563…`), `app-v41-avant-etape7.py`, `app-v42-clarify.py` (v42, empreinte `e5f2f1a9…`), `app-v42-avant-etape8.py`, `app-v43-polish-final.py` (v43 finale, empreinte `7b3ce69b…18471`).
 
 | Étape | Problèmes détectés | Corrigés | Restants | Tests exécutés | Réussis | Échoués |
 |---|---|---|---|---|---|---|
@@ -10,20 +10,25 @@ Sauvegardes de chaque étape dans `sauvegardes/` : `app-v35-origine.py`, `app-v3
 | 2. Contrastes et thèmes | 63 | 63 | 0 | 19 | 19 | 0 |
 | Vérification de la v37 | – | – | – | 225 | 223 | 2 (défauts de la v35, traités à l'étape 3) |
 | 3. ADAPT (téléphone) | 25 | 25 | 0 | 267 | 267 | 0 |
+| 4. POLISH (harmonisation) | 146 | 146 | 0 | 421 | 421 | 0 |
+| 5. DISTILL (menu et navigation) | 11 | 11 | 0 | 268 | 268 | 0 |
+| 6. TYPESET + LAYOUT | 15 | 15 | 0 | 259 | 259 | 0 |
+| 7. CLARIFY (textes et libellés) | 22 | 22 | 0 | 286 | 286 | 0 |
+| 8. POLISH FINAL (audit complet) | 5 | 5 | 0 | 466 | 466 | 0 |
 
 ## Fichiers et sauvegardes
 
 | Fichier | État |
 |---|---|
-| `app-v30.py` | v38 = v36 + corrections des étapes 2 et 3 |
+| `app-v30.py` | v43 = v36 + corrections des étapes 2 à 8 |
 | `app-v36.py` | v36 de l'étape 1 (inchangé) |
 | `docs/index.html`, `docs/sw.js` | Changements de l'étape 1 (`ciel-v3`). L'étape 2 n'a rien changé ici. |
 | `.streamlit/config.toml` | Inchangé |
-| `sauvegardes/` (sur ce poste, hors git) | `app-v35-origine.py`, `app-v36-etape1.py`, `app-v36-avant-etape2.py`, `app-v37-avant-etape3.py`, `index-v35.html`, `index-etape1.html`, `sw-v35.js`, `sw-etape1.js` |
+| `sauvegardes/` (sur ce poste, hors git) | `app-v35-origine.py`, `app-v36-etape1.py`, `app-v36-avant-etape2.py`, `app-v37-avant-etape3.py`, `app-v38-avant-etape4.py`, `app-v39-polish.py`, `SUIVI-v39.md`, `app-v40-distill.py`, `SUIVI-v40.md`, `app-v40-avant-etape6.py`, `app-v41-typeset-layout.py`, `SUIVI-v41.md`, `app-v41-avant-etape7.py`, `app-v42-clarify.py`, `SUIVI-v42.md`, `app-v42-avant-etape8.py`, `app-v43-polish-final.py`, `SUIVI-v43.md`, `index-v35.html`, `index-etape1.html`, `sw-v35.js`, `sw-etape1.js` |
 
 La v35 d'origine est aussi conservée dans git (commit `ff79253`).
 
-## Tableau de bord
+## Tableau de bord de l'étape 2
 
 | | Nombre |
 |---|---|
@@ -36,7 +41,7 @@ La v35 d'origine est aussi conservée dans git (commit `ff79253`).
 
 Les 63 problèmes confirmés viennent de l'inventaire de départ (64), moins 3 points qui, une fois vérifiés, n'étaient pas des défauts (voir plus bas), plus 2 défauts trouvés en cours de route (F4 et F5).
 
-## 1. Étape 1 (HARDEN) : 7 améliorations, d'après la session précédente
+## Étape 1 (HARDEN) : 7 améliorations, d'après la session précédente
 
 Ces améliorations n'ont pas été refaites ici.
 
@@ -50,7 +55,7 @@ Ces améliorations n'ont pas été refaites ici.
 
 On ne sait pas si les 40 réponses pré-cochées font partie des 46 quiz : elles ne sont pas additionnées.
 
-## 2 et 3. Étape 2 : problèmes et corrections
+## Étape 2 : problèmes et corrections
 
 ### A. Couleurs du thème sous 4,5:1 : 10 problèmes, 10 corrigés
 
@@ -114,7 +119,7 @@ Cause commune à F1, F4 et F5 : depuis Streamlit 1.50 environ, les champs ne por
 - D4 : l'oscilloscope. Son écran sombre est voulu ; ses libellés clairs sont lisibles dans les trois thèmes.
 - F2 : les ronds des choix. Ils étaient déjà corrects, grâce à l'étape 1.
 
-## 5. Tests de l'étape 2 (19 réussis, 0 échoué)
+## Étape 2 : tests (19 réussis, 0 échoué)
 
 Les tests ont été faits en local, avec Streamlit 1.67, en invité, sans Supabase.
 
@@ -320,10 +325,338 @@ Comparaison du code : entre v37 et v38, une seule fonction Python change (`rende
 - **Tablettes et téléphones en paysage :** les règles « au doigt » reposent sur `(pointer: coarse)`, que l'émulation de ce navigateur ne simule pas. Sur un vrai appareil tactile, elles s'appliqueront quelle que soit la largeur.
 - **Vrai Supabase :** il n'y a pas d'identifiants sur ce poste, et vous avez demandé de ne pas toucher aux données.
 
-## À prévoir plus tard (hors étape 2)
+## Étape 4 : POLISH (harmonisation des anciennes pages), v39
 
-- Il reste environ 25 couleurs `rgba(...)` écrites en dur, surtout des fonds teintés (par exemple ligne 1034 : `rgba(56,189,248,0.3)`). Elles n'étaient pas dans l'inventaire de l'étape 2.
-- Les cartes ont une bordure gauche colorée de 5 à 6 px. Il faudra trancher sur ce choix de design lors d'une prochaine étape (mise en page et finitions).
+Sauvegarde faite avant : `sauvegardes/app-v38-avant-etape4.py`.
+
+Choix validés :
+- titre de page identique à l'intitulé du menu, sans emoji ;
+- ancien titre conservé en accroche sous le titre ;
+- emojis gardés dans les onglets, sous-titres et accordéons ;
+- cartes avec une bordure fine.
+
+### Problèmes détectés et corrigés : 146 sur 146
+
+| Chantier | Détectés | Corrigés | Correction |
+|---|---|---|---|
+| P1 Titres de page | 42 | 42 | Fonction commune `page_header(titre, accroche)`. Le titre reprend l'intitulé du menu, sans emoji. L'ancien titre devient l'accroche (38 pages) ; elle est omise quand elle ne faisait que répéter le titre (Carnet d'erreurs, Examen blanc, Décodeur Wireshark, Programmation, Grand quiz, Réseaux). |
+| P2 Ancien en-tête de la page Historique & badges | 1 | 1 | En-tête commun. L'étiquette « ESPACE PERSONNEL CERTIFIANT » au-dessus du titre est supprimée. Le total d'XP passe dans une case de statistique standard. |
+| P3 Paragraphes atténués en style en ligne | 62 | 62 | Une seule classe `texte-attenue` |
+| P4 Hiérarchie des titres inversée (un `####` à 24 px dépassait un `st.subheader` à 20,8 px) | 1 | 1 | Échelle commune : h3 20,8 px > h4 17,6 px > titre de carte 16,8 px |
+| P5 Bordures épaisses des cartes (4 à 6 px) | 28 | 28 | Supprimées. Les cartes gardent leur bordure fine de 1 px, leur titre coloré et leur fond teinté. |
+| P6 Couleurs `rgba` écrites en dur | 10 | 10 | `color-mix()` sur les variables du thème. **Cela solde le point « à prévoir » de l'étape 2.** |
+| Trouvé pendant les tests : formules `$…$` affichées en brut dans du HTML | 2 | 2 | Accroche de « Fonctions » et introduction « charge RC » écrites en texte normal |
+
+Sans objet :
+- **P7 Badges :** déjà homogènes grâce au CSS commun. Le seul badge à style en ligne est traité en P6, et l'étiquette en capitales en P2.
+- **P8 Séparateurs :** déjà homogènes (25,6 px au-dessus et au-dessous, mesuré).
+
+Rétabli pendant le travail : la règle de suppression des bordures avait aussi touché les bordures gauches de 3 px des messages Streamlit (succès, erreur, info, avertissement). Elles sont hors du périmètre validé, donc remises à l'identique.
+
+Non modifiés, comme convenu :
+- les emojis des onglets, sous-titres et accordéons (environ 350) ;
+- le contenu des cours ;
+- la police et la mise en page générale ;
+- le stockage, les comptes et le calcul des XP.
+
+Entre v38 et v39, seules des fonctions d'affichage ont changé, plus l'ajout de `page_header`.
+
+### Tests de l'étape 4 : 421 exécutés, 421 réussis, 0 échoué
+
+| Test | Résultat |
+|---|---|
+| Syntaxe Python, et script de transformation où chaque remplacement a trouvé le nombre attendu | 2 réussis |
+| Non-régression, 50 pages × 3 thèmes (avant les 3 retouches finales) | 150 réussis. Seule différence avec la v38 : la page Historique a un bloc de plus, ce qui est attendu (en-tête en deux blocs). |
+| Non-régression sur la version finale, 50 pages × 3 thèmes | 150 réussis |
+| Comptes, faux Supabase | 32 réussis |
+| Examen blanc complet, 3 thèmes | 24 réussis |
+| Inventaire téléphone, 50 pages (débordement, toucher, textes, menu) | 50 réussis. Au premier passage, un bouton du Gantt avait été mesuré pendant l'affichage ; il fait bien 44 px au second contrôle. |
+| Contraste : Remédiation en sombre, gris et clair (90 textes chacun), CGE en sombre et en clair (43 textes chacun) | 5 réussis, 0 texte sous le seuil |
+| Hiérarchie des titres mesurée (page Cybersécurité) | 1 réussi |
+| Contrôles à l'œil : E5, Historique, CGE, Remédiation, Fonctions | 5 réussis |
+| Recherche de formules `$…$` restées dans des titres, accroches ou introductions en HTML | 1 réussi (aucune) |
+| Journaux : aucune erreur de l'appli | 1 réussi |
+
+### À noter pour la suite
+
+- Ces pages contiennent encore environ 350 emojis dans les onglets, sous-titres et accordéons, laissés volontairement. Leur retrait serait une refonte de contenu à décider à part.
+- Le contraste n'a été mesuré que sur 2 pages modifiées représentatives (cartes teintées et badges). Les couleurs viennent toutes des variables vérifiées à l'étape 2.
+
+## Étape 5 : DISTILL (menu et navigation), v40
+
+Version de départ : v39, sauvegardée dans `sauvegardes/app-v39-polish.py`. Choix validé : « A + fusions sûres ».
+
+### Avant et après
+
+| | v39 | v40 |
+|---|---|---|
+| Groupes dans le menu | 12 | 7 (Accueil, Réviser, Mon espace, Cours, Labo pratique, Épreuves & BTS blanc, Guide & ressources) |
+| Pages dans le menu | 50 | 44 |
+| Hauteur du menu sur ordinateur (sections fermées) | 1 653 px | 1 425 px |
+| « Mon espace » | sous 8 sections repliées | 3ᵉ groupe, visible dès le premier écran |
+
+### Problèmes détectés et corrigés : 11 sur 11
+
+| # | Problème | Correction |
+|---|---|---|
+| F1 | « Décodeur Wireshark » et « Captures de trames », deux pages pour le même outil | Une page « Wireshark » à 2 onglets |
+| F2 | « Planning des révisions » (8 lignes), qui résume le programme semaine par semaine | Dépliant en tête de « BTS blanc : programme et planning » |
+| F3 | « Anglais technique » : sa liste de composants était déjà dans « Datasheets » | Son glossaire est ajouté à « Datasheets & anglais technique » |
+| F4 | « Résumé suites & décibels », qui double Suites, Fonctions et Formulaire | Dépliant en bas du « Formulaire complet » (contenu conservé) |
+| F5 | « Vidéos de cours » et « Liens utiles », deux mini-pages | Une page « Ressources » (« Vidéos & liens utiles ») à 2 onglets |
+| F6 | « Historique & badges » doublait « Mes stats » | Placé sous « Mes stats » |
+| M1 | 12 groupes dans le menu | 7 groupes. Les 4 sections de cours sont réunies dans « Cours », avec des sous-titres Informatique, Électronique, Maths, Anglais & CGE. |
+| M2 | « Mon espace » et « Guide » sous 8 sections repliées | « Mon espace » remonte en 3ᵉ position |
+| M3, M4 | Intitulés trop longs : « Cybersécurité : EBIOS, PKI, pfSense, VPN » et « Terminaux (Cisco, Linux, AD…) » | « Cybersécurité : EBIOS, PKI, VPN » et « Terminaux de pratique » |
+| M5 | L'onglet « Gestion du compte » de l'Historique renvoyait seulement vers « Mon compte » | Masqué sous « Mes stats ». « Mon compte » reste dans le menu. |
+
+Les titres de page suivent les nouveaux intitulés, selon la règle de l'étape 4. Les 3 pages BTS blanc prennent le préfixe « BTS blanc : », pour se distinguer des épreuves E4, E5 et E6 dans le groupe commun.
+
+**Anciennes adresses conservées.** `?p=maths-resume`, `anglais-tech`, `planning`, `pcap`, `scores`, `videos` et `liens` mènent à la page qui contient désormais leur contenu. C'est vrai aussi pour une session déjà ouverte qui avait gardé l'ancienne page en mémoire.
+
+**Volontairement non fusionnés :**
+- Les 5 pages de cours (réseaux, OWASP, programmation, système, électronique) : elles seules ont les mini-évaluations de 10 questions qui rapportent des XP, avec leurs clés d'activité, et les fiches réflexes.
+- « Trouver ta méthode » et « Méthodes par matière ».
+
+**Aucun contenu supprimé.** Les clés d'XP et les statistiques ne changent pas. Entre v39 et v40, 5 fonctions changent : `nav_current`, `nav_go`, `render_sidebar_menu`, `render_page_analyse_scores` (paramètre `embarque`) et `render_extended_lab` (titre renommé). Le stockage et les comptes sont intacts.
+
+### Tests de l'étape 5 : 268 exécutés, 268 réussis, 0 échoué
+
+| Test | Résultat |
+|---|---|
+| Syntaxe Python | 1 réussi |
+| Cohérence menu et routeur : 44 pages, toutes avec leur branche, aucune branche orpheline | 1 réussi |
+| Anciennes adresses (7 × lien `?p=`, 7 × session ouverte, 7 × contenu regroupé présent) et pages fusionnées complètes (6), onglet compte masqué (1) | 28 réussis |
+| Non-régression, 44 pages × 3 thèmes, sur le fichier final | 132 réussis |
+| Comptes, faux Supabase | 32 réussis |
+| Examen blanc complet, 3 thèmes | 24 réussis |
+| Inventaire téléphone, 44 pages (débordement, toucher, textes, menu fermé) | 44 réussis |
+| Menu à l'écran sur ordinateur (7 groupes, « Mon espace » au premier écran) | 1 réussi |
+| Groupe « Cours » ouvert sur ses sous-titres, et fil d'Ariane | 1 réussi |
+| `?p=scores` à l'écran, menant à « Mes stats » avec l'historique | 1 réussi |
+| Page « Wireshark » à 2 onglets, à l'écran | 1 réussi |
+| Menu ouvert sur téléphone | 1 réussi |
+| Journaux du serveur et console du navigateur sans erreur de l'appli | 1 réussi |
+
+Incidents de travail, corrigés avant ces tests :
+- une indentation fausse dans l'Historique (erreur de syntaxe détectée tout de suite) ;
+- un script de test qui plantait en affichant un emoji dans la console Windows (problème du test, pas de l'appli).
+
+### Non testé
+
+- Vrais téléphones, et vrai Supabase (mêmes limites qu'aux étapes précédentes).
+- Ouvrir une ancienne adresse ne sélectionne pas automatiquement le bon onglet. Par exemple, `?p=pcap` ouvre « Wireshark » sur l'onglet « Décodeur » ; il faut cliquer sur « Captures commentées ».
+
+## Étape 6 : TYPESET + LAYOUT (typographie et mise en page), v41
+
+Sauvegarde faite avant : `sauvegardes/app-v40-avant-etape6.py`. Choix validé pour l'accueil : version compacte.
+
+La police Inter est gardée. Le détecteur d'Impeccable la signale comme « trop répandue », mais c'est l'identité de l'appli, et le périmètre portait sur l'harmonisation, pas sur un changement d'identité.
+
+### Avant et après (mesuré à l'écran sur 12 pages représentatives)
+
+| Mesure | v40 | v41 |
+|---|---|---|
+| Tailles de texte différentes à l'écran | 19 (dont 14 entre 11,5 et 18,4 px) | **8 rôles** : 12, 14, 16, 18, 20, 24, 41,6 et 73,6 px |
+| Tailles différentes dans le code | 29 | 8 jetons (`--fs-xs` … `--fs-display`), plus 2 tailles d'icônes |
+| Graisses | 6 (400, 500, 600, 700, 800, 900) | 4, plus le 900 réservé à « Salut. » et au logo |
+| Interlettrage | 14 valeurs | 3 rôles (affichage, titre, capitales) |
+| Interlignage | 7 valeurs | 4 rôles, plus 1,8 gardé dans 3 listes de contenu |
+| Largeur de lecture (caractères par ligne, au plus) | 82 à 99 sur 6 pages | 71 au plus ; de 36 à 71 selon les pages |
+| Espace au-dessus et au-dessous des titres | 8–12 px au-dessus, 16 px au-dessous (inversé) | 32 px au-dessus, 8 px au-dessous |
+| Accueil sur ordinateur | 1 896 px | 1 319 px (−30 %) |
+| Accueil sur téléphone | 3 242 px (4 écrans), première action à 837 px | 2 294 px pour un nouvel utilisateur, environ 1 670 px ensuite ; première action à 613 px (dans le premier écran) |
+
+### Problèmes détectés et corrigés : 15 sur 15
+
+| # | Problème | Correction |
+|---|---|---|
+| T1 | 19 tailles à l'écran, 29 dans le code | 8 rôles en variables, et 66 tailles écrites en dur passées sur ces rôles |
+| T2 | Titres de cartes à 16,8 px, presque comme le texte ; deux tailles de h3 et deux de h4 | h2 24 > h3 20 > h4 et titre de carte 18 > texte 16 |
+| T3 | 6 graisses | 500 → 400 (5 cas) ; titre de page 900 → 800 |
+| T4 | 14 interlettrages, 7 interlignages | Jetons `--ls-*` et `--lh-*` |
+| T5 | Espacement des titres inversé | 32 px au-dessus, 8 px au-dessous, aucune marge pour le premier élément d'un bloc ; `text-wrap: balance` sur les titres et `pretty` sur les paragraphes |
+| L1 | Lignes de 82 à 99 caractères | Prose limitée à `58ch`, soit environ 70 caractères réels avec Inter. Tableaux, code et graphiques gardent toute la largeur. |
+| L2 | 24 marges intérieures, 17 marges extérieures, 9 arrondis | Échelle d'espacement de base 4 px (`--sp-1` … `--sp-8`) et 3 arrondis (8, 12, 14 px) pour les cadres |
+| L3 | 5 compositions de cartes différentes | Cartes, formulaires et bannière : marge intérieure de 20 px, arrondi de 14 px ; cases de statistiques : 16 px et 12 px |
+| L4 | Boutons de l'accueil posés sous les cartes | La colonne entière devient la carte, bouton compris (CSS seulement) |
+| A1 | Accueil de 4 écrans sur téléphone, première action hors du premier écran | Bandeau compact ; 3 chiffres clés sur téléphone (les 2 autres sont dans les cartes et dans Mes stats) |
+| A2 | « J-27 » affiché deux fois | Une seule fois, dans les chiffres clés |
+| A3 | « Première fois ici ? » montré à tout le monde | Montré seulement à un nouvel utilisateur : aucune flashcard, aucun mot, aucune statistique de quiz, aucun historique, aucun jour de révision. Calculé sur les données, **rien n'est enregistré**. Les 3 guides restent dans le menu. |
+| A4 | « Pour aller plus loin » : 3 grandes cartes qui répètent le menu | Une ligne de 3 boutons |
+| A5 | Maîtrise par matière (7 lignes) qui doublait Mes stats | « À travailler en priorité » : les 3 matières les plus faibles, et un lien vers « Toutes mes matières dans Mes stats » |
+| A6 | Bandeau d'accueil trop haut | Marges réduites (24 px sur ordinateur, 8 px sur téléphone) |
+
+Incidents de travail, corrigés avant les tests finaux :
+- Une règle de l'étape 4 maintenait les titres `<h4>` des cartes à 16 px ; elle est alignée sur 18 px.
+- La première limite de largeur (`70ch`) donnait encore environ 84 caractères par ligne, car l'unité `ch` correspond à la largeur du « 0 », plus large que la lettre moyenne. Elle est réglée à `58ch`.
+
+Contrepartie : les pages très longues s'allongent un peu, à cause des lignes plus courtes et de l'espace ajouté au-dessus des titres (« semaines » passe de 5 063 à 6 049 px sur ordinateur).
+
+**Inchangés :** les comptes, Supabase, le stockage et les XP. Seules des fonctions d'affichage changent : l'accueil, et les tailles de texte écrites en dur dans quelques pages.
+
+### Tests de l'étape 6 : 259 exécutés, 259 réussis, 0 échoué
+
+| Test | Résultat |
+|---|---|
+| Syntaxe Python | 1 réussi |
+| Mesure typographique finale : 12 pages, tailles toutes dans l'échelle, 71 caractères par ligne au plus | 12 réussis |
+| Accueil : « Première fois ici ? » pour un nouvel utilisateur puis masqué après des quiz, J-xx unique, 3 boutons, lien vers Mes stats, 1 à 3 matières en priorité, aucune exception | 8 réussis |
+| Non-régression, 44 pages × 3 thèmes, sur le fichier final | 132 réussis. Seul l'accueil a moins de blocs qu'en v40, ce qui est attendu. |
+| Comptes, faux Supabase | 32 réussis |
+| Examen blanc complet, 3 thèmes | 24 réussis |
+| Inventaire téléphone, 44 pages | 44 réussis |
+| Contraste de l'accueil en sombre, clair et gris (123 textes chacun) | 3 réussis |
+| Accueil à l'écran sur ordinateur et sur téléphone | 2 réussis |
+| Journaux du serveur sans erreur de l'appli | 1 réussi |
+
+Note sur le contraste en gris : une première mesure, prise pendant la transition de couleur juste après le changement de thème, signalait 30 textes du menu à 2,5:1. Une fois l'affichage stabilisé, il n'en reste aucun ; c'est un artefact de mesure.
+
+### Non testé
+
+- Vrais téléphones, et vrai Supabase.
+- Le contraste n'a été mesuré que sur l'accueil (dont les cartes ont changé). Les couleurs des autres pages ne changent pas à cette étape.
+
+## Étape 7 : CLARIFY (textes, libellés, messages), v42
+
+Sauvegarde faite avant : `sauvegardes/app-v41-avant-etape7.py` (identique à la v41 validée). Choix validé : toutes les reformulations proposées (priorités 1 à 5), y compris celles qui changent le sens.
+
+Audit : 1 079 textes d'interface lus (144 boutons, 245 messages, 141 onglets, 103 accordéons, 192 champs, titres, légendes et exemples). Fichiers modifiés : `app-v30.py` et ce suivi.
+
+### Problèmes détectés et corrigés : 22 sur 22
+
+| # | Problème | Correction | Ampleur |
+|---|---|---|---|
+| 1.1 | Un invité lisait « XP enregistrés sur votre profil » | Le message dit le gain réel ; en invité, il précise « (en invité, ils disparaissent quand tu fermes la page) ». Quatre introductions qui promettaient « sur votre profil » sont reformulées. | 5 quiz de cours + 4 introductions |
+| 1.2 | Un 0/10 s'affichait en vert | Vert à partir de 7/10, neutre de 5 à 6, orange en dessous | 5 quiz de cours |
+| 1.3 | Erreurs techniques montrées brutes | Phrase claire avec la marche à suivre ; le détail technique passe dans une petite ligne en dessous | 3 messages |
+| 1.4 | Renvois vers des pages qui n'existent plus | Chemins de cours des flashcards mis aux noms actuels du menu ; message de l'historique vide réécrit | 105 chemins + 1 message |
+| 1.5 | « Certifiant » et « officiel » collés à du contenu écrit pour l'appli | Retirés là où c'était inexact. Gardés quand c'est vrai : programme, barème, coefficient, BO, annales, thèmes de culture générale. | 15 « certifiant » et 17 « officiel » retirés |
+| 1.6 | (trouvé pendant le travail) « +X XP » affiché à chaque tentative, alors que les XP ne sont gagnés qu'une fois par activité | « pas de nouveaux XP : déjà gagnés lors d'une tentative précédente » | 32 messages de résultat + 26 exercices |
+| 2.1 | Tutoiement et vouvoiement mélangés | Tutoiement pour toute l'interface (consignes, messages, libellés, introductions) | 60 textes |
+| 2.2 | « +X points » au lieu de « XP » | « XP » partout | 11 messages |
+| 2.3 | Plusieurs noms pour la même chose | Lexique : **quiz**, **examen blanc**, **exercice** | 13 libellés |
+| 2.4 | Verbes des boutons disparates | **Vérifier** (exercice), **Valider mes réponses** (quiz), **Rendre ma copie** (examen) | 7 boutons |
+| 2.5 | « Révision du jour » contre « Séance du jour » | « Séance du jour » partout | 1 accroche |
+| 2.6 | Anglais et jargon : Check, Roadmap, Hardening, Technical Grammar Focus, Master hub, hub | Remplacés par du français | 9 libellés |
+| 3.1 | Majuscule à chaque mot | Majuscule de phrase. Noms propres et sigles protégés, citations « » respectées. | 290 libellés |
+| 3.2 | Emojis décoratifs en tête des boutons | Retirés ; ✅ ❌ 🤔 gardés (auto-évaluation) ; ⬅️ ➡️ deviennent ← → | 23 boutons |
+| 3.3 | Boutons vagues (« Valider », « Ouvrir → », « Voir → », « Installer → ») | « Valider mes réponses », « Ouvrir le carnet → », « Voir les méthodes → », « Voir comment l'installer → » | 7 boutons |
+| 3.4 | 5 formats de résultat et un ton gonflé | Un format unique : « **Résultat : 7/10 (70 %)** · +21 XP », puis un conseil | 32 messages |
+| 3.5 | « 70% » sans espace | « 70 % » avec espace insécable, uniquement dans le texte affiché (jamais dans le CSS ni dans le code d'exemple) | 22 |
+| 4.1 | « en bas du menu de gauche » : faux sur téléphone | La consigne précise le bouton du menu en haut à gauche sur téléphone | 1 |
+| 4.2 | Classement non chargé : aucune marche à suivre | « Réessaie dans un instant : tes résultats ne sont pas perdus. » | 1 |
+| 4.3 | Historique vide : vouvoiement et page périmée | Nouveau message et bouton « Faire un Grand quiz → » | 1 |
+| 5.1 | Code mort (`render_today_panel`, jamais appelée, avec un texte périmé) | Supprimé | 48 lignes |
+| 5.2 | Accroches qui répétaient le titre | Réécrites ou retirées | 6 accroches |
+
+**Ce qui ne change pas :**
+- Le **système d'XP est intact** : la fonction d'origine est identique. Une petite enveloppe note seulement le gain réel pour que le message dise vrai. Les 49 appels d'XP et leurs clés d'activité sont identiques à la v41.
+- Les fonctions d'enregistrement des scores et des réponses, de connexion, de création de compte et de stockage sont identiques.
+- Les quiz et les examens fonctionnent comme avant ; seuls les textes affichés changent.
+- Les clés de widgets sont identiques, sauf les 2 qui appartenaient à la fonction morte supprimée.
+
+**Gardés volontairement :**
+- 8 « vous » : citations d'examen, sujet de culture générale, contenus de cours et de quiz, et un vrai pluriel.
+- Le nom « Quiz Certifiant … » enregistré dans l'historique des élèves : c'est une donnée de progression, à ne pas toucher.
+- Les emojis des onglets et des sous-titres.
+
+### Tests de l'étape 7 : 286 exécutés, 286 réussis, 0 échoué (sur le fichier final)
+
+| Test | Résultat |
+|---|---|
+| Syntaxe Python | 1 réussi |
+| Non-régression, 44 pages × 3 thèmes (dont l'absence de doublons de boutons renommés) | 132 réussis |
+| Comptes, faux Supabase | 32 réussis |
+| Examen blanc complet, 3 thèmes | 24 réussis |
+| Accueil (Première fois, J-xx, boutons, maîtrise) | 8 réussis |
+| Anciennes adresses et pages regroupées | 28 réussis |
+| Messages d'XP et de résultat : invité au 1er essai, « déjà gagnés » au 2e essai, couleur selon le score, historique vide, plus de page périmée | 8 réussis |
+| Inventaire téléphone, 44 pages | 44 réussis |
+| Intégrité du code : clés de widgets, fonctions XP, scores et comptes identiques, 49 appels d'XP identiques | 3 réussis |
+| Plus aucun ancien nom de page dans les chemins de cours | 1 réussi |
+| Les espaces avant % ne touchent ni le CSS ni le code d'exemple | 1 réussi |
+| Contrôles à l'écran : Cybersécurité, Terminaux, accueil | 3 réussis |
+| Journaux sans erreur de l'appli | 1 réussi |
+
+### Incidents de travail, tous corrigés avant les tests finaux
+
+- Les scripts des lots 1 et 2 se sont arrêtés sur une forme de texte imprévue, **avant d'écrire** dans le fichier ; ils ont été corrigés puis relancés.
+- Lot 3 : les positions données par l'analyseur Python sont en octets. La première passe n'a donc traité que 32 libellés sur 290. Le fichier a été restauré à l'état d'après le lot 2, puis la correction a été relancée.
+- Une espace avant % était tombée dans un commentaire de code C++ montré aux élèves ; elle est annulée.
+- Après le premier contrôle à l'écran : 1 accroche jargon et 11 consignes au vouvoiement oubliées ont été corrigées. Les tests ont été relancés sur le fichier final.
+- Trois tests automatiques étaient à adapter, sans que l'appli soit en cause :
+  - le chemin de cours d'une flashcard ne s'affiche qu'après avoir retourné la carte ; la vérification se fait donc dans les données ;
+  - deux libellés attendus par les tests avaient été renommés.
+
+### Points non vérifiés
+
+- Les 26 messages d'exercices de terminal en situation réelle : leur logique est la même que celle des quiz, qui est testée, mais je n'ai pas saisi les commandes justes pour réussir chaque exercice.
+- Vrais téléphones et vrai Supabase (mêmes limites qu'avant).
+- Observation, sans modification : le système d'XP enregistre aussi une activité ratée à 0 point. Refaire ce quiz ensuite ne rapporte donc plus rien. C'est le comportement d'origine ; il est désormais affiché honnêtement, mais pas changé, comme demandé.
+
+## Étape 8 : POLISH FINAL (audit complet puis 5 corrections), v43
+
+Audit complet de la v42 d'abord, sans modifier le code. Les 5 corrections ci-dessous ont ensuite été appliquées après accord (« Oui, les 5 »). Sauvegarde avant les corrections : `sauvegardes/app-v42-avant-etape8.py`. Sauvegarde finale : `sauvegardes/app-v43-polish-final.py` (SHA-256 `7b3ce69bc9d74ecff98dbdc62dbc5e27b002403ad8ef739fa08b276cd3218471`).
+
+### Audit de la v42 (avant correction)
+
+| Contrôle | Résultat |
+|---|---|
+| Contrastes WCAG, 44 pages × 3 thèmes, à 1280 px | 121 réussis, 11 échoués (4 causes : D2, D3, D4 et un clignotement passager) |
+| Débordements à 1280 px, 44 × 3 | 132 réussis |
+| Non-régression : pages, comptes (faux Supabase), examen, accueil, anciennes adresses, messages | 132 + 32 + 24 + 8 + 28 + 8, tous réussis |
+| 26 exercices de terminal, testés pour la première fois | 49 réussis, 3 échoués (exercice Trunk + 1 erreur du test lui-même) |
+| Flashcards : 105 liens vers les cours, 8 cartes retournées | Tous valides |
+| Minuteur de l'examen (`st.iframe`) | Décompte correct |
+| Intégrité : fonctions de stockage, comptes, scores et sessions identiques à la v35 ; 49 appels d'XP identiques ; 213 clés de widgets sans doublon | Réussi. Seule `render_today_panel`, du code mort, avait été retirée. |
+| Journaux du serveur et console du navigateur | Aucune erreur de l'appli |
+
+### Problèmes trouvés et corrigés (5)
+
+| # | Gravité | Problème | Cause | Correction |
+|---|---|---|---|---|
+| D1 | Haute | Exercice Cisco Atelier 2 (Trunk) : la bonne réponse `switchport trunk allowed vlan 10,20,40` était refusée. Défaut présent depuis la v35. | La réponse était comparée sans espaces à un texte attendu qui en contenait, donc jamais égal. | Texte attendu écrit sans espaces : `allowedvlan10,20,40` |
+| D2 | Moyenne | Thème clair : la barre de titre d'un accordéon ouvert devenait noire, avec un titre invisible. | Fond sombre imposé par Streamlit sur `summary`. | CSS : fond transparent, `--surface-2` au survol |
+| D3 | Moyenne | Texte des boutons-liens (« Regarder sur YouTube ») illisible dans les 3 thèmes. Défaut présent depuis la v35. | La couleur des paragraphes s'appliquait au texte du bouton. | CSS : `--bg` sur les boutons principaux, `--text` sur les secondaires |
+| D4 | Moyenne | 14 formules affichées en erreur (`\text`, `\times`, `\alpha`, `\rightarrow`). Défaut présent depuis la v35. | Barres obliques simples dans des chaînes Python ordinaires, lues comme `\t`, `\a` ou `\r`. | 13 barres obliques doublées et la formule `Nb\_termes` des suites corrigée. Le texte affiché est inchangé. |
+| D5 | Basse | Environ 20 consignes d'exercices encore au vouvoiement | Oubli de l'étape 7 | 26 verbes passés au tutoiement sur 25 lignes (Passez → Passe, Créez → Crée…) |
+
+Aucune donnée Supabase, aucun calcul d'XP, aucun compte, aucun quiz ni examen n'a été modifié. La police Inter, les 3 thèmes et les 44 pages sont conservés. L'écart avec la v42 est de 43 lignes, toutes identifiées.
+
+### Tests de la v43 (466 réussis, 0 échoué)
+
+| Test | Résultat |
+|---|---|
+| 26 exercices de terminal : réussite, « +N XP » affiché, XP ajoutés une seule fois, « déjà gagnés » au 2e essai | 52 réussis |
+| Exercice Trunk : `10,20,40` et `10, 20, 40` acceptés ; `10,20` et `10,20,30` refusés | 4 réussis |
+| Non-régression, 44 pages × 3 thèmes | 132 réussis |
+| Comptes, faux Supabase | 32 réussis |
+| Examen blanc complet, 3 thèmes | 24 réussis |
+| Accueil | 8 réussis |
+| Anciennes adresses et pages regroupées | 28 réussis |
+| Messages d'XP et de résultat | 8 réussis |
+| Contrastes (17 626 textes mesurés), formules et débordements à 1280 px, 44 pages × 3 thèmes | 132 réussis |
+| Téléphone (375 px) : aucun défilement horizontal, 44 pages | 44 réussis (seuls dépassent les éléments rognés ou défilants de KaTeX, ce qui est normal) |
+| Intégrité du code par rapport à la v42 : 117 fonctions, seule `render_extended_lab` modifiée (D1, D5) ; appels d'XP, 213 clés, `st.iframe` et Supabase inchangés | 1 réussi |
+| Journaux du serveur : aucune erreur de l'appli (seulement des fermetures de connexion Windows dues aux iframes de test) | 1 réussi |
+
+### Observation non corrigée
+
+- Thème clair : juste après un changement de thème, l'élément actif du menu garde 2 à 3 secondes le fond de l'ancien thème. C'est une transition passagère, pas un état stable ; elle n'a pas été corrigée. Elle n'est pas réapparue lors du balayage complet de la v43.
+
+### Vérifications manuelles restantes (non faites ici, à ne pas considérer comme testées)
+
+- Les 26 exercices ont été validés par des tests automatiques (AppTest), pas tapés à la main dans le navigateur.
+- Vrai téléphone (iOS/Android) : seule la largeur de 375 px a été simulée.
+- Vrai Supabase sur l'appli déployée : création de compte, connexion, enregistrement des XP, mot de passe oublié.
+- Version de Streamlit en production (les tests utilisent la 1.67).
+- Bouton « Regarder la leçon sur YouTube » des flashcards après retournement d'une carte : D3 a été vérifié sur la page Ressources, mais pas sur ce bouton-là.
+
+## Points laissés en attente à l'étape 2 : soldés à l'étape 4
+
+- Couleurs `rgba(...)` écrites en dur : remplacées par des variables du thème (étape 4, P6). Il n'en reste que dans la définition des thèmes, où elles sont voulues.
+- Bordures gauches colorées de 5 à 6 px sur les cartes : supprimées (étape 4, P5).
 
 ## Environnement de test
 
