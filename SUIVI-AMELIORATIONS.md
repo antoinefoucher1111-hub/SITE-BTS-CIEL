@@ -1,6 +1,6 @@
 # CIEL Studio : suivi des améliorations
 
-Mis à jour le 13/11/2026. Version de travail : **v43** (dans `app-v30.py`, le nom attendu par l'appli). La v38 est commitée sur la branche locale `v38-contrastes-mobile`. Les v39 à v43 (étapes 4 à 8) ne sont pas encore commitées. Rien n'est fusionné dans `main`, poussé ou déployé.
+Mis à jour le 13/11/2026. Version stable : **v43** (dans `app-v30.py`, le nom attendu par l'appli), commitée dans `6cf0557` sur la branche locale `v43-stable`, avec le tag local annoté `v43`. Les v39 à v42 n'ont pas de commit propre : elles sont regroupées dans ce commit v43 et restent disponibles dans `sauvegardes/`. La v38 reste commitée sur la branche locale `v38-contrastes-mobile`. **Rien n'est poussé sur GitHub, fusionné dans `main` ou déployé.** Détail plus bas, section « Stabilisation de la v43 dans Git ».
 
 Sauvegardes de chaque étape dans `sauvegardes/` : `app-v35-origine.py`, `app-v36-etape1.py`, `app-v36-avant-etape2.py`, `app-v37-avant-etape3.py`, `app-v38-avant-etape4.py`, `app-v39-polish.py` (v39 validée, empreinte SHA-256 `cf0ef305…0514c`), `app-v40-distill.py` (v40, empreinte `8605e916…`), `app-v40-avant-etape6.py`, `app-v41-typeset-layout.py` (v41, empreinte `f6fcb563…`), `app-v41-avant-etape7.py`, `app-v42-clarify.py` (v42, empreinte `e5f2f1a9…`), `app-v42-avant-etape8.py`, `app-v43-polish-final.py` (v43 finale, empreinte `7b3ce69b…18471`).
 
@@ -24,6 +24,8 @@ Sauvegardes de chaque étape dans `sauvegardes/` : `app-v35-origine.py`, `app-v3
 | `app-v36.py` | v36 de l'étape 1 (inchangé) |
 | `docs/index.html`, `docs/sw.js` | Changements de l'étape 1 (`ciel-v3`). L'étape 2 n'a rien changé ici. |
 | `.streamlit/config.toml` | Inchangé |
+| `.gitignore` | Réécrit en UTF-8 (commit `d64661c`) : sauvegardes, `.claude/`, `app-v36.py`, secrets et données locales exclus |
+| `docs/manifest.webmanifest` | Contenu identique au commit ; apparaît « modifié » à cause des fins de ligne (voir « Stabilisation de la v43 dans Git ») |
 | `sauvegardes/` (sur ce poste, hors git) | `app-v35-origine.py`, `app-v36-etape1.py`, `app-v36-avant-etape2.py`, `app-v37-avant-etape3.py`, `app-v38-avant-etape4.py`, `app-v39-polish.py`, `SUIVI-v39.md`, `app-v40-distill.py`, `SUIVI-v40.md`, `app-v40-avant-etape6.py`, `app-v41-typeset-layout.py`, `SUIVI-v41.md`, `app-v41-avant-etape7.py`, `app-v42-clarify.py`, `SUIVI-v42.md`, `app-v42-avant-etape8.py`, `app-v43-polish-final.py`, `SUIVI-v43.md`, `index-v35.html`, `index-etape1.html`, `sw-v35.js`, `sw-etape1.js` |
 
 La v35 d'origine est aussi conservée dans git (commit `ff79253`).
@@ -652,6 +654,42 @@ Aucune donnée Supabase, aucun calcul d'XP, aucun compte, aucun quiz ni examen n
 - Vrai Supabase sur l'appli déployée : création de compte, connexion, enregistrement des XP, mot de passe oublié.
 - Version de Streamlit en production (les tests utilisent la 1.67).
 - Bouton « Regarder la leçon sur YouTube » des flashcards après retournement d'une carte : D3 a été vérifié sur la page Ressources, mais pas sur ce bouton-là.
+
+## Stabilisation de la v43 dans Git (13/11)
+
+### État des branches et du tag (local uniquement)
+
+```
+main, origin/main      ff79253  v35 (inchangé)
+v38-contrastes-mobile  cbc8285  v38 + suivi (inchangé, jamais poussé)
+v43-stable             ff79253 → c2c675f (v38) → cbc8285 (suivi) → d64661c (.gitignore) → 6cf0557 (v43) → commit de ce suivi
+tag v43 (annoté)       → 6cf0557
+```
+
+- `d64661c` : `.gitignore` seul. L'ancien était en UTF-16, Git ne le lisait pas et n'ignorait donc rien.
+- `6cf0557` : `app-v30.py` (empreinte `7b3ce69b…18471`) et `SUIVI-AMELIORATIONS.md` (`e480ca35…`, identique à `sauvegardes/SUIVI-v43.md`), seuls.
+- Le commit suivant ne contient que ce fichier de suivi, mis à jour. Le tag `v43` reste sur `6cf0557`.
+- L'entrée de sous-module `SITE-BTS-CIEL` n'a pas été touchée.
+- **Rien n'est poussé, fusionné ni déployé.**
+
+### Vérification d'une copie propre du tag `v43` : 284 réussis, 0 échoué
+
+Copie exportée par `git archive` : 16 fichiers suivis, sans `sauvegardes/`, `.claude/` ni `app-v36.py`. Résultats : pages 132, comptes 32, examen 24, accueil 8, anciennes adresses 28, messages 8, exercices de terminal 52.
+
+Deux points relevés pendant la vérification, sans lien avec l'appli :
+
+- Sous Windows (`core.autocrlf=true`), `git archive` écrit les fichiers en CRLF. La copie a donc une autre empreinte (`b8dc605…`), qui redevient `7b3ce69…` une fois les CR retirés. Les tests ont été faits sur une copie exportée avec `core.autocrlf=false`, c'est-à-dire sur les octets exacts du commit.
+- Le test des anciennes adresses s'est d'abord arrêté parce que la console Windows ne pouvait pas afficher un emoji. Relancé avec une sortie en UTF-8, il donne 28/28.
+
+### Pourquoi `docs/manifest.webmanifest` apparaît « modifié » avec un diff vide
+
+- Le contenu est identique au commit : le blob `a88683b2…` est le même dans HEAD, dans l'index et pour le fichier du disque.
+- Avec `core.autocrlf=true`, le clone a extrait ce fichier en CRLF, et l'index a mémorisé une taille de **1 179 octets**.
+- Le 12/11 à 12:01, pendant l'étape 1, les fichiers de `docs/` ont été réécrits en LF (même date que `sauvegardes/index-etape1.html`). Le manifeste fait maintenant **1 157 octets**, avec le même texte.
+- Quand la taille sur le disque diffère de la taille mémorisée, Git déclare le fichier modifié sans comparer le contenu. `git diff`, lui, compare le contenu et ne trouve rien. Même `git update-index --refresh` ne retire pas l'indication (testé sur une copie de l'index, le vrai index n'a pas été touché).
+- Ce n'est pas un vrai changement. Il n'est pas commité, et aucune restauration n'a été faite. On pourra le faire disparaître plus tard, si on le souhaite :
+  - `git add docs/manifest.webmanifest` met seulement à jour la taille mémorisée et ne produit aucun commit, puisque le contenu est identique ;
+  - ou réextraire le fichier depuis Git, ce qui le remet en CRLF.
 
 ## Points laissés en attente à l'étape 2 : soldés à l'étape 4
 
