@@ -6,8 +6,14 @@ SITE-BTS-CIEL/
 # Sauvegardes locales des étapes d'amélioration
 sauvegardes/
 
-# Configuration locale de Claude Code
-.claude/
+# Configuration locale de Claude Code : tout est ignoré, sauf les Skills propres au projet.
+# Les Skills tiers se réinstallent depuis skills-lock.json (npx skills experimental_install).
+# security-review-ciel reste local tant que l'audit de sécurité n'est pas corrigé (dépôt public).
+.claude/*
+!.claude/skills/
+.claude/skills/*
+!.claude/skills/streamlit-apptest/
+!.claude/skills/suivi-ameliorations/
 
 # Copie de travail de la v36 (doublon de sauvegardes/app-v36-etape1.py)
 app-v36.py
