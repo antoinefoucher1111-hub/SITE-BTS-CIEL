@@ -33,6 +33,13 @@
     .barre i { display: block; height: 100%; width: 40%; background: linear-gradient(90deg, #ff453a, #3d6bff);
       border-radius: 3px; animation: va 1.2s ease-in-out infinite alternate; }
     @keyframes va { from { transform: translateX(-60%); } to { transform: translateX(210%); } }
+    /* Réduction des animations demandée par le système : barre fixe au lieu du va-et-vient, pas de fondu */
+    @media (prefers-reduced-motion: reduce) {
+      .barre i { animation: none; transform: none; width: 100%; opacity: 0.6; }
+      #ecran { transition: none; }
+    }
+    /* Contour de focus clavier visible sur les boutons de l'écran d'erreur */
+    .btn:focus-visible { outline: 2px solid #3d6bff; outline-offset: 2px; }
     .boutons { display: none; flex-direction: column; gap: 10px; margin-top: 6px; }
     .boutons.visible { display: flex; }
     .btn { display: block; border-radius: 999px; padding: 12px 22px; font-weight: 700; font-size: .95rem; text-decoration: none;

@@ -1,7 +1,7 @@
 // Service worker : garde en mémoire l'écran de démarrage et les icônes (l'appli s'ouvre même avec un réseau lent).
 // Le contenu des révisions vient toujours du site en direct : il n'est jamais mis en cache ici.
 // Change le numéro de version quand tu modifies index.html, pour que les téléphones prennent la nouvelle version.
-const VERSION = "ciel-v2";
+const VERSION = "ciel-v3";
 const FICHIERS = ["./", "index.html", "manifest.webmanifest", "icons/icon-192.png", "icons/icon-512.png", "icons/apple-touch-icon.png"];
 
 self.addEventListener("install", (e) => {
